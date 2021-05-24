@@ -1,12 +1,13 @@
 import os
 import h5py
 import numpy as np
+import pandas as pd
 import tkinter
 from tkinter.filedialog import askopenfilename, askopenfilenames
 from collections import defaultdict
 from nptdms import TdmsFile
 
-def importFile():
+def importFile(curated_channel = None):
     """
     `importFile` opens a window to select a file to import.
     Returns path and calls `openFile` to extract data."
@@ -20,10 +21,11 @@ def importFile():
     folder_name = os.path.split(in_path)[0] # Get path until folder
     file_name = os.path.split(in_path)[1] # Get filename
     
-    voltage_mV, current_pA, command, ttl, time, dt = openFile(in_path) # Call openFile() function
+    voltage_mV, current_pA, command, ttl, extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt = openFile(in_path, curated_channel) # Call openFile() function
     
-    return voltage_mV, current_pA, command, ttl, time, dt, folder_name, file_name
+    return voltage_mV, current_pA, command, ttl, extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt, folder_name, file_name
 
+# return extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt
 
 def openFile(in_path, curated_channel = None):
     """
@@ -34,14 +36,14 @@ def openFile(in_path, curated_channel = None):
     if '.tdms' in in_path:
         extracted_channels, time, dt = openTDMSfile(in_path)
     elif '.hdf5' in in_path:
-        extracted_channels, time, dt = openHDF5file(in_path, curated_channel = curated_channel)
+        extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt = openHDF5file(in_path, curated_channel = curated_channel)
     
     voltage_mV = extracted_channels[0]
     current_pA = extracted_channels[1]
     command = extracted_channels[2]
     ttl = extracted_channels[3]
     
-    return voltage_mV, current_pA, command, ttl, time, dt
+    return voltage_mV, current_pA, command, ttl, extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt
 
 def openHDF5file(in_path,
                  channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
