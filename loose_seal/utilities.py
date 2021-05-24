@@ -43,6 +43,114 @@ def openFile(in_path, curated_channel = None):
     
     return voltage_mV, current_pA, command, ttl, time, dt
 
+def openHDF5file(in_path,
+                 channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
+                 curated_channel = None):
+    """
+    Opens the selected `.hdf5` file and extracts sorted data from chosen channels.
+    
+    :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
+    :curated_channel: e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality.
+    """
+
+    # Read hdf5 file:
+    hdf5_file = h5py.File(in_path, 'r')
+    
+    # Define empty dictionary to populate with correctly sorted data:
+    data_dict = defaultdict(list)
+    # Define empty dictionary to populate with corrected trialKeys:
+    key_dict = defaultdict(list)
+    
+    # Iterate through channels to find trial indices and sort them numerically:
+    for channel in hdf5_file.keys():
+        
+        # Fix hdf5 indexing. Otherwise it sorts sweeps alphabetically (as 1, 10, 11, [...], 2, 21, 22...)
+        if 'Channel' in channel:
+            # Get keys from hdf5 (i.e. the name of each sweep/trial)
+            # These have been sorted alphabetically as in strings: 
+            trialKeysInHDF5 = list(hdf5_file[channel].keys())
+            
+            # Convert to integers so you can sort numerically:
+            trialKeysInHDF5_int = [int(x) for x in trialKeysInHDF5]
+            
+            # Get the indices that will sort the array:
+            trialKeysInHDF5_sorting_indices = list(np.argsort(trialKeysInHDF5_int))
+            
+            if curated_channel is not None:
+                # Use trial keys from curated_channel to ensure same number of trials are present in all channels.
+                trialKeysInHDF5 = list(hdf5_file[curated_channel].keys())
+                trialKeysInHDF5_int = [int(x) for x in trialKeysInHDF5]
+                trialKeysInHDF5_sorting_indices = list(np.argsort(trialKeysInHDF5_int))
+        
+        # In the case of 'Output' channels, we need to add an extra step.
+        # Whereas trialKeys for "Channel" always start at "1", "Output" starts at random values like "14197".
+        elif 'Output' in channel:
+            trialKeysInHDF5 = list(hdf5_file[channel].keys())
+            trialKeysInHDF5_int = [int(x) for x in trialKeysInHDF5]
+            trialKeysInHDF5_sorting_indices = list(np.argsort(trialKeysInHDF5_int))
+            # Transform them so they start from 1 and can be compared to the curated_channel keys:
+            trialKeysInHDF5_int_from1 = [(x-min(trialKeysInHDF5_int)+1) for x in trialKeysInHDF5_int]
+     
+            if curated_channel is not None:
+                # Compare the trial keys starting from 1 to those from the curated channel.
+                # Then use the indices of matching keys to extract only the curated trials to analyse.
+                trialKeysInHDF5_curated = list(hdf5_file[curated_channel].keys())
+                trialKeysInHDF5_curated_int = [int(x) for x in trialKeysInHDF5_curated]
+                trialKeysInHDF5_curated_sorting_indices = list(np.argsort(trialKeysInHDF5_curated_int))
+                # Sort the curated integer keys so you can use them in the list.index() step.
+                trialKeysInHDF5_curated_int_sorted = sorted(trialKeysInHDF5_curated_int)
+                # For the sorted curated trial keys, find the index of the value matching each curated_channel trial.
+                # Use this as the sorting indices.
+                trialKeysInHDF5_sorting_indices = [trialKeysInHDF5_int_from1.index(trialKeysInHDF5_curated_int_sorted[i]) for i in range(len(trialKeysInHDF5_curated_int_sorted))]
+
+        # 'Sweeps_Analysis' will be a copy of either 'Channel A' or 'Channel B' that has been curated.
+        # Should be the same provided as curated_channel, which will be used to subset all the channels.
+        # Won't be extracted as would only be a duplication.
+        elif 'Sweeps_Analysis' in channel:
+            trialKeysInHDF5 = list(hdf5_file[channel].keys())
+            trialKeysInHDF5_int = [int(x) for x in trialKeysInHDF5]
+            trialKeysInHDF5_sorting_indices = list(np.argsort(trialKeysInHDF5_int))
+
+        # To extract 'Time':
+        elif 'Time' in channel:
+            trialKeysInHDF5 = list(hdf5_file[channel].keys())
+            trialKeysInHDF5_sorting_indices = range(len(trialKeysInHDF5))
+        
+        # In case there is any other channel in the hdf5 file you haven't accounted for:
+        else:
+            # Print a warning:
+            print(f"Unrecognised {channel}: check function. This channel may not be properly sorted.")
+            trialKeysInHDF5 = list(hdf5_file[curated_channel].keys())
+            trialKeysInHDF5_int = [int(x) for x in trialKeysInHDF5]
+            trialKeysInHDF5_sorting_indices = list(np.argsort(trialKeysInHDF5_int))
+
+        # Once you have the correct indices to obtain sorted trial keys, extract the ordered data:
+        for i in range(len(trialKeysInHDF5_sorting_indices)):
+            correctedTrialKey = trialKeysInHDF5[trialKeysInHDF5_sorting_indices[i]] 
+            data_dict[channel].append(np.array(hdf5_file[channel][correctedTrialKey]))
+            key_dict[channel].append(correctedTrialKey)
+    
+    extracted_channels = []
+    corrected_trial_keys = []
+
+    # Keep only the useful channels and their trial keys:
+    for channel in channel_list:
+        extracted_channels.append(data_dict[channel])
+        corrected_trial_keys.append(key_dict[channel])
+    
+    # Get time and delta_t
+    if len(data_dict['Time']) >0:
+        time = data_dict['Time']
+        dt = np.mean(np.diff(time))
+    else:
+        dt = 0.04
+        time = np.linspace(0, len(data_dict['Channel A'][0])*dt, len(['Channel A'][0]))
+    
+    # Create data frame of data:
+    channels_data_frame = pd.DataFrame(extracted_channels, index = channel_list, columns = corrected_trial_keys[0])
+
+    return extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt
+
 def openTDMSfile(in_path, channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B']):
     """
     `openTDMSfile` returns a list of arrays, where each is a sweep/trial.
@@ -50,23 +158,23 @@ def openTDMSfile(in_path, channel_list = ['Channel A', 'Channel B', 'Output A', 
     
     # Load .tdms file
     tdms_file = TdmsFile(in_path) 
-    dataDict = defaultdict(list)
+    data_dict = defaultdict(list)
     
     # Iterate through channels and extract data from sweeps/trials
     for group in tdms_file.groups():
         i=0
         for sweep in group.channels():
-            dataDict[group.name].append(sweep.data)
+            data_dict[group.name].append(sweep.data)
             i+=1
                        
     # Keep only useful channels
     extracted_channels = []
 
     for channel in channel_list: 
-        extracted_channels.append(dataDict[channel])
+        extracted_channels.append(data_dict[channel])
     
     # Get time and delta_t
-    time = dataDict['Time'][0]
+    time = data_dict['Time'][0]
     dt = np.mean(np.diff(time))
     
     return extracted_channels, time, dt
