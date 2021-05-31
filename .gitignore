@@ -38,3 +38,4 @@ other_code/yulin_patching_analysis/sEPSC.py
 other_code/yulin_patching_analysis/__pycache__/sEPSC.cpython-37.pyc
 other_code/yulin_patching_analysis/__pycache__/temp.cpython-37.pyc
 other_code/yulin_patching_analysis/temp.py
+*.pyc
