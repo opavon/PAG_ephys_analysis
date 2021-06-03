@@ -25,8 +25,6 @@ def importFile(curated_channel = None):
     
     return voltage_mV, current_pA, command, ttl, extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt, folder_name, file_name
 
-# return extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt
-
 def openFile(in_path, curated_channel = None):
     """
     `openFile` checks whether you are attempting to open a `.tdms` or a `.hdf5` file.
