@@ -178,3 +178,24 @@ def openTDMSfile(in_path, channel_list = ['Channel A', 'Channel B', 'Output A', 
     dt = np.mean(np.diff(time))
     
     return extracted_channels, time, dt
+
+# To update
+def parse_TTL_edges(TTL, edgeType):
+    trial =0
+    edges = []
+    
+    while len(edges)<1 and trial < len(TTL):
+    
+        if 'rising' in edgeType:
+            edges = np.where(np.diff(TTL[trial])>0) 
+        elif 'falling' in edgeType:
+            edges = np.where(np.diff(TTL[trial])<0) 
+        elif 'both' in edgeType:
+            edges = np.where(np.diff(TTL[trial])!=0)    
+            
+        edges = edges + np.full(len(edges),1) #+1 to correct the shift due to differentiation
+        edges = edges[0] #just to unwrap the array
+        
+        trial = trial+1
+    
+    return edges
