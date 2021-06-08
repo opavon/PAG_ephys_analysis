@@ -141,7 +141,7 @@ def openHDF5file(in_path,
     # Get time and delta_t
     if len(data_dict['Time']) >0:
         time = data_dict['Time']
-        dt = np.mean(np.diff(time))
+        dt = 0.04 # could do np.mean(np.diff(time)), but we always acquire at 25KHz
     else:
         dt = 0.04
         time = np.linspace(0, len(data_dict['Channel A'][0])*dt, len(['Channel A'][0]))
