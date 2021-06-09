@@ -45,12 +45,14 @@ def openFile(in_path, curated_channel = None):
 
 def openHDF5file(in_path,
                  channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
-                 curated_channel = None):
+                 curated_channel = None,
+                 sampling_rate_khz = 25):
     """
     Opens the selected `.hdf5` file and extracts sorted data from chosen channels.
     
     :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
     :curated_channel: e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality.
+    :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
     """
 
     # Read hdf5 file:
@@ -139,11 +141,12 @@ def openHDF5file(in_path,
         corrected_trial_keys.append(key_dict[channel])
     
     # Get time and delta_t
-    if len(data_dict['Time']) >0:
+    if len(data_dict['Time']) > 0:
         time = data_dict['Time']
-        dt = 0.04 # could do np.mean(np.diff(time)), but we always acquire at 25KHz
+        dt = 1/sampling_rate_khz # could try to objectively do np.mean(np.diff(time)), but that would always underestimate the value as len(np.diff(x)) will always be one value shorter than len(x) 
+    
     else:
-        dt = 0.04
+        dt = 1/sampling_rate_khz # could try to objectively do np.mean(np.diff(time)), but that would always underestimate the value as len(np.diff(x)) will always be one value shorter than len(x) 
         time = np.linspace(0, len(data_dict['Channel A'][0])*dt, len(['Channel A'][0]))
     
     # Create data frame of data:
@@ -151,9 +154,14 @@ def openHDF5file(in_path,
 
     return extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt
 
-def openTDMSfile(in_path, channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B']):
+def openTDMSfile(in_path,
+                 channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
+                 sampling_rate_khz = 25):
     """
     `openTDMSfile` returns a list of arrays, where each is a sweep/trial.
+
+    :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
+    :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
     """
     
     # Load .tdms file
@@ -175,7 +183,7 @@ def openTDMSfile(in_path, channel_list = ['Channel A', 'Channel B', 'Output A', 
     
     # Get time and delta_t
     time = data_dict['Time'][0]
-    dt = np.mean(np.diff(time))
+    dt = 1/sampling_rate_khz # could try to objectively do np.mean(np.diff(time)), but that would always underestimate the value as len(np.diff(x)) will always be one value shorter than len(x) 
     
     return extracted_channels, time, dt
 
