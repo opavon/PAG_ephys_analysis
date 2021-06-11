@@ -7,10 +7,18 @@ from tkinter.filedialog import askopenfilename, askopenfilenames
 from collections import defaultdict
 from nptdms import TdmsFile
 
-def importFile(curated_channel = None):
+def importFile(
+    channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
+    curated_channel = None,
+    sampling_rate_khz = 25
+    ):
     """
     `importFile` opens a window to select a file to import.
-    Returns path and calls `openFile` to extract data."
+    It then uses the path to the selected file to call `openFile` to extract data.
+
+    :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
+    :curated_channel: e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality. Defaults to None.
+    :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
     """
 
     root = tkinter.Tk()
@@ -21,37 +29,43 @@ def importFile(curated_channel = None):
     folder_name = os.path.split(in_path)[0] # Get path until folder
     file_name = os.path.split(in_path)[1] # Get filename
     
-    voltage_mV, current_pA, command, ttl, extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt = openFile(in_path, curated_channel) # Call openFile() function
+    extracted_channels_data_frame, time, dt = openFile(in_path, channel_list, curated_channel, sampling_rate_khz) # Call openFile() function
     
-    return voltage_mV, current_pA, command, ttl, extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt, folder_name, file_name
+    return extracted_channels_data_frame, time, dt, folder_name, file_name
 
-def openFile(in_path, curated_channel = None):
+def openFile(
+    in_path,
+    channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
+    curated_channel = None,
+    sampling_rate_khz = 25
+    ):
     """
     `openFile` checks whether you are attempting to open a `.tdms` or a `.hdf5` file.
-    Extracts the data from selected channels.
+    It then calls the right function to extract the data from selected channels.
+
+    :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
+    :curated_channel: e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality. Defaults to None.
+    :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
     """
 
     if '.tdms' in in_path:
-        extracted_channels, time, dt = openTDMSfile(in_path)
+        extracted_channels_data_frame, time, dt = openTDMSfile(in_path, channel_list, sampling_rate_khz)
     elif '.hdf5' in in_path:
-        extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt = openHDF5file(in_path, curated_channel = curated_channel)
+        extracted_channels_data_frame, time, dt = openHDF5file(in_path, channel_list, curated_channel, sampling_rate_khz)
     
-    voltage_mV = extracted_channels[0]
-    current_pA = extracted_channels[1]
-    command = extracted_channels[2]
-    ttl = extracted_channels[3]
-    
-    return voltage_mV, current_pA, command, ttl, extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt
+    return extracted_channels_data_frame, time, dt
 
-def openHDF5file(in_path,
-                 channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
-                 curated_channel = None,
-                 sampling_rate_khz = 25):
+def openHDF5file(
+    in_path,
+    channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
+    curated_channel = None,
+    sampling_rate_khz = 25
+    ):
     """
-    Opens the selected `.hdf5` file and extracts sorted data from chosen channels.
+    `openHDF5file` Opens the selected `.hdf5` file and extracts sorted data from chosen channels.
     
     :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
-    :curated_channel: e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality.
+    :curated_channel: e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality. Defaults to None.
     :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
     """
 
@@ -142,21 +156,23 @@ def openHDF5file(in_path,
     
     # Get time and delta_t
     if len(data_dict['Time']) > 0:
-        time = data_dict['Time']
         dt = 1/sampling_rate_khz # could try to objectively do np.mean(np.diff(time)), but that would always underestimate the value as len(np.diff(x)) will always be one value shorter than len(x) 
+        time = data_dict['Time']
     
     else:
         dt = 1/sampling_rate_khz # could try to objectively do np.mean(np.diff(time)), but that would always underestimate the value as len(np.diff(x)) will always be one value shorter than len(x) 
         time = np.linspace(0, len(data_dict['Channel A'][0])*dt, len(['Channel A'][0]))
     
     # Create data frame of data:
-    channels_data_frame = pd.DataFrame(extracted_channels, index = channel_list, columns = corrected_trial_keys[0])
+    extracted_channels_data_frame = pd.DataFrame(extracted_channels, index = channel_list, columns = corrected_trial_keys[0])
 
-    return extracted_channels, corrected_trial_keys, channel_list, channels_data_frame, time, dt
+    return extracted_channels_data_frame, time, dt
 
-def openTDMSfile(in_path,
-                 channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
-                 sampling_rate_khz = 25):
+def openTDMSfile(
+    in_path,
+    channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
+    sampling_rate_khz = 25
+    ):
     """
     `openTDMSfile` returns a list of arrays, where each is a sweep/trial.
 
@@ -165,15 +181,21 @@ def openTDMSfile(in_path,
     """
     
     # Load .tdms file
-    tdms_file = TdmsFile(in_path) 
+    tdms_file = TdmsFile(in_path)
+    # Define empty dictionary to populate with correctly sorted data:
     data_dict = defaultdict(list)
+    # Define empty list to populate with trial keys:
+    trial_keys = []
     
     # Iterate through channels and extract data from sweeps/trials
     for group in tdms_file.groups():
-        i=0
+        # Iterate through sweeps and append data to dictionary
         for sweep in group.channels():
             data_dict[group.name].append(sweep.data)
-            i+=1
+            # Assign the names of each sweep for Channel A to use for the data frame
+            # We take Channel A (or B) as they start from 1 (Output channels start from a random number
+            if group.name == 'Channel A':
+                trial_keys.append(sweep.name)
                        
     # Keep only useful channels
     extracted_channels = []
@@ -182,10 +204,13 @@ def openTDMSfile(in_path,
         extracted_channels.append(data_dict[channel])
     
     # Get time and delta_t
-    time = data_dict['Time'][0]
     dt = 1/sampling_rate_khz # could try to objectively do np.mean(np.diff(time)), but that would always underestimate the value as len(np.diff(x)) will always be one value shorter than len(x) 
+    time = data_dict['Time'][0]
+
+    # Create data frame of data:
+    extracted_channels_data_frame = pd.DataFrame(extracted_channels, index = channel_list, columns = trial_keys)
     
-    return extracted_channels, time, dt
+    return extracted_channels_data_frame, time, dt
 
 # To update
 def parse_TTL_edges(TTL, edgeType):
