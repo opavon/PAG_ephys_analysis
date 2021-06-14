@@ -31,7 +31,7 @@ def importFile(
     
     extracted_channels_data_frame, time, dt = openFile(in_path, channel_list, curated_channel, sampling_rate_khz) # Call openFile() function
     
-    return extracted_channels_data_frame, time, dt, folder_name, file_name
+    return extracted_channels_data_frame, time, dt, folder_name, file_name # pandas data frame, list, float, str, str
 
 def openFile(
     in_path,
@@ -53,7 +53,7 @@ def openFile(
     elif '.hdf5' in in_path:
         extracted_channels_data_frame, time, dt = openHDF5file(in_path, channel_list, curated_channel, sampling_rate_khz)
     
-    return extracted_channels_data_frame, time, dt
+    return extracted_channels_data_frame, time, dt # pandas data frame, list, float
 
 def openHDF5file(
     in_path,
@@ -166,7 +166,7 @@ def openHDF5file(
     # Create data frame of data:
     extracted_channels_data_frame = pd.DataFrame(extracted_channels, index = channel_list, columns = corrected_trial_keys[0])
 
-    return extracted_channels_data_frame, time, dt
+    return extracted_channels_data_frame, time, dt # pandas data frame, list, float
 
 def openTDMSfile(
     in_path,
@@ -210,25 +210,56 @@ def openTDMSfile(
     # Create data frame of data:
     extracted_channels_data_frame = pd.DataFrame(extracted_channels, index = channel_list, columns = trial_keys)
     
-    return extracted_channels_data_frame, time, dt
+    return extracted_channels_data_frame, time, dt # pandas data frame, list, float
 
-# To update
-def parse_TTL_edges(TTL, edgeType):
-    trial =0
-    edges = []
+def getLooseRseal(
+    file_name,
+    channels_data_frame,
+    dt):
+    """
+    `getLooseRseal` calculates the seal resistance (Rseal) from the test pulse size and the cell's response.
+    Takes a data frame and returns both the Rseal average and its value across time of recording.
     
-    while len(edges)<1 and trial < len(TTL):
-    
-        if 'rising' in edgeType:
-            edges = np.where(np.diff(TTL[trial])>0) 
-        elif 'falling' in edgeType:
-            edges = np.where(np.diff(TTL[trial])<0) 
-        elif 'both' in edgeType:
-            edges = np.where(np.diff(TTL[trial])!=0)    
-            
-        edges = edges + np.full(len(edges),1) #+1 to correct the shift due to differentiation
-        edges = edges[0] #just to unwrap the array
+    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
+    :extracted_channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    :dt: delta time obtained by dividing 1 over sampling rate.
+    """
+
+    cell_name = [file_name.split('.')[0]] # Get the file name without the extension
+    print(cell_name)
+    seal_resistance = []
+    trial_keys = []
+
+    for sweep in channels_data_frame.columns:
         
-        trial = trial+1
-    
-    return edges
+        sweep_IA = np.array(channels_data_frame.at['Channel A', sweep])
+        sweep_IB = np.array(channels_data_frame.at['Channel B', sweep])
+        sweep_OA = np.array(channels_data_frame.at['Output A', sweep])
+
+        # Find the edges of the test_pulse
+        test_pulse_start = np.where(np.diff(sweep_OA) < (0))
+        test_pulse_end = np.where(np.diff(sweep_OA) > (0))
+        # Extract them from the tuple
+        test_pulse_start_i = test_pulse_start[0][0]
+        test_pulse_end_i = test_pulse_end[0][0]
+
+        # Use the indices of the test_pulse command to define baseline period and test period (Output A)
+        sweep_OA_baseline = np.mean(sweep_OA[int(test_pulse_start_i - (20/dt)):test_pulse_start_i])
+        sweep_OA_pulse = np.mean(sweep_OA[int(test_pulse_end_i - (49/dt)):test_pulse_end_i])
+        test_pulse_command = sweep_OA_baseline - sweep_OA_pulse #mV
+
+        # Do the same as above but for the recorded Current (Channel B)
+        sweep_IB_baseline = np.mean(sweep_IB[int(test_pulse_start_i - (20/dt)):test_pulse_start_i])
+        sweep_IB_pulse = np.mean(sweep_IB[int(test_pulse_end_i - (49/dt)):test_pulse_end_i])
+        test_pulse_membrane = sweep_IB_baseline - sweep_IB_pulse #pA
+
+        # Get seal resistance = mV/pA
+        seal_resistance.append(test_pulse_command / test_pulse_membrane * 1000) # to get MOhm
+
+        # Get trial name
+        trial_keys.append(sweep)
+
+    # Create data frame of data:
+    extracted_Rseal_data_frame = pd.DataFrame([seal_resistance], index = cell_name, columns = trial_keys)
+
+    return extracted_Rseal_data_frame # pandas data frame
