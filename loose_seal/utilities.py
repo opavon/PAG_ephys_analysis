@@ -226,35 +226,37 @@ def getLooseRseal(
     """
 
     cell_name = [file_name.split('.')[0]] # Get the file name without the extension
-    print(cell_name)
     seal_resistance = []
     trial_keys = []
 
     for sweep in channels_data_frame.columns:
         
-        sweep_IA = np.array(channels_data_frame.at['Channel A', sweep])
+        # sweep_IA = np.array(channels_data_frame.at['Channel A', sweep]) # Not needed as we record in Voltage Clamp
         sweep_IB = np.array(channels_data_frame.at['Channel B', sweep])
         sweep_OA = np.array(channels_data_frame.at['Output A', sweep])
 
-        # Find the edges of the test_pulse
-        test_pulse_start = np.where(np.diff(sweep_OA) < (0))
-        test_pulse_end = np.where(np.diff(sweep_OA) > (0))
-        # Extract them from the tuple
-        test_pulse_start_i = test_pulse_start[0][0]
-        test_pulse_end_i = test_pulse_end[0][0]
+        # Get the indices corresponding to the test_pulse using the Output Channel
+        test_pulse = np.where(sweep_OA < 0)
+        test_pulse_OA_indices = test_pulse[0]
 
-        # Use the indices of the test_pulse command to define baseline period and test period (Output A)
-        sweep_OA_baseline = np.mean(sweep_OA[int(test_pulse_start_i - (20/dt)):test_pulse_start_i])
-        sweep_OA_pulse = np.mean(sweep_OA[int(test_pulse_end_i - (49/dt)):test_pulse_end_i])
-        test_pulse_command = sweep_OA_baseline - sweep_OA_pulse #mV
+        # Use the indices of the test_pulse command (Output A) to define baseline period and test period
+        sweep_OA_baseline = np.mean(sweep_OA[:(test_pulse_OA_indices[0]-1)]) # -1 to stop baseline before command starts
+        sweep_OA_pulse = np.mean(sweep_OA[test_pulse_OA_indices])
+        test_pulse_command = sweep_OA_baseline - sweep_OA_pulse # mV
 
-        # Do the same as above but for the recorded Current (Channel B)
-        sweep_IB_baseline = np.mean(sweep_IB[int(test_pulse_start_i - (20/dt)):test_pulse_start_i])
-        sweep_IB_pulse = np.mean(sweep_IB[int(test_pulse_end_i - (49/dt)):test_pulse_end_i])
-        test_pulse_membrane = sweep_IB_baseline - sweep_IB_pulse #pA
+        # Use the test_pulse indices to get the baseline and cell response to calculate the seal resistance
+        # To be exact and account for the delays between digital command and output from the amplifier, you could add +1 to the first index to calculate the baseline.
+        sweep_IB_baseline = np.mean(sweep_IB[:(test_pulse_OA_indices[0])])
+        # Similary, to avoid using the values recorded while the test pulse command begins, you can skip a milisecond (+4 indices) to the beginning, to ensure you start averaging once the signal has reached the cell. 
+        # To be extra exact, you could add +2 to the last index so you use all the samples. 
+        # However, this shouldn't make a big difference, so we just skip the milisecond to avoid the transition period.
+        sweep_IB_pulse = np.mean(sweep_IB[(test_pulse_OA_indices[0]+4):(test_pulse_OA_indices[-1])])
+        test_pulse_membrane = sweep_IB_baseline - sweep_IB_pulse # pA
 
         # Get seal resistance = mV/pA
-        seal_resistance.append(test_pulse_command / test_pulse_membrane * 1000) # to get MOhm
+        Rseal = (test_pulse_command / test_pulse_membrane) * 1000 # to get MOhm
+        # Append results
+        seal_resistance.append(Rseal)
 
         # Get trial name
         trial_keys.append(sweep)
