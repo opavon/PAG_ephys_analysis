@@ -214,36 +214,39 @@ def openTDMSfile(
 
 def getLooseRseal(
     file_name,
-    channels_data_frame,
-    dt):
+    channels_data_frame
+    ):
     """
     `getLooseRseal` calculates the seal resistance (Rseal) from the test pulse size and the cell's response.
-    Takes a data frame and returns both the Rseal average and its value across time of recording.
+    Takes a data frame and returns the Rseal value across sweeps for the time of recording.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :extracted_channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
-    :dt: delta time obtained by dividing 1 over sampling rate.
     """
 
+    # Initialize variables to build results data frame:
     cell_name = [file_name.split('.')[0]] # Get the file name without the extension
     seal_resistance = []
     trial_keys = []
 
     for sweep in channels_data_frame.columns:
         
+        ## Load data: Output A (command) and Channel B (recording in Voltage Clamp)
         # sweep_IA = np.array(channels_data_frame.at['Channel A', sweep]) # Not needed as we record in Voltage Clamp
         sweep_IB = np.array(channels_data_frame.at['Channel B', sweep])
         sweep_OA = np.array(channels_data_frame.at['Output A', sweep])
 
-        # Get the indices corresponding to the test_pulse using the Output Channel
+        ## Get the indices corresponding to the test_pulse using the Output Channel
         test_pulse = np.where(sweep_OA < 0)
         test_pulse_OA_indices = test_pulse[0]
 
+        ## Get test_pulse magnitude
         # Use the indices of the test_pulse command (Output A) to define baseline period and test period
         sweep_OA_baseline = np.mean(sweep_OA[:(test_pulse_OA_indices[0]-1)]) # -1 to stop baseline before command starts
         sweep_OA_pulse = np.mean(sweep_OA[test_pulse_OA_indices])
         test_pulse_command = sweep_OA_baseline - sweep_OA_pulse # mV
 
+        ## Get cell response to test_pulse:
         # Use the test_pulse indices to get the baseline and cell response to calculate the seal resistance
         # To be exact and account for the delays between digital command and output from the amplifier, you could add +1 to the first index to calculate the baseline.
         sweep_IB_baseline = np.mean(sweep_IB[:(test_pulse_OA_indices[0])])
@@ -253,12 +256,12 @@ def getLooseRseal(
         sweep_IB_pulse = np.mean(sweep_IB[(test_pulse_OA_indices[0]+4):(test_pulse_OA_indices[-1])])
         test_pulse_membrane = sweep_IB_baseline - sweep_IB_pulse # pA
 
-        # Get seal resistance = mV/pA
+        ## Get seal resistance = mV/pA
         Rseal = (test_pulse_command / test_pulse_membrane) * 1000 # to get MOhm
         # Append results
         seal_resistance.append(Rseal)
 
-        # Get trial name
+        ## Get trial name for results data frame
         trial_keys.append(sweep)
 
     # Create data frame of data:
