@@ -5,3 +5,4 @@
 # pip install pandas
 # pip install pyinspect
 # pip install jupyter
+# pip install seaborn
