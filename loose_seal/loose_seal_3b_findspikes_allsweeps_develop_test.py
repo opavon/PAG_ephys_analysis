@@ -425,7 +425,7 @@ plt.show()
 # 
 # * `widths`: most widths fall between 4-6 samples, with a few between 6-8 (corresponding to the spikes with the slight bump in the beginning). The one with a width above 18 is probably noise. 
 # 
-# * `width_heights`: this is similar to `peak-heights`, and the noise is probably the value below zero. 
+# * `width_heights`: this is similar to `peak_heights`, and the noise is probably the value below zero. 
 # 
 # Let's take a look by coloring the spikes according to each of this parameters.
 
