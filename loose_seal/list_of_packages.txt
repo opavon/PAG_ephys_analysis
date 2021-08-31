@@ -6,3 +6,4 @@
 # pip install pyinspect
 # pip install jupyter
 # pip install seaborn
+# pip install PyQt5
