@@ -1,11 +1,14 @@
 import os
-import h5py
-import numpy as np
-import pandas as pd
 import tkinter
-from tkinter.filedialog import askopenfilename, askopenfilenames
+from tkinter.filedialog import askopenfilename, askopenfilenames, askdirectory
+import h5py
 from collections import defaultdict
 from nptdms import TdmsFile
+import numpy as np
+import pandas as pd
+from scipy.signal import find_peaks
+import matplotlib.pyplot as plt
+from IPython import get_ipython
 
 def importFile(
     channel_list = ['Channel A', 'Channel B', 'Output A', 'Output B'],
@@ -221,7 +224,7 @@ def getLooseRseal_old(
     Takes a data frame and returns the Rseal value across sweeps for the time of recording.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
-    :extracted_channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    :channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
     """
 
     # Initialize variables to build results data frame:
@@ -278,7 +281,7 @@ def getLooseRseal(
     Takes a data frame and returns the Rseal value across sweeps for the time of recording.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
-    :extracted_channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    :channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
     """
 
     # Initialize variables to build results data frame:
@@ -330,3 +333,110 @@ def getLooseRseal(
     extracted_Rseal_data_frame = pd.DataFrame([test_pulse_command, test_pulse_membrane, seal_resistance], index = ['test_pulse_command', 'test_pulse_membrane', 'seal_resistance'], columns = trial_keys)
 
     return extracted_Rseal_data_frame # pandas data frame
+
+def concatenateSweeps(
+    file_name,
+    channels_data_frame
+    ):
+    """
+    `concatenateSweeps` extracts the sweeps containing the recorded signal from `channels_data_frame` and concatenates them. It also creates a concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID. It returns two numpy.ndarrays for the concatenated data and the concatenated sweep IDs.
+    
+    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
+    :channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    """
+
+    # Extract sweeps
+    sweep_IB = np.array(channels_data_frame.loc['Channel B', :])
+    
+    # Concatenate sweeps
+    sweep_IB_concatenated = np.concatenate(sweep_IB)
+    
+    # Create pseudo-sweep
+    pseudo_sweep_keys = []
+    
+    for i, sweep in enumerate(sweep_IB):
+        # get sweep ID as integer
+        sweep_key = int(channels_data_frame.columns[i])
+        # create a pseudo-sweep of the same length as the data but consisting of the sweep ID
+        sweep_keys_tmp = np.zeros(len(sweep), dtype = int) + sweep_key
+        pseudo_sweep_keys.append(sweep_keys_tmp)
+    
+    # Concatenate the pseudo-sweep
+    pseudo_sweep_concatenated = np.concatenate(pseudo_sweep_keys)
+
+    return sweep_IB_concatenated, pseudo_sweep_concatenated
+
+def findSpikes(
+    file_name,
+    sweep_IB_concatenated,
+    prominence_min = None,
+    prominence_max = None,
+    wlen_ms = 10,
+    sampling_rate_khz = 25
+    ):
+    """
+    `findSpikes` uses scipy's `find_peaks` to detect peaks in the data and obtain their prominences. It then plots the distribution of prominences and allows the user to input the minimal and maximal prominence values to be used to detect peaks. It next runs `find_peaks` one more time with the user selected parameters and plots the data and the detected peaks. It returns the indices of peaks in the data that satisfy all given conditions, the properties of such peaks, and the parameters selected by the user.
+    
+    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
+    :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    :prominence_min: minimal required prominence of peaks. Defaults to None.
+    :prominence_max: maximal required prominence of peaks. Defaults to None.
+    :wlen_ms: window length in ms that limits the evaluated area for each peak. Defaults 10 ms.
+    :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
+    """
+
+    # Get delta_t from sampling rate:
+    dt = 1/sampling_rate_khz
+    
+    # Run `find_peaks` with no parameters, so we can examine the prominences of anything detected. This will help us fine-tune the function call.
+    peaks_tmp, properties_tmp = find_peaks(-sweep_IB_concatenated, height = (None, None), threshold = (None, None), distance = None, prominence = (prominence_min, prominence_max), width = (None, None), wlen = wlen_ms/dt)
+
+    # Plot the distribution of prominences from the detected peaks.
+    get_ipython().run_line_magic('matplotlib', 'qt')
+    plt.figure(figsize = (8, 6), dpi = 100) # Set figure size
+    ax = plt.gca()
+    plt.hist(properties_tmp['prominences'], bins = 200, density = False, histtype = 'bar', log = True)
+    plt.title('Figure A: Prominence of detected peaks', fontsize = 14)
+    plt.text(0.95, 0.95, f'Parameters: wlen = {wlen_ms}ms', horizontalalignment='right', verticalalignment='top', transform = ax.transAxes)
+    plt.xlabel('peak prominence [pA]', fontsize = 12)
+    plt.pause(0.5) # Alternative to waitforbuttonpress() - does not close the figure and proceeds to input().
+    # if plt.waitforbuttonpress(): # if not using pause(), this is needed to render the figure
+    #     plt.close()
+
+    # Based on the histogram above, select the interval of prominences that will contain the peaks from spikes and not from baseline noise.
+    prominence_min = int(input("Enter the min value for the desired prominence"))
+    prominence_max = int(input("Enter the max value for the desired prominence"))
+        
+    plt.close() # needed here if plt.pause() is used instead of plt.waitforbuttonpress()
+
+    # Use the selected prominence values to find spikes in the data.
+    peaks, properties = find_peaks(-sweep_IB_concatenated, height = (None, None), threshold = (None, None), distance = None, prominence = (prominence_min, prominence_max), width = (None, None), wlen = wlen_ms/dt)
+
+    # Get cell ID and parameters used
+    cell_id = [file_name.split('.')[0]]
+    parameters_used = pd.DataFrame([[prominence_min, prominence_max, wlen_ms/dt, wlen_ms]], columns = ['prominence_min', 'prominence_max', 'wlen [samples]', 'wlen [ms]'], index = cell_id)
+
+    # Plot the data with the detected peaks.
+    get_ipython().run_line_magic('matplotlib', 'qt')
+    plt.figure(figsize = (8, 6), dpi = 100) # Set figure size
+    plt.plot(peaks, sweep_IB_concatenated[peaks], "xr"); plt.plot(sweep_IB_concatenated); plt.legend(['peaks'])
+    plt.title('Figure B: Detected peaks for concatenated sweeps', fontsize = 14)
+    plt.xlabel('samples', fontsize = 12)
+    plt.ylabel('current [pA]', fontsize = 12)
+    #plt.pause(0.5)
+    plt.show(block = True) # Lets you interact with plot and proceeds when figure is closed
+
+    happy = input("Are you happy with your choice of prominence? y/n")
+
+    if happy == 'y':
+        print(f"found {len(peaks)} spikes")
+    else:
+        # Empty results just in case.
+        peaks = []
+        properties = []
+        parameters_used = []
+        print('Try running findSpikes() again')
+    
+    plt.close()
+    
+    return peaks, properties, parameters_used # ndarray, dict, pandas data frame
