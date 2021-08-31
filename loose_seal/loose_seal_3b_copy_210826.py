@@ -256,7 +256,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 ax = plt.gca()
 plt.hist(properties_1c['prominences'], bins = 200, density = False, histtype = 'bar', log = True)
 plt.title('Figure 1d: Prominence of detected peaks', fontsize = 14)
-plt.text(0.05, 0.95, 'prominence = (100, 200)', fontsize = 10, horizontalalignment = 'left', verticalalignment = 'top', transform = ax.transAxes)
+plt.text(0.95, 0.95, 'prominence = (100, 200)', fontsize = 10, horizontalalignment = 'right', verticalalignment = 'top', transform = ax.transAxes)
 plt.xlabel('peak prominence [pA]', fontsize = 12)
 plt.show()
 
