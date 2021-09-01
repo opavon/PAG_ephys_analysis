@@ -440,3 +440,27 @@ def findSpikes(
     plt.close()
     
     return peaks, properties, parameters_used # ndarray, dict, pandas data frame
+
+def cutSpikes(
+    file_name,
+    sweep_IB_concatenated,
+    peaks
+    ):
+    """
+    `cutSpikes` cuts an interval of 10 ms around each peak for plotting and further analysis. It then calculates a baseline for each peak by averaging 1-3 ms, leaving out the first ms before the peak index as it will contain the spike itself. Finally, it subtracts the calculated value to baseline the cut spikes, which will facilitate visualisation and quality control. It returns three numpy arrays of the same length containing the cut spikes, the baseline before each peak, and the resulting baselined cut spikes.
+    
+    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
+    :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    :peaks: indices of detected spikes obtained from `findSpikes()`.
+    """
+    
+    # Cut 125 samples (5 ms) before and after each peak
+    cut_spikes = np.array([sweep_IB_concatenated[(peaks[p]-125) : (peaks[p]+125)] for p in range(len(peaks))])
+
+    # Get baseline for each spike by averaging 1-3 ms before each peak
+    cut_spikes_holding = np.array([np.mean(sweep_IB_concatenated[(peaks[p]-100) : (peaks[p]-25)]) for p in range(len(peaks))])
+
+    # Subtract baseline from cut spikes
+    cut_spikes_baselined = np.array([cut_spikes[i] - cut_spikes_holding[i] for i in range(len(cut_spikes))])
+
+    return cut_spikes, cut_spikes_holding, cut_spikes_baselined # ndarray, ndarray, ndarray
