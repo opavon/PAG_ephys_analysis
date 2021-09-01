@@ -293,7 +293,7 @@ plt.show()
 # %% [markdown]
 # ### 1.4 | Cut, baseline, and average detected spikes
 # 
-# Once we have detected all the peaks in our concatenated sweep, we proceed to cut and inspect them as a quality chec Cutting 5 ms at either side of the sweep is enough for visualisation purposes.k.
+# Once we have detected all the peaks in our concatenated sweep, we proceed to cut and inspect them as a quality check. Cutting 5 ms at either side of the sweep is enough for visualisation purposes.
 
 # %%
 cut_spikes = [sweep_IB_1_concatenated[peaks_1d[p]-125 : peaks_1d[p]+125] for p in range(len(peaks_1d))]
