@@ -228,7 +228,7 @@ def getLooseRseal_old(
     """
 
     # Initialize variables to build results data frame:
-    cell_name = [file_name.split('.')[0]] # Get the file name without the extension
+    file_id = [file_name.split('.')[0]] # Get the file name without the extension
     seal_resistance = []
     trial_keys = []
 
@@ -268,7 +268,7 @@ def getLooseRseal_old(
         trial_keys.append(sweep)
 
     # Create data frame of data:
-    extracted_Rseal_data_frame = pd.DataFrame([seal_resistance], index = cell_name, columns = trial_keys)
+    extracted_Rseal_data_frame = pd.DataFrame([seal_resistance], index = file_id, columns = trial_keys)
 
     return extracted_Rseal_data_frame # pandas data frame
 
@@ -285,7 +285,7 @@ def getLooseRseal(
     """
 
     # Initialize variables to build results data frame:
-    cell_id = [file_name.split('.')[0]] # Get the file name without the extension
+    # file_id = [file_name.split('.')[0]] # Get the file name without the extension
     test_pulse_command = []
     test_pulse_membrane = []
     seal_resistance = []
@@ -335,13 +335,11 @@ def getLooseRseal(
     return extracted_Rseal_data_frame # pandas data frame
 
 def concatenateSweeps(
-    file_name,
     channels_data_frame
     ):
     """
     `concatenateSweeps` extracts the sweeps containing the recorded signal from `channels_data_frame` and concatenates them. It also creates a concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID. It returns two numpy.ndarrays for the concatenated data and the concatenated sweep IDs.
     
-    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
     """
 
@@ -364,7 +362,7 @@ def concatenateSweeps(
     # Concatenate the pseudo-sweep
     pseudo_sweep_concatenated = np.concatenate(pseudo_sweep_keys)
 
-    return sweep_IB_concatenated, pseudo_sweep_concatenated
+    return sweep_IB_concatenated, pseudo_sweep_concatenated # ndarray, ndarray
 
 def findSpikes(
     file_name,
@@ -392,16 +390,15 @@ def findSpikes(
     peaks_tmp, properties_tmp = find_peaks(-sweep_IB_concatenated, height = (None, None), threshold = (None, None), distance = None, prominence = (prominence_min, prominence_max), width = (None, None), wlen = wlen_ms/dt)
 
     # Plot the distribution of prominences from the detected peaks.
-    get_ipython().run_line_magic('matplotlib', 'qt')
-    plt.figure(figsize = (8, 6), dpi = 100) # Set figure size
+    get_ipython().run_line_magic('matplotlib', 'qt') # avoid 'tk' here
+    fig1 = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
     ax = plt.gca()
     plt.hist(properties_tmp['prominences'], bins = 200, density = False, histtype = 'bar', log = True)
     plt.title('Figure A: Prominence of detected peaks', fontsize = 14)
     plt.text(0.95, 0.95, f'Parameters: wlen = {wlen_ms}ms', horizontalalignment='right', verticalalignment='top', transform = ax.transAxes)
     plt.xlabel('peak prominence [pA]', fontsize = 12)
-    plt.pause(0.5) # Alternative to waitforbuttonpress() - does not close the figure and proceeds to input().
-    # if plt.waitforbuttonpress(): # if not using pause(), this is needed to render the figure
-    #     plt.close()
+    fig1.canvas.manager.window.move(0, 0) # Move figure to top left corner
+    plt.pause(0.5) # Alternative to waitforbuttonpress() or plt.show(block = True)- does not close the figure and proceeds to input(). If we needed to interact with the histogram before inputing the desired values we could either increase the length of the pause or switch to plt.show(block = True), which would leave the figure open until we close it, and only then it proceeds to input().
 
     # Based on the histogram above, select the interval of prominences that will contain the peaks from spikes and not from baseline noise.
     prominence_min = int(input("Enter the min value for the desired prominence"))
@@ -413,16 +410,17 @@ def findSpikes(
     peaks, properties = find_peaks(-sweep_IB_concatenated, height = (None, None), threshold = (None, None), distance = None, prominence = (prominence_min, prominence_max), width = (None, None), wlen = wlen_ms/dt)
 
     # Get cell ID and parameters used
-    cell_id = [file_name.split('.')[0]]
-    parameters_used = pd.DataFrame([[prominence_min, prominence_max, wlen_ms/dt, wlen_ms]], columns = ['prominence_min', 'prominence_max', 'wlen [samples]', 'wlen [ms]'], index = cell_id)
+    file_id = [file_name.split('.')[0]] # Get the file name without the extension
+    parameters_used = pd.DataFrame([[prominence_min, prominence_max, wlen_ms/dt, wlen_ms]], columns = ['prominence_min', 'prominence_max', 'wlen [samples]', 'wlen [ms]'], index = file_id)
 
     # Plot the data with the detected peaks.
-    get_ipython().run_line_magic('matplotlib', 'qt')
-    plt.figure(figsize = (8, 6), dpi = 100) # Set figure size
+    get_ipython().run_line_magic('matplotlib', 'qt') # avoid 'tk' here
+    fig2 = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
     plt.plot(peaks, sweep_IB_concatenated[peaks], "xr"); plt.plot(sweep_IB_concatenated); plt.legend(['peaks'])
     plt.title('Figure B: Detected peaks for concatenated sweeps', fontsize = 14)
     plt.xlabel('samples', fontsize = 12)
     plt.ylabel('current [pA]', fontsize = 12)
+    fig2.canvas.manager.window.move(0, 0) # Move figure to top left corner
     #plt.pause(0.5)
     plt.show(block = True) # Lets you interact with plot and proceeds when figure is closed
 
@@ -442,14 +440,12 @@ def findSpikes(
     return peaks, properties, parameters_used # ndarray, dict, pandas data frame
 
 def cutSpikes(
-    file_name,
     sweep_IB_concatenated,
     peaks
     ):
     """
     `cutSpikes` cuts an interval of 10 ms around each peak for plotting and further analysis. It then calculates a baseline for each peak by averaging 1-3 ms, leaving out the first ms before the peak index as it will contain the spike itself. Finally, it subtracts the calculated value to baseline the cut spikes, which will facilitate visualisation and quality control. It returns three numpy arrays of the same length containing the cut spikes, the baseline before each peak, and the resulting baselined cut spikes.
     
-    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
     :peaks: indices of detected spikes obtained from `findSpikes()`.
     """
@@ -464,3 +460,151 @@ def cutSpikes(
     cut_spikes_baselined = np.array([cut_spikes[i] - cut_spikes_holding[i] for i in range(len(cut_spikes))])
 
     return cut_spikes, cut_spikes_holding, cut_spikes_baselined # ndarray, ndarray, ndarray
+
+def plotSpikesQC(
+    file_name,
+    properties,
+    cut_spikes_baselined
+    ):
+    """
+    `plotSpikesQC` generates a summary plot that can be used to determine the metrics that can be used to quality check the detected spikes. The summary plot contains (1) a subplot with all the detected spikes after cutting and baselining, and (2) three subplots with the histograms of the main metrics that can be used to detect noise in the detected spikes, which are `width_heights`, `widths`, and `peak_heights`. It only outputs the plot for visualisation purposes and does not return any variable. 
+    
+    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
+    :properties: dictionary containing properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
+    :cut_spikes_baselined: numpy array containing the baselined cut spikes.
+    """
+
+    file_id = [file_name.split('.')[0]] # Get the file name without the extension
+    cell_id = ['_'.join((file_id[0].split('_'))[0:5])] # Get cell id to print in plot
+
+    # Get color palette and generate one color for each spike
+    import matplotlib.cm as cm
+    baselined_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined)))
+
+    # Generate figure layout
+    get_ipython().run_line_magic('matplotlib', 'qt')
+    fig, axs = plt.subplots (2, 2, tight_layout = True)
+
+    # Plot cut and baselined spikes
+    for s in range(len(cut_spikes_baselined)):
+        axs[0,0].plot(cut_spikes_baselined[s], color = baselined_spikes_colors[s])
+    axs[0,0].set_title('Cut and baselined spikes', fontsize = 12)
+    axs[0,0].set_xlim([((len(cut_spikes_baselined[0])/2)-45), ((len(cut_spikes_baselined[0])/2)+55)])
+    axs[0,0].set_ylabel('current [pA]')
+
+    # Plot Histogram of the height at which widths where evaluated
+    axs[0,1].hist(properties['width_heights'], bins = 100, density = False, histtype = 'bar', log = True, color = 'k')
+    axs[0,1].set_title('Width heights ["wh"]', fontsize = 12)
+    # Plot Histogram of peak widths
+    axs[1,0].hist(properties['widths'], bins = 100, density = False, histtype = 'bar', log = True, color = 'k')
+    axs[1,0].set_title('Peak widths ["pw"]', fontsize = 12)
+    # Plot Histogram of peak heights
+    axs[1,1].hist(properties['peak_heights'], bins = 100, density = False, histtype = 'bar', log = True, color = 'k')
+    axs[1,1].set_title('Peak heights ["ph"]', fontsize = 12)
+
+    # Add title
+    plt.suptitle(f'QC metrics for {cell_id[0]}', fontsize = 14)
+    
+    # Move figure to top left corner
+    fig.canvas.manager.window.move(0, 0)
+    plt.show()
+
+def getSpikesQC(
+    file_name,
+    properties,
+    cut_spikes_baselined,
+    filter_by = ['wh', 'pw', 'ph'],
+    QC_wh_min = float('-inf'),
+    QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'),
+    QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'),
+    QC_ph_max = float('inf'),
+    ):
+    """
+    `getSpikesQC` allows to quality check the detected spikes by defining thresholds in three different metrics. It then generates a summary plot that can be used to assess whether the chosen metrics correctly remove the noise and leave the true spikes untouched. The summary plot contains (1) a subplot with all the detected spikes after cutting and baselining, coloring the noise traces according to the QC metric that excludes them, and (2) three subplots with the histograms of the metrics used, which are `width_heights`, `widths`, and `peak_heights`. If the result is satisfactory, it return a data frame with the selected filters. 
+    
+    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
+    :properties: dictionary containing properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
+    :cut_spikes_baselined: numpy array containing the baselined cut spikes.
+    :filter_by: metrics to be used to detect noise. Defaults to ['wh', 'pw', 'ph']. `width_heights`, `widths`, and `peak_heights`
+    :QC_wh_min: value of `width_heights` below which a peak will be considered noise. Defaults to -inf.
+    :QC_wh_max: value of `width_heights` above which a peak will be considered noise. Defaults to inf.
+    :QC_pw_min: value of `widths` below which a peak will be considered noise. Defaults to -inf.
+    :QC_pw_max: value of `widths` above which a peak will be considered noise. Defaults to inf.
+    :QC_ph_min: value of `peak_heights` below which a peak will be considered noise. Defaults to -inf.
+    :QC_ph_max: value of `peak_heights` above which a peak will be considered noise. Defaults to inf.
+    """
+
+    file_id = [file_name.split('.')[0]] # Get the file name without the extension
+    cell_id = ['_'.join((file_id[0].split('_'))[0:5])] # Get cell id to print in plot
+    
+    # Get color palette and generate one color for each metric
+    cmap = plt.get_cmap('tab20')
+    c_spikes = 'lightgray' # gray - clean spikes
+    c_ph = cmap(3) # orange - noise by peak height
+    c_pw = cmap(7) # red - noise by peak width
+    c_wh = cmap(9) # purple - noise by width height
+
+    get_ipython().run_line_magic('matplotlib', 'qt')
+
+    fig, axs = plt.subplots (2, 2, tight_layout = True)
+
+    # Plot cut and baselined spikes colored by whether they pass the desired QC or not.
+    for s in range(len(cut_spikes_baselined)):
+        if 'wh' in filter_by and (properties['width_heights'][s] < QC_wh_min or properties['width_heights'][s] > QC_wh_max):
+            axs[0,0].plot(cut_spikes_baselined[s], c = c_wh)
+        elif 'pw' in filter_by and (properties['widths'][s] < QC_pw_min or properties['widths'][s] > QC_pw_max):
+            axs[0,0].plot(cut_spikes_baselined[s], c = c_pw)
+        elif 'ph' in filter_by and (properties['peak_heights'][s] < QC_ph_min or properties['peak_heights'][s] > QC_ph_max):
+            axs[0,0].plot(cut_spikes_baselined[s], c = c_ph)
+        else:
+            axs[0,0].plot(cut_spikes_baselined[s], c = c_spikes)
+    axs[0,0].set_title('Spikes colored by QC parameters', fontsize = 12)
+    axs[0,0].set_xlim([((len(cut_spikes_baselined[0])/2)-45), ((len(cut_spikes_baselined[0])/2)+55)])
+    axs[0,0].set_ylabel('current [pA]')
+
+    # Plot Histogram of the height at which widths where evaluated
+    n_1, bins_1, patches_1 = axs[0,1].hist(properties['width_heights'], bins = 100, density = False, histtype = 'bar', log = True)
+    for i in range(len(patches_1)):
+        if (bins_1[i] < QC_wh_min or bins_1[i] > QC_wh_max):
+            patches_1[i].set_facecolor(c_wh)
+        else:
+            patches_1[i].set_facecolor('lightgray')
+    axs[0,1].set_title('Width heights ["wh"]', fontsize = 12)
+    # Plot Histogram of peak widths
+    n_2, bins_2, patches_2 = axs[1,0].hist(properties['widths'], bins = 100, density = False, histtype = 'bar', log = True, color = c_pw)
+    for i in range(len(patches_2)):
+        if (bins_2[i] < QC_pw_min or bins_2[i] > QC_pw_max):
+            patches_2[i].set_facecolor(c_pw)
+        else:
+            patches_2[i].set_facecolor('lightgray')
+    axs[1,0].set_title('Peak widths ["pw"]', fontsize = 12)
+    # Plot Histogram of peak heights
+    n_3, bins_3, patches_3 = axs[1,1].hist(properties['peak_heights'], bins = 100, density = False, histtype = 'bar', log = True, color = c_ph)
+    for i in range(len(patches_3)):
+        if (bins_3[i] < QC_ph_min or bins_3[i] > QC_ph_max):
+            patches_3[i].set_facecolor(c_ph)
+        else:
+            patches_3[i].set_facecolor('lightgray')
+    axs[1,1].set_title('Peak heights ["ph"]', fontsize = 12)
+
+    # Add title
+    plt.suptitle(f'QCed spikes from {cell_id[0]}', fontsize = 14)
+    
+    # Move figure to top left corner
+    fig.canvas.manager.window.move(0, 0)
+    plt.show(block = True)
+
+    # Check whether QC is complete
+    happy = input("Are you happy with your choice of parameters for QC? y/n")
+
+    if happy == 'y':
+        print('QC completed')
+        parameters_QC = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max'], index = cell_id)
+    else:
+        print('Try running findSpikes() again')
+
+    plt.close()
+
+    return parameters_QC # pandas data frame
