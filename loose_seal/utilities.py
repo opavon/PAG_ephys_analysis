@@ -407,11 +407,11 @@ def findSpikes(
     plt.close() # needed here if plt.pause() is used instead of plt.waitforbuttonpress()
 
     # Use the selected prominence values to find spikes in the data.
-    peaks, properties = find_peaks(-sweep_IB_concatenated, height = (None, None), threshold = (None, None), distance = None, prominence = (prominence_min, prominence_max), width = (None, None), wlen = wlen_ms/dt)
+    peaks, peaks_properties = find_peaks(-sweep_IB_concatenated, height = (None, None), threshold = (None, None), distance = None, prominence = (prominence_min, prominence_max), width = (None, None), wlen = wlen_ms/dt)
 
     # Get cell ID and parameters used
     file_id = [file_name.split('.')[0]] # Get the file name without the extension
-    parameters_used = pd.DataFrame([[prominence_min, prominence_max, wlen_ms/dt, wlen_ms]], columns = ['prominence_min', 'prominence_max', 'wlen [samples]', 'wlen [ms]'], index = file_id)
+    parameters_find_peaks = pd.DataFrame([[prominence_min, prominence_max, wlen_ms/dt, wlen_ms]], columns = ['prominence_min', 'prominence_max', 'wlen [samples]', 'wlen [ms]'], index = file_id)
 
     # Plot the data with the detected peaks.
     get_ipython().run_line_magic('matplotlib', 'qt') # avoid 'tk' here
@@ -423,7 +423,7 @@ def findSpikes(
     fig2.canvas.manager.window.move(0, 0) # Move figure to top left corner
     #plt.pause(0.5)
     plt.show(block = True) # Lets you interact with plot and proceeds when figure is closed
-
+    
     happy = input("Are you happy with your choice of prominence? y/n")
 
     if happy == 'y':
@@ -431,13 +431,13 @@ def findSpikes(
     else:
         # Empty results just in case.
         peaks = []
-        properties = []
-        parameters_used = []
+        peaks_properties = []
+        parameters_find_peaks = []
         print('Try running findSpikes() again')
     
     plt.close()
     
-    return peaks, properties, parameters_used # ndarray, dict, pandas data frame
+    return peaks, peaks_properties, parameters_find_peaks # ndarray, dict, pandas data frame
 
 def cutSpikes(
     sweep_IB_concatenated,
@@ -463,14 +463,14 @@ def cutSpikes(
 
 def plotSpikesQC(
     file_name,
-    properties,
+    peaks_properties,
     cut_spikes_baselined
     ):
     """
     `plotSpikesQC` generates a summary plot that can be used to determine the metrics that can be used to quality check the detected spikes. The summary plot contains (1) a subplot with all the detected spikes after cutting and baselining, and (2) three subplots with the histograms of the main metrics that can be used to detect noise in the detected spikes, which are `width_heights`, `widths`, and `peak_heights`. It only outputs the plot for visualisation purposes and does not return any variable. 
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
-    :properties: dictionary containing properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
+    :peaks_properties: dictionary containing properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
     :cut_spikes_baselined: numpy array containing the baselined cut spikes.
     """
 
@@ -493,13 +493,13 @@ def plotSpikesQC(
     axs[0,0].set_ylabel('current [pA]')
 
     # Plot Histogram of the height at which widths where evaluated
-    axs[0,1].hist(properties['width_heights'], bins = 100, density = False, histtype = 'bar', log = True, color = 'k')
+    axs[0,1].hist(peaks_properties['width_heights'], bins = 100, density = False, histtype = 'bar', log = True, color = 'k')
     axs[0,1].set_title('Width heights ["wh"]', fontsize = 12)
     # Plot Histogram of peak widths
-    axs[1,0].hist(properties['widths'], bins = 100, density = False, histtype = 'bar', log = True, color = 'k')
+    axs[1,0].hist(peaks_properties['widths'], bins = 100, density = False, histtype = 'bar', log = True, color = 'k')
     axs[1,0].set_title('Peak widths ["pw"]', fontsize = 12)
     # Plot Histogram of peak heights
-    axs[1,1].hist(properties['peak_heights'], bins = 100, density = False, histtype = 'bar', log = True, color = 'k')
+    axs[1,1].hist(peaks_properties['peak_heights'], bins = 100, density = False, histtype = 'bar', log = True, color = 'k')
     axs[1,1].set_title('Peak heights ["ph"]', fontsize = 12)
 
     # Add title
@@ -511,7 +511,7 @@ def plotSpikesQC(
 
 def getSpikesQC(
     file_name,
-    properties,
+    peaks_properties,
     cut_spikes_baselined,
     filter_by = ['wh', 'pw', 'ph'],
     QC_wh_min = float('-inf'),
@@ -525,7 +525,7 @@ def getSpikesQC(
     `getSpikesQC` allows to quality check the detected spikes by defining thresholds in three different metrics. It then generates a summary plot that can be used to assess whether the chosen metrics correctly remove the noise and leave the true spikes untouched. The summary plot contains (1) a subplot with all the detected spikes after cutting and baselining, coloring the noise traces according to the QC metric that excludes them, and (2) three subplots with the histograms of the metrics used, which are `width_heights`, `widths`, and `peak_heights`. If the result is satisfactory, it return a data frame with the selected filters. 
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
-    :properties: dictionary containing properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
+    :peaks_properties: dictionary containing properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
     :cut_spikes_baselined: numpy array containing the baselined cut spikes.
     :filter_by: metrics to be used to detect noise. Defaults to ['wh', 'pw', 'ph']. `width_heights`, `widths`, and `peak_heights`
     :QC_wh_min: value of `width_heights` below which a peak will be considered noise. Defaults to -inf.
@@ -552,11 +552,11 @@ def getSpikesQC(
 
     # Plot cut and baselined spikes colored by whether they pass the desired QC or not.
     for s in range(len(cut_spikes_baselined)):
-        if 'wh' in filter_by and (properties['width_heights'][s] < QC_wh_min or properties['width_heights'][s] > QC_wh_max):
+        if 'wh' in filter_by and (peaks_properties['width_heights'][s] < QC_wh_min or peaks_properties['width_heights'][s] > QC_wh_max):
             axs[0,0].plot(cut_spikes_baselined[s], c = c_wh)
-        elif 'pw' in filter_by and (properties['widths'][s] < QC_pw_min or properties['widths'][s] > QC_pw_max):
+        elif 'pw' in filter_by and (peaks_properties['widths'][s] < QC_pw_min or peaks_properties['widths'][s] > QC_pw_max):
             axs[0,0].plot(cut_spikes_baselined[s], c = c_pw)
-        elif 'ph' in filter_by and (properties['peak_heights'][s] < QC_ph_min or properties['peak_heights'][s] > QC_ph_max):
+        elif 'ph' in filter_by and (peaks_properties['peak_heights'][s] < QC_ph_min or peaks_properties['peak_heights'][s] > QC_ph_max):
             axs[0,0].plot(cut_spikes_baselined[s], c = c_ph)
         else:
             axs[0,0].plot(cut_spikes_baselined[s], c = c_spikes)
@@ -565,7 +565,7 @@ def getSpikesQC(
     axs[0,0].set_ylabel('current [pA]')
 
     # Plot Histogram of the height at which widths where evaluated
-    n_1, bins_1, patches_1 = axs[0,1].hist(properties['width_heights'], bins = 100, density = False, histtype = 'bar', log = True)
+    n_1, bins_1, patches_1 = axs[0,1].hist(peaks_properties['width_heights'], bins = 100, density = False, histtype = 'bar', log = True)
     for i in range(len(patches_1)):
         if (bins_1[i] < QC_wh_min or bins_1[i] > QC_wh_max):
             patches_1[i].set_facecolor(c_wh)
@@ -573,7 +573,7 @@ def getSpikesQC(
             patches_1[i].set_facecolor('lightgray')
     axs[0,1].set_title('Width heights ["wh"]', fontsize = 12)
     # Plot Histogram of peak widths
-    n_2, bins_2, patches_2 = axs[1,0].hist(properties['widths'], bins = 100, density = False, histtype = 'bar', log = True, color = c_pw)
+    n_2, bins_2, patches_2 = axs[1,0].hist(peaks_properties['widths'], bins = 100, density = False, histtype = 'bar', log = True, color = c_pw)
     for i in range(len(patches_2)):
         if (bins_2[i] < QC_pw_min or bins_2[i] > QC_pw_max):
             patches_2[i].set_facecolor(c_pw)
@@ -581,7 +581,7 @@ def getSpikesQC(
             patches_2[i].set_facecolor('lightgray')
     axs[1,0].set_title('Peak widths ["pw"]', fontsize = 12)
     # Plot Histogram of peak heights
-    n_3, bins_3, patches_3 = axs[1,1].hist(properties['peak_heights'], bins = 100, density = False, histtype = 'bar', log = True, color = c_ph)
+    n_3, bins_3, patches_3 = axs[1,1].hist(peaks_properties['peak_heights'], bins = 100, density = False, histtype = 'bar', log = True, color = c_ph)
     for i in range(len(patches_3)):
         if (bins_3[i] < QC_ph_min or bins_3[i] > QC_ph_max):
             patches_3[i].set_facecolor(c_ph)
@@ -601,10 +601,88 @@ def getSpikesQC(
 
     if happy == 'y':
         print('QC completed')
-        parameters_QC = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max'], index = cell_id)
+        parameters_QC = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, filter_by]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'filter_by'], index = cell_id)
     else:
-        print('Try running findSpikes() again')
+        print('Try running getSpikesQC() again with different parameters')
+        parameters_QC = []
 
     plt.close()
 
     return parameters_QC # pandas data frame
+
+def denoiseSpikes(
+    file_name,
+    peaks,
+    peaks_properties,
+    cut_spikes_baselined,
+    filter_by = ['wh', 'pw', 'ph'],
+    QC_wh_min = float('-inf'),
+    QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'),
+    QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'),
+    QC_ph_max = float('inf'),
+    ):
+    """
+    `denoiseSpikes` removes detected peaks according to the chosen parameters. It first plots the cut, baselined, and denoised spikes to visualise whether the selected parameters lead to a successful denoising. It then removes the indices corresponding to noise from `peaks` and `cut_spikes_baselined`. It returns an array containing the `peaks_denoised` and another containing the `cut_spikes_baselined_denoised`, which can be used for downstream analysis to compute firing rate and other parameters. It also returns a data frame with the filters used for denoising.
+    
+    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
+    :peaks: indices of detected spikes obtained from `findSpikes()`.
+    :peaks_properties: dictionary containing properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
+    :cut_spikes_baselined: numpy array containing the baselined cut spikes.
+    :filter_by: metrics to be used to detect noise. Defaults to ['wh', 'pw', 'ph']. `width_heights`, `widths`, and `peak_heights`
+    :QC_wh_min: value of `width_heights` below which a peak will be considered noise. Defaults to -inf.
+    :QC_wh_max: value of `width_heights` above which a peak will be considered noise. Defaults to inf.
+    :QC_pw_min: value of `widths` below which a peak will be considered noise. Defaults to -inf.
+    :QC_pw_max: value of `widths` above which a peak will be considered noise. Defaults to inf.
+    :QC_ph_min: value of `peak_heights` below which a peak will be considered noise. Defaults to -inf.
+    :QC_ph_max: value of `peak_heights` above which a peak will be considered noise. Defaults to inf.
+    """
+    
+    file_id = [file_name.split('.')[0]] # Get the file name without the extension
+    cell_id = ['_'.join((file_id[0].split('_'))[0:5])] # Get cell id to print in plot
+
+    # Use the selected parameters to find the indices of peaks that are not spikes
+    noise_indices = []
+    
+    if 'wh' in filter_by:
+        noise_indices_wh = np.where((peaks_properties['width_heights'] < QC_wh_min) | (peaks_properties['width_heights'] > QC_wh_max))
+        noise_indices.append(noise_indices_wh[0])
+    elif 'pw' in filter_by:
+        noise_indices_pw = np.where((peaks_properties['widths'] < QC_pw_min) | (peaks_properties['widths'] > QC_pw_max))
+        noise_indices.append(noise_indices_pw[0])
+    elif 'ph' in filter_by:
+        noise_indices_ph = np.where((peaks_properties['peak_heights'] < QC_ph_min) | (peaks_properties['peak_heights'] > QC_ph_max))
+        noise_indices.append(noise_indices_ph[0])
+
+    # Remove the indices corresponding to noise 
+    cut_spikes_baselined_denoised = np.delete(cut_spikes_baselined, noise_indices, 0)
+    peaks_denoised = np.delete(peaks, noise_indices, 0)
+
+    # Plot cut, baselined, and denoised spikes to check whether denoising is complete.
+    import matplotlib.cm as cm
+    denoised_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined_denoised)))
+    get_ipython().run_line_magic('matplotlib', 'qt') # avoid 'tk' here
+    fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
+    for s in range(len(cut_spikes_baselined_denoised)):
+        plt.plot(cut_spikes_baselined_denoised[s], color = denoised_spikes_colors[s])
+    plt.xlim([((len(cut_spikes_baselined_denoised[0])/2)-45), ((len(cut_spikes_baselined_denoised[0])/2)+55)])
+    plt.title('Cut, baselined, and denoised spikes', fontsize = 14)
+    plt.xlabel('samples', fontsize = 12)
+    plt.ylabel('current [pA]', fontsize = 12)
+    fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
+    plt.show(block = True)
+
+    # Check whether denoising is complete
+    happy = input("Are you happy with your choice of parameters for denoising? y/n")
+
+    if happy == 'y':
+        print('denoising completed')
+        parameters_denoise = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, filter_by]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'filter_by'], index = cell_id)
+    else:
+        print('Try running denoiseSpikes() again with different parameters')
+        parameters_denoise = []
+
+    plt.close()
+
+    return peaks_denoised, cut_spikes_baselined_denoised, parameters_denoise # ndarray, ndarray, pandas data frame
