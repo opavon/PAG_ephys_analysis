@@ -241,17 +241,94 @@ plt.close()
 
 # %%
 def cleanSpikes(
+    file_name,
     cut_spikes_baselined_denoised
     ):
     """
-    `cleanSpikes` 
+    `cleanSpikes` allows the user to identify and remove any spikes that have been incorrectly baselined by looking at the value of the peak. It returns an array containing all the spikes that are properly baselined, which can be used to compute an average spike and its main parameters.
     
-    :??:
-    :??:
+    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
+    :cut_spikes_baselined_denoised: array containing the detected spikes after baselining and removing noise.
     """
     
-    # Compute average from all detected spikes after baseline, QC, and clean up
-    
+    # Stack the nested array to access same position in all spikes
+    cut_spikes_stack = np.vstack(cut_spikes_baselined_denoised)
+    cut_spikes_peak_index = int(len(cut_spikes_baselined_denoised[0])/2) # get the index where the peak is
+
+    file_id = [file_name.split('.')[0]] # Get the file name without the extension
+    cell_id = ['_'.join((file_id[0].split('_'))[0:5])] # Get cell id to print in plot
+
+    # Get color palette and generate one color for each spike
+    import matplotlib.cm as cm
+    denoised_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined_denoised)))
+
+    # Generate figure layout
+    get_ipython().run_line_magic('matplotlib', 'qt')
+    fig, axs = plt.subplots (2, 2, tight_layout = True, figsize = (9, 5), dpi = 100) # Set figure size
+
+    # Plot cut, baselined, and denoised spikes
+    for s in range(len(cut_spikes_baselined_denoised)):
+        axs[0,0].plot(cut_spikes_baselined_denoised[s], color = denoised_spikes_colors[s])
+    axs[0,0].set_title('Cut, baselined, and denoised spikes', fontsize = 12)
+    axs[0,0].set_xlim([((len(cut_spikes_baselined_denoised[0])/2)-45), ((len(cut_spikes_baselined_denoised[0])/2)+55)])
+    axs[0,0].set_xlabel('samples', fontsize = 12)
+    axs[0,0].set_ylabel('current [pA]', fontsize = 12)
+
+    # Plot Histogram of the peak values for each baselined spike
+    axs[0,1].hist(cut_spikes_stack[:,cut_spikes_peak_index], bins = 200, density = False, histtype = 'bar', log = True, color = 'k')
+    axs[0,1].set_title('Histogram of peak values for baselined spikes', fontsize = 12)
+    axs[0,1].set_xlabel('peak value [pA]', fontsize = 12)
+
+    # Add title
+    plt.suptitle(f'Baselined spikes from {cell_id[0]}', fontsize = 14)
+
+    # Move figure to top left corner
+    fig.canvas.manager.window.move(0, 0)
+    plt.pause(0.5)
+
+    # Based on the histogram above, select the peak value threshold that will identify spikes that were not properly baselined
+    peak_min = int(input("Enter the peak value above which to exclude incorrectly baselined spikes"))
+
+    # Select the spikes that couldn't be baselined
+    spikes_to_remove = np.where(cut_spikes_stack[:,cut_spikes_peak_index] > peak_min)
+    cut_spikes_baselined_clean = np.delete(cut_spikes_baselined_denoised, spikes_to_remove, 0)
+    print(f"The number of denoised spikes was: {len(cut_spikes_baselined_denoised)}")
+    print(f"The number of clean spikes is: {len(cut_spikes_baselined_clean)}")
+
+    # Now show the results
+    clean_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined_clean)))
+
+    # Plot cut, baselined, denoised, and clean spikes
+    for s in range(len(cut_spikes_baselined_clean)):
+        axs[1,0].plot(cut_spikes_baselined_clean[s], color = clean_spikes_colors[s])
+    axs[1,0].set_title('Cut, baselined, denoised, and cleaned spikes', fontsize = 12)
+    axs[1,0].set_xlim([((len(cut_spikes_baselined_clean[0])/2)-45), ((len(cut_spikes_baselined_clean[0])/2)+55)])
+    axs[1,0].set_xlabel('samples', fontsize = 12)
+    axs[1,0].set_ylabel('current [pA]', fontsize = 12)
+
+    # Plot Histogram of the peak values for each baselined spike
+    n_1, bins_1, patches_1 = axs[1,1].hist(cut_spikes_stack[:,cut_spikes_peak_index], bins = 200, density = False, histtype = 'bar', log = True)
+    for i in range(len(patches_1)):
+        if (bins_1[i] > peak_min):
+                patches_1[i].set_facecolor('r')
+        else:
+            patches_1[i].set_facecolor('lightgray')
+    axs[1,1].set_title('Histogram of peak values for baselined spikes', fontsize = 12)
+    axs[1,1].set_xlabel('peak value [pA]', fontsize = 12)
+
+    plt.pause(0.5)
+
+    # Check whether clean up is complete
+    happy = input("Are you happy with your choice of prominence? y/n")
+
+    if happy == 'y':
+        print(f"The number of spikes removed was: {len(spikes_to_remove)}")
+    else:
+        # Empty results just in case.
+        cut_spikes_baselined_clean = []
+        print('Try running cleanSpikes() again')
+        
+    plt.close()
 
     return cut_spikes_baselined_clean # ndarray
 
@@ -277,13 +354,35 @@ def averageSpikes(
     cut_spikes_baselined_clean
     ):
     """
-    `averageSpikes` 
+    `averageSpikes` computes an average spike from all the detected spikes after baseline, QC, denoising, and clean up. It returns an array with the values of the average spike that can be used to compute parameters of interest for further analysis.
     
-    :??:
-    :??:
+    :cut_spikes_baselined_clean:
     """
  
-    # Compute average from all detected spikes after baseline, QC, and clean up
+    # Compute average from all detected spikes after baseline, QC, denoising, and clean up
     average_spike = np.array(np.mean(cut_spikes_baselined_clean, 0))
 
     return average_spike # ndarray
+
+
+# %%
+# Test the functions
+
+test_cut_spikes_baselined_clean = cleanSpikes(file_name, cut_spikes_baselined_denoised)
+print(len(test_cut_spikes_baselined_clean))
+test_cut_spikes_baselined_clean
+
+# %%
+test_average_spike = averageSpikes(test_cut_spikes_baselined_clean)
+
+get_ipython().run_line_magic('matplotlib', 'qt') # avoid 'tk' here
+fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
+for s in range(len(test_cut_spikes_baselined_clean)):
+    plt.plot(test_cut_spikes_baselined_clean[s], 'k')
+plt.plot(test_average_spike, color = 'r')
+plt.title('Cut spikes with average in red', fontsize = 14)
+plt.ylabel('current [pA]')
+plt.xlim([80, 180])
+plt.ylim([-200, 100])
+fig.canvas.manager.window.move(0, 0)
+plt.show()
