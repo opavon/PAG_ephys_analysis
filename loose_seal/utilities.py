@@ -332,6 +332,17 @@ def getLooseRseal(
     # Create data frame of data:
     extracted_Rseal_data_frame = pd.DataFrame([test_pulse_command, test_pulse_membrane, seal_resistance], index = ['test_pulse_command', 'test_pulse_membrane', 'seal_resistance'], columns = trial_keys)
 
+    # Plot Rseal across sweeps
+    get_ipython().run_line_magic('matplotlib', 'qt')
+    fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
+    plt.plot(seal_resistance, 'k')
+    plt.title('Seal Resistance across sweeps', fontsize = 14)
+    plt.xlabel('sweep number', fontsize = 12)
+    plt.ylabel('Seal Resistance [MOhm]', fontsize = 12)
+    plt.axis([0, len(seal_resistance), 0, 50])
+    fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
+    plt.show()
+
     return extracted_Rseal_data_frame # pandas data frame
 
 def concatenateSweeps(
@@ -361,6 +372,15 @@ def concatenateSweeps(
     
     # Concatenate the pseudo-sweep
     pseudo_sweep_concatenated = np.concatenate(pseudo_sweep_keys)
+
+    # Plot concatenated sweeps
+    get_ipython().run_line_magic('matplotlib', 'qt')
+    fig = plt.figure(figsize = (10, 5), dpi = 100) # Set figure size
+    plt.plot(sweep_IB_concatenated, 'k')
+    plt.title('Concatenated Sweeps', fontsize = 14)
+    plt.ylabel('current [pA]', fontsize = 12)
+    fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
+    plt.show()
 
     return sweep_IB_concatenated, pseudo_sweep_concatenated # ndarray, ndarray
 
@@ -458,6 +478,19 @@ def cutSpikes(
 
     # Subtract baseline from cut spikes
     cut_spikes_baselined = np.array([cut_spikes[i] - cut_spikes_holding[i] for i in range(len(cut_spikes))])
+
+    # Plot cut spikes after baselining
+    get_ipython().run_line_magic('matplotlib', 'qt')
+    fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
+    import matplotlib.cm as cm
+    baselined_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined)))
+    for s in range(len(cut_spikes_baselined)):
+            plt.plot(cut_spikes_baselined[s], color = baselined_spikes_colors[s])
+    plt.title('Cut and baselined spikes', fontsize = 14)
+    plt.ylabel('current [pA]', fontsize = 12)
+    plt.xlim([((len(cut_spikes_baselined[0])/2)-45), ((len(cut_spikes_baselined[0])/2)+55)])
+    fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
+    plt.show()
 
     return cut_spikes, cut_spikes_holding, cut_spikes_baselined # ndarray, ndarray, ndarray
 
@@ -849,7 +882,6 @@ def spikesQC(
         cut_spikes_baselined_QC = []
         parameters_QC = []
         print('Try running spikesQC() again with different parameters')
-        plt.close()
         return peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC # empty, empty, empty  empty, empty
     
     plt.close()
@@ -968,9 +1000,111 @@ def averageSpikes(
         plt.plot(cut_spikes_baselined_clean[s], 'k')
     plt.plot(average_spike, color = 'r')
     plt.title('Cut spikes with average in red', fontsize = 14)
-    plt.ylabel('current [pA]')
+    plt.ylabel('current [pA]', fontsize = 12)
     plt.xlim([((len(cut_spikes_baselined_clean[0])/2)-45), ((len(cut_spikes_baselined_clean[0])/2)+55)])
     fig.canvas.manager.window.move(0, 0)
     plt.show()
 
     return average_spike # ndarray
+
+def getSpikeParameters(
+    file_name,
+    average_spike,
+    threshold_onset_factor = 0.04,
+    threshold_end_factor = 50,
+    sampling_rate_khz = 25
+    ):
+    """
+    `getSpikeParameters` computes key parameters to characterise the average spike shape. It returns a data frame with the spike onset and total duration of the spike.
+    
+    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
+    :average_spike: array containing the values of the average spike.
+    :threshold_onset_factor: float between 0 and 1 defining the percentage of the spike magnitude to be used to calculate spike onset. Defaults to 0.04. Khalid & Bean 2010 define spike threshold as the point at which dV/dt reached 4% of its maximal value, which corresponds well to a sharp inflection in the phase-plane plot of dV/dt versus voltage. The fact that we are recording extracellularly in Voltage Clamp means that we are mainly picking up capacitative current. The way capacitance is charged means that we can only detect signal when there is a change in the rate of charging. If the current flowing is constant (i.e. rest) the signal will be flat. Only when there is a change in the current (i.e. action potential) will we detect it. Thus, we basically record the change of rate in the capacitative current, which means that our peak corresponds to the point in time where the "change" in current is maximal (i.e. when the action potential rises fastest). By setting the threshold at 4% of the peak magnitude we are using a similar threshold to that defined in Khalid & Bean 2010. 
+    :threshold_end_factor: integer defining the factor by which to multiply the value corresponding to the baseline of the derivative. Used to define the interval within which the average spike is considered to have returned to baseline and therefore ended. Defaults to 50.
+    :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
+
+    """
+    # Get delta_t from sampling rate:
+    dt = 1/sampling_rate_khz
+
+    file_id = [file_name.split('.')[0]] # Get the file name without the extension
+    cell_id = ['_'.join((file_id[0].split('_'))[0:5])] # Get cell id to print in plot
+
+    # Find the peak magnitude and where the peak is, defined by the cutSpikes() function (should be sample 125)
+    spike_magnitude = min(average_spike)
+    average_spike_peak_index = int(np.where(average_spike == min(average_spike))[0]) # needs to be an integer
+    # Compute derivative of average spike
+    average_spike_diff = np.diff(average_spike)
+    # Compute baseline of derivative by averaging period before spike starts
+    average_spike_diff_baseline = abs(np.mean(average_spike_diff[average_spike_peak_index-100:average_spike_peak_index-25]))
+
+    # Define threshold for onset and end
+    threshold_onset = spike_magnitude*threshold_onset_factor
+    threshold_end = average_spike_diff_baseline*threshold_end_factor
+
+    # Calculate spike onset, end, and duration
+    spike_onset_indices = []
+    spike_end_indices = []
+
+    # Assess the average spike indices before the peak and keep those that cross the threshold
+    for i, s in enumerate(average_spike): # i is the index, s is the value
+        if i != 0 and i < average_spike_peak_index and s < threshold_onset:
+            spike_onset_indices.append(np.where(average_spike == s)[0])
+    # Assess the derivative indices after the peak and keep those where the derivative is back to baseline (baseline defined by threshold_end)
+    for i, s in enumerate(average_spike_diff):
+        if i != 0 and i > average_spike_peak_index and -threshold_end < average_spike_diff[i-2] < threshold_end and -threshold_end < average_spike_diff[i-1] < threshold_end and -threshold_end < s < threshold_end:
+            spike_end_indices.append(np.where(average_spike_diff == s)[0])
+
+    # Extract onset and end, calculate length and onset to peak
+    spike_onset = spike_onset_indices[0][0]
+    spike_end = spike_end_indices[0][0]
+    spike_length = (spike_end_indices[0][0] - spike_onset_indices[0][0]) * dt
+    spike_onset_to_peak = ((np.where(average_spike == np.min(average_spike))[0][0])-(spike_onset_indices[0][0])) * dt
+
+    # Plot the average spike and its derivative
+    get_ipython().run_line_magic('matplotlib', 'qt')    
+    fig, axs = plt.subplots (2, sharex=True, figsize = (7, 5), dpi = 100) # Set figure size
+    axs[0].plot(spike_onset, average_spike[spike_onset], "xk") # spike onset
+    axs[0].plot(spike_end, average_spike[spike_end], "xk") # spike end
+    axs[0].plot(average_spike, 'r') # average spike
+    axs[0].set_ylabel('current [pA]', fontsize = 12)
+    axs[0].axhline(y = 0, c = 'k', ls = '--') # horizontal dashed line at 0
+    axs[1].plot(average_spike_diff, 'c') # derivative of average spike
+    axs[1].axhline(y = 0, c = 'k', ls = '--') # horizontal dashed line at 0
+    plt.suptitle('Averaged spike with onset and end and its derivative', fontsize = 14)
+    plt.xlim([((len(average_spike)/2)-45), ((len(average_spike)/2)+55)])
+    fig.canvas.manager.window.move(0, 0)
+    plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
+
+    # Check whether clean up is complete
+    happy_onset = input("Are you happy with the calculated onset and end? y/n")
+
+    if happy_onset == 'y':
+        average_spike_parameters = pd.DataFrame([[spike_onset, spike_end, spike_length, spike_onset_to_peak, spike_magnitude]], columns = ['onset [sample]', 'end [sample]', 'length [ms]', 'onset to peak [ms]', 'magnitude [pA]'], index = cell_id)
+        print('spike parameters calculated')
+        print(f'Spike onset at {spike_onset}')
+        print(f'Spike end at {spike_end}')
+        print(f'Spike length of {spike_length} ms')
+        print(f'Spike onset to peak of {spike_onset_to_peak} ms')
+        print(f'Spike magnitude of {spike_magnitude} pA')
+    else:
+        # Empty variables to prevent wrong results from being used.
+        average_spike_parameters = []
+        print('Try running getSpikeParameters() again')
+
+    plt.close()
+
+    # Plot the average spike with the calculated onset and end
+    get_ipython().run_line_magic('matplotlib', 'qt')
+    fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
+    plt.plot(spike_onset, average_spike[spike_onset], "xr")
+    plt.plot(spike_end, average_spike[spike_end], "xr")
+    plt.plot(average_spike, 'k')
+    plt.suptitle('Averaged spike with onset and end', fontsize = 14)
+    plt.axhline(y = 0, c = 'k', ls = '--')
+    plt.ylabel('current [pA]', fontsize = 12)
+    plt.xlim([((len(average_spike)/2)-45), ((len(average_spike)/2)+55)])
+    fig.canvas.manager.window.move(0, 0)
+    plt.show()
+
+    return average_spike_parameters # pandas data frame
