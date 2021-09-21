@@ -341,7 +341,8 @@ def getLooseRseal(
     plt.ylabel('Seal Resistance [MOhm]', fontsize = 12)
     plt.axis([0, len(seal_resistance), 0, 50])
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    plt.show()
+    # plt.show()
+    plt.pause(5)
 
     return extracted_Rseal_data_frame # pandas data frame
 
@@ -380,7 +381,8 @@ def concatenateSweeps(
     plt.title('Concatenated Sweeps', fontsize = 14)
     plt.ylabel('current [pA]', fontsize = 12)
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    plt.show()
+    # plt.show()
+    plt.pause(5)
 
     return sweep_IB_concatenated, pseudo_sweep_concatenated # ndarray, ndarray
 
@@ -490,7 +492,8 @@ def cutSpikes(
     plt.ylabel('current [pA]', fontsize = 12)
     plt.xlim([((len(cut_spikes_baselined[0])/2)-45), ((len(cut_spikes_baselined[0])/2)+55)])
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    plt.show()
+    # plt.show()
+    plt.pause(5)
 
     return cut_spikes, cut_spikes_holding, cut_spikes_baselined # ndarray, ndarray, ndarray
 
@@ -540,7 +543,8 @@ def plotSpikesQC(
     
     # Move figure to top left corner
     fig.canvas.manager.window.move(0, 0)
-    plt.show()
+    # plt.show()
+    plt.pause(5)
 
 def getSpikesQC(
     file_name,
@@ -1003,7 +1007,8 @@ def averageSpikes(
     plt.ylabel('current [pA]', fontsize = 12)
     plt.xlim([((len(cut_spikes_baselined_clean[0])/2)-45), ((len(cut_spikes_baselined_clean[0])/2)+55)])
     fig.canvas.manager.window.move(0, 0)
-    plt.show()
+    # plt.show()
+    plt.pause(5)
 
     return average_spike # ndarray
 
@@ -1105,6 +1110,7 @@ def getSpikeParameters(
     plt.ylabel('current [pA]', fontsize = 12)
     plt.xlim([((len(average_spike)/2)-45), ((len(average_spike)/2)+55)])
     fig.canvas.manager.window.move(0, 0)
-    plt.show()
-
+    # plt.show()
+    plt.pause(5)
+    
     return average_spike_parameters # pandas data frame
