@@ -277,8 +277,7 @@ def getLooseRseal(
     channels_data_frame
     ):
     """
-    `getLooseRseal` calculates the seal resistance (Rseal) from the test pulse size and the cell's response.
-    Takes a data frame and returns the Rseal value across sweeps for the time of recording.
+    `getLooseRseal` calculates the seal resistance (Rseal) from the test pulse size and the cell's response. Takes a data frame and returns the Rseal value across sweeps for the time of recording.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
@@ -339,7 +338,7 @@ def getLooseRseal(
     plt.title('Seal Resistance across sweeps', fontsize = 14)
     plt.xlabel('sweep number', fontsize = 12)
     plt.ylabel('Seal Resistance [MOhm]', fontsize = 12)
-    plt.axis([0, len(seal_resistance), 0, 50])
+    plt.axis([0, len(seal_resistance), 0, round(np.mean(seal_resistance)*2)])
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
     # plt.show()
     plt.pause(5)
@@ -437,7 +436,7 @@ def findSpikes(
 
     # Plot the data with the detected peaks.
     get_ipython().run_line_magic('matplotlib', 'qt') # avoid 'tk' here
-    fig2 = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
+    fig2 = plt.figure(figsize = (10, 5), dpi = 100) # Set figure size
     plt.plot(peaks, sweep_IB_concatenated[peaks], "xr"); plt.plot(sweep_IB_concatenated); plt.legend(['peaks'])
     plt.title('Figure B: Detected peaks for concatenated sweeps', fontsize = 14)
     plt.xlabel('samples', fontsize = 12)
@@ -446,16 +445,14 @@ def findSpikes(
     #plt.pause(0.5)
     plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
     
-    happy = input("Are you happy with your choice of prominence? y/n")
+    happy_prominence = input("Are you happy with your choice of prominence? y/n")
 
-    if happy == 'y':
+    if happy_prominence == 'y':
         print(f"found {len(peaks)} spikes")
     else:
-        # Empty variables to prevent wrong results from being used.
-        peaks = []
-        peaks_properties = []
-        parameters_find_peaks = []
         print('Try running findSpikes() again')
+        plt.close()
+        return None, None, None # return empty variables to prevent wrong results from being used
     
     plt.close()
     
@@ -634,15 +631,15 @@ def getSpikesQC(
     plt.show(block = True)
 
     # Check whether QC is complete
-    happy = input("Are you happy with your choice of parameters for QC? y/n")
+    happy_QC = input("Are you happy with your choice of parameters for QC? y/n")
 
-    if happy == 'y':
+    if happy_QC == 'y':
         parameters_QC = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, filter_by]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'filter_by'], index = cell_id)
         print('QC completed')
     else:
-        # Empty variables to prevent wrong results from being used.
-        parameters_QC = []
         print('Try running getSpikesQC() again with different parameters')
+        plt.close()
+        return None # return empty variables to prevent wrong results from being used
 
     plt.close()
 
@@ -712,15 +709,16 @@ def denoiseSpikes(
     plt.show(block = True) # Lets you interact with plot and proceeds when figure is closed
 
     # Check whether denoising is complete
-    happy = input("Are you happy with your choice of parameters for denoising? y/n")
+    happy_denoise = input("Are you happy with your choice of parameters for denoising? y/n")
 
-    if happy == 'y':
+    if happy_denoise == 'y':
         print('denoising completed')
         parameters_denoise = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, filter_by]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'filter_by'], index = cell_id)
     else:
         print('Try running denoiseSpikes() again with different parameters')
-        parameters_denoise = []
-
+        plt.close()
+        return None, None, None # return empty variables to prevent wrong results from being used
+    
     plt.close()
 
     return peaks_denoised, cut_spikes_baselined_denoised, parameters_denoise # ndarray, ndarray, pandas data frame
@@ -826,15 +824,9 @@ def spikesQC(
         print('proceeding to remove peaks that do not qualify as spikes')
         plt.close()
     else:
-        # Empty variables to prevent wrong results from being used and exit function.
-        peaks_QC = []
-        cut_spikes_QC = []
-        cut_spikes_holding_QC = []
-        cut_spikes_baselined_QC = []
-        parameters_QC = []
         print('Try running spikesQC() again with different parameters')
         plt.close()
-        return peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC # empty, empty, empty  empty, empty
+        return None, None, None, None, None # return empty variables to prevent wrong results from being used
 
     # Use the selected parameters to find the indices of peaks that are not spikes
     noise_indices = []
@@ -879,14 +871,9 @@ def spikesQC(
         print('QC completed')
         print(f"The number of spikes removed during QC was: {len(noise_indices[0])}")
     else:
-        # Empty variables to prevent wrong results from being used and exit function.
-        peaks_QC = []
-        cut_spikes_QC = []
-        cut_spikes_holding_QC = []
-        cut_spikes_baselined_QC = []
-        parameters_QC = []
         print('Try running spikesQC() again with different parameters')
-        return peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC # empty, empty, empty  empty, empty
+        plt.close()
+        return None, None, None, None, None # return empty variables to prevent wrong results from being used
     
     plt.close()
 
@@ -977,9 +964,9 @@ def cleanSpikes(
         print('Clean up completed')
         print(f"The number of spikes removed was: {len(spikes_to_remove)}")
     else:
-        # Empty variables to prevent wrong results from being used.
-        cut_spikes_baselined_clean = []
         print('Try running cleanSpikes() again')
+        plt.close()
+        return None # return empty variables to prevent wrong results from being used
         
     plt.close()
 
@@ -1091,11 +1078,11 @@ def getSpikeParameters(
         print(f'Spike end at {spike_end}')
         print(f'Spike length of {spike_length} ms')
         print(f'Spike onset to peak of {spike_onset_to_peak} ms')
-        print(f'Spike magnitude of {spike_magnitude} pA')
+        print(f'Spike magnitude of {round(spike_magnitude, 2)} pA')
     else:
-        # Empty variables to prevent wrong results from being used.
-        average_spike_parameters = []
         print('Try running getSpikeParameters() again')
+        plt.close()
+        return None # return empty variables to prevent wrong results from being used
 
     plt.close()
 
@@ -1120,6 +1107,7 @@ def getFiringRate(
     channels_data_frame,
     sweep_IB_concatenated,
     pseudo_sweep_concatenated,
+    Rseal_data_frame,
     peaks_QC,
     sampling_rate_khz = 25,
     n_bins = 100
@@ -1129,8 +1117,9 @@ def getFiringRate(
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
-    :pseudo_sweep_concatenated:concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID.
     :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    :pseudo_sweep_concatenated:concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID.
+    :Rseal_data_frame: data fram with the Rseal values across sweeps for the time of recording.
     :peaks_QC: indices of the detected spikes obtained from `findSpikes()`, after quality control.
     :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
     :n_bins: number of bins in which to divide the total length of recording. Defaults to 100.
