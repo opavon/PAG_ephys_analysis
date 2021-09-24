@@ -1,9 +1,11 @@
-# numpy
 # pip install h5py
 # pip install npTDMS
-# pip install matplotlib
-# pip install pandas
-# pip install pyinspect
-# pip install jupyter
-# pip install seaborn
 # pip install PyQt5
+# pip install ipython
+# pip install jupyter
+# pip install numpy
+# pip install pandas
+# pip install matplotlib
+# pip install seaborn
+# pip install scipy
+# pip install pyinspect
