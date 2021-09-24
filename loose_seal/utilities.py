@@ -6,6 +6,7 @@ from collections import defaultdict
 from nptdms import TdmsFile
 import numpy as np
 import pandas as pd
+from scipy import stats
 from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 from IPython import get_ipython
@@ -1279,25 +1280,25 @@ def getInterspikeInterval(
     )
 
     # Plot histogram of interspike intervals
-    axs['A'].hist(interspike_clean, bins = 50, density = False, histtype = 'bar', log = False, color = 'k')
+    axs['A'].hist(interspike_interval, bins = 50, density = False, histtype = 'bar', log = False, color = 'k')
     axs['A'].set_title('A) ISI of detected spikes', fontsize = 12)
     axs['A'].set_xlabel('Interspike Interval [ms]', fontsize = 10)
     axs['A'].set_xlim([0, None])
 
     # Plot ISI vs Holding (mean)
-    axs['B'].scatter(interspike_clean, holding_isi_avg, label = f'Slope = {np.round(stats.linregress(interspike_clean, holding_isi_avg)[0],5)}\npvalue = {np.round(stats.linregress(interspike_clean, holding_isi_avg)[3],2)}')
-    # axs['B'].scatter(interspike_clean, holding_isi_avg, label = f'Correlation = {np.round(np.corrcoef(interspike_clean, holding_isi_avg)[0,1], 2)}')
+    axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Slope = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[3],2)}')
+    # axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_avg)[0,1], 2)}')
     axs['B'].set_title('B) ISI vs Holding (avg)', fontsize = 12), axs['B'].legend()
     axs['B'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['B'].set_ylabel('Holding current [pA]', fontsize = 10)
 
     # Plot ISI vs Holding (std)
-    axs['C'].scatter(interspike_clean, holding_isi_std, label = f'Slope = {np.round(stats.linregress(interspike_clean, holding_isi_std)[0],5)}\npvalue = {np.round(stats.linregress(interspike_clean, holding_isi_std)[3],2)}')
-    # axs['C'].scatter(interspike_clean, holding_isi_std, label = f'Correlation = {np.round(np.corrcoef(interspike_clean, holding_isi_std)[0,1], 2)}')
+    axs['C'].scatter(interspike_interval, holding_isi_std, label = f'Slope = {np.round(stats.linregress(interspike_interval, holding_isi_std)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_std)[3],2)}')
+    # axs['C'].scatter(interspike_interval, holding_isi_std, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_std)[0,1], 2)}')
     axs['C'].set_title('C) ISI vs Holding (std)', fontsize = 12), axs['C'].legend()
     axs['C'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['C'].set_ylabel('Holding current [std]', fontsize = 10)
 
     test_holding_avg = np.array([isi_hold_avg for i, isi_hold_avg in enumerate(holding_isi_avg) if (-50 < holding_isi_avg[i] < 50)])
-    test_isi_avg = np.array([isi for i, isi in enumerate(interspike_clean) if (-50 < holding_isi_avg[i] < 50)])
+    test_isi_avg = np.array([isi for i, isi in enumerate(interspike_interval) if (-50 < holding_isi_avg[i] < 50)])
 
     # Plot ISI vs Holding (avg)
     axs['D'].scatter(test_isi_avg, test_holding_avg, label = f'Slope = {np.round(stats.linregress(test_isi_avg, test_holding_avg)[0],5)}\npvalue = {np.round(stats.linregress(test_isi_avg, test_holding_avg)[3],2)}')
@@ -1306,7 +1307,7 @@ def getInterspikeInterval(
     axs['D'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['D'].set_ylabel('Holding current [pA]', fontsize = 10)
 
     test_holding_std = np.array([isi_hold_std for i, isi_hold_std in enumerate(holding_isi_std) if (holding_isi_std[i] < 20)])
-    test_isi_std = np.array([isi for i, isi in enumerate(interspike_clean) if (holding_isi_std[i] < 20)])
+    test_isi_std = np.array([isi for i, isi in enumerate(interspike_interval) if (holding_isi_std[i] < 20)])
 
     # Plot ISI vs Holding (std)
     axs['E'].scatter(test_isi_std, test_holding_std, label = f'Slope = {np.round(stats.linregress(test_isi_std, test_holding_std)[0],5)}\npvalue = {np.round(stats.linregress(test_isi_std, test_holding_std)[3],2)}')
