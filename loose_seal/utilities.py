@@ -1280,3 +1280,94 @@ def getInterspikeInterval(
     interspike_interval_dataframe = pd.DataFrame([interspike_interval, holding_isi_avg, holding_isi_std], index = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'], columns = range(len(interspike_interval)))
 
     return interspike_interval_dataframe # pandas dataframe
+
+def saveLooseSealResults(
+    save_path,
+    file_name,
+    sweep_IB_concatenated,
+    pseudo_sweep_concatenated,
+    peaks,
+    cut_spikes,
+    cut_spikes_holding,
+    cut_spikes_baselined,
+    peaks_QC,
+    cut_spikes_QC,
+    cut_spikes_holding_QC,
+    cut_spikes_baselined_QC,
+    cut_spikes_baselined_clean,
+    average_spike,
+    Rseal_df,
+    peaks_properties,
+    parameters_find_peaks,
+    parameters_QC,
+    parameters_clean,
+    parameters_avg_spike,
+    firing_frequency_df,
+    spikes_by_sweep_df,
+    spikes_by_window_df,
+    interspike_interval_df
+    ):
+    """
+    `saveLooseSealResults` takes all the outputs from the loose-seal analysis pipeline and saves them into the specified path. It first takes all the arrays and saves them into a single `.npz` file. It then saves each dataframe as an individual `.json` file.
+    It prints "results saved" as an output.
+    
+    :save_path: path to the directory where the data will be saved.
+    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
+    :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    :pseudo_sweep_concatenated: concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID.
+    :peaks: indices of detected spikes obtained from `findSpikes()`.
+    :cut_spikes: numpy array containing the cut spikes.
+    :cut_spikes_holding: numpy array containing the baseline before each peak.
+    :cut_spikes_baselined: numpy array containing the baselined cut spikes.
+    :peaks_QC: indices of the detected spikes obtained from `findSpikes()`, after quality control.
+    :cut_spikes_QC: numpy array containing the cut spikes after quality control.
+    :cut_spikes_holding_QC: numpy array containing the baseline before each peak after quality control.
+    :cut_spikes_baselined_QC: array containing the detected spikes after baselining and removing noise.
+    :cut_spikes_baselined_clean: array containing the detected spikes after baselining, quality control, and removing the spikes incorrectly baselined.
+    :average_spike: array containing the values of the average spike.
+    :Rseal_df: data frame with the Rseal values across sweeps for the time of recording.
+    :peaks_properties: dictionary containing the properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
+    :parameters_find_peaks: dataframe with the parameters selected by the user when running `findSpikes`.
+    :parameters_QC: dataframe with the filters used for quality control.
+    :parameters_clean: dataframe with the filters used for spike clean up.
+    :parameters_avg_spike: dataframe with the spike onset, end, and magnitude, as well as the total duration of the spike and the time from onset to peak.
+    :firing_frequency_df: dataframe with the calculated firing frequency obtained by dividing the total number of detected spikes over length of recording.
+    :spikes_by_sweep_df: dataframe with the calculated firing frequency for each sweep.
+    :spikes_by_window_df: dataframe with the calculated firing frequency for each time window of our choice.
+    :interspike_interval_df: dataframe containing the interspike interval together with the average and standard deviation of the  injected current between each pair of spikes.
+    """
+    file_id = [file_name.split('.')[0]] # Get the file name without the extension
+
+    # Save all numpy arrays as a single .npz file
+    np.savez_compressed(os.path.join(save_path, file_id[0] + "_results.npz"), sweep_IB_concatenated = sweep_IB_concatenated, pseudo_sweep_concatenated = pseudo_sweep_concatenated, peaks = peaks, cut_spikes = cut_spikes, cut_spikes_holding = cut_spikes_holding, cut_spikes_baselined = cut_spikes_baselined, peaks_QC = peaks_QC, cut_spikes_QC = cut_spikes_QC, cut_spikes_holding_QC = cut_spikes_holding_QC, cut_spikes_baselined_QC = cut_spikes_baselined_QC, cut_spikes_baselined_clean = cut_spikes_baselined_clean, average_spike = average_spike)
+
+    # To retrieve the data from a .npz file into a variable do:
+    # results_data = np.load(os.path.join(save_path, file_id[0] + "_results.npz"))
+    # print([key for key in results_data])
+    # Then you can retrieve one specific variable
+    # average_spike = results_data['average_spike']
+
+    # Save each pandas dataframe as .json file
+    # Rseal_df
+    Rseal_df.to_json(os.path.join(save_path, file_id[0] + "_df_Rseal.json"))
+    # peaks_properties - first convert dict to dataframe and then save as .json
+    pd.DataFrame.from_dict(peaks_properties, orient = 'index').to_json(os.path.join(save_path, file_id[0] + "_df_peaks_properties.json"))
+    # parameters_find_peaks
+    parameters_find_peaks.to_json(os.path.join(save_path, file_id[0] + "_df_parameters_find_peaks.json"))
+    # parameters_QC
+    parameters_QC.to_json(os.path.join(save_path, file_id[0] + "_df_parameters_QC.json"))
+    # parameters_clean
+    parameters_clean.to_json(os.path.join(save_path, file_id[0] + "_df_parameters_clean.json"))
+    # parameters_avg_spike
+    parameters_avg_spike.to_json(os.path.join(save_path, file_id[0] + "_df_parameters_avg_spike.json"))
+    # firing_frequency_df, spikes_by_sweep_df, spikes_by_window_df
+    firing_frequency_df.to_json(os.path.join(save_path, file_id[0] + "_df_firing_frequency.json"))
+    spikes_by_sweep_df.to_json(os.path.join(save_path, file_id[0] + "_df_spikes_by_sweep.json"))
+    spikes_by_window_df.to_json(os.path.join(save_path, file_id[0] + "_df_spikes_by_window.json"))
+    # interspike_interval_df
+    interspike_interval_df.to_json(os.path.join(save_path, file_id[0] + "_df_interspike_interval.json"))
+    
+    # To retrieve the data from a .json file into a dataframe do:
+    # df_name = pd.read_json(os.path.join(save_path, file_id[0] + "_df_name.json"))
+
+    print('results saved')
