@@ -17,8 +17,9 @@ def importFile(
     sampling_rate_khz = 25
     ):
     """
-    `importFile` opens a window to select a file to import.
-    It then uses the path to the selected file to call `openFile` to extract data.
+    `importFile` opens a dialog window to select a file to import.
+    It then uses the path to the selected file to call `openFile` to extract the data.
+    It returns a dataframe with the extracted channels (where each row is a channel and each column a sweep) and four objects containing time, delta time, folder name, and file name.
 
     :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
     :curated_channel: e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality. Defaults to None.
@@ -27,15 +28,15 @@ def importFile(
 
     root = tkinter.Tk()
     root.attributes("-topmost", True) # Make window appear on top
-    in_path = askopenfilename() # Open dialogue to select file
+    in_path = askopenfilename() # Open dialog window to select file
     root.destroy() # Close the root window
 
     folder_name = os.path.split(in_path)[0] # Get path until folder
     file_name = os.path.split(in_path)[1] # Get filename
     
-    extracted_channels_data_frame, time, dt = openFile(in_path, channel_list, curated_channel, sampling_rate_khz) # Call openFile() function
+    extracted_channels_dataframe, time, dt = openFile(in_path, channel_list, curated_channel, sampling_rate_khz) # Call openFile() function
     
-    return extracted_channels_data_frame, time, dt, folder_name, file_name # pandas data frame, list, float, str, str
+    return extracted_channels_dataframe, time, dt, folder_name, file_name # pandas dataframe, list, float, str, str
 
 def openFile(
     in_path,
@@ -45,19 +46,21 @@ def openFile(
     ):
     """
     `openFile` checks whether you are attempting to open a `.tdms` or a `.hdf5` file.
-    It then calls the right function to extract the data from selected channels.
+    It then calls the right function to extract the data from the selected channels.
+    It returns a dataframe with the extracted channels (where each row is a channel and each column a sweep) and two objects containing time and delta time.
 
+    :in_path: path to the selected file.
     :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
     :curated_channel: e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality. Defaults to None.
     :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
     """
 
     if '.tdms' in in_path:
-        extracted_channels_data_frame, time, dt = openTDMSfile(in_path, channel_list, sampling_rate_khz)
+        extracted_channels_dataframe, time, dt = openTDMSfile(in_path, channel_list, sampling_rate_khz)
     elif '.hdf5' in in_path:
-        extracted_channels_data_frame, time, dt = openHDF5file(in_path, channel_list, curated_channel, sampling_rate_khz)
+        extracted_channels_dataframe, time, dt = openHDF5file(in_path, channel_list, curated_channel, sampling_rate_khz)
     
-    return extracted_channels_data_frame, time, dt # pandas data frame, list, float
+    return extracted_channels_dataframe, time, dt # pandas dataframe, list, float
 
 def openHDF5file(
     in_path,
@@ -66,8 +69,10 @@ def openHDF5file(
     sampling_rate_khz = 25
     ):
     """
-    `openHDF5file` Opens the selected `.hdf5` file and extracts sorted data from chosen channels.
+    `openHDF5file` opens the selected `.hdf5` file and extracts sorted data from the selected channels.
+    It returns a dataframe with the extracted channels (where each row is a channel and each column a sweep) and two objects containing time and delta time.
     
+    :in_path: path to the selected file.
     :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
     :curated_channel: e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality. Defaults to None.
     :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
@@ -167,10 +172,10 @@ def openHDF5file(
         dt = 1/sampling_rate_khz # could try to objectively do np.mean(np.diff(time)), but that would always underestimate the value as len(np.diff(x)) will always be one value shorter than len(x) 
         time = np.linspace(0, len(data_dict['Channel A'][0])*dt, len(['Channel A'][0]))
     
-    # Create data frame of data:
-    extracted_channels_data_frame = pd.DataFrame(extracted_channels, index = channel_list, columns = corrected_trial_keys[0])
+    # Create dataframe of data:
+    extracted_channels_dataframe = pd.DataFrame(extracted_channels, index = channel_list, columns = corrected_trial_keys[0])
 
-    return extracted_channels_data_frame, time, dt # pandas data frame, list, float
+    return extracted_channels_dataframe, time, dt # pandas dataframe, list, float
 
 def openTDMSfile(
     in_path,
@@ -179,7 +184,9 @@ def openTDMSfile(
     ):
     """
     `openTDMSfile` returns a list of arrays, where each is a sweep/trial.
+    It returns a dataframe with the extracted channels (where each row is a channel and each column a sweep) and two objects containing time and delta time.
 
+    :in_path: path to the selected file.
     :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
     :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
     """
@@ -196,7 +203,7 @@ def openTDMSfile(
         # Iterate through sweeps and append data to dictionary
         for sweep in group.channels():
             data_dict[group.name].append(sweep.data)
-            # Assign the names of each sweep for Channel A to use for the data frame
+            # Assign the names of each sweep for Channel A to use for the dataframe
             # We take Channel A (or B) as they start from 1 (Output channels start from a random number
             if group.name == 'Channel A':
                 trial_keys.append(sweep.name)
@@ -211,93 +218,32 @@ def openTDMSfile(
     dt = 1/sampling_rate_khz # could try to objectively do np.mean(np.diff(time)), but that would always underestimate the value as len(np.diff(x)) will always be one value shorter than len(x) 
     time = data_dict['Time'][0]
 
-    # Create data frame of data:
-    extracted_channels_data_frame = pd.DataFrame(extracted_channels, index = channel_list, columns = trial_keys)
+    # Create dataframe of data:
+    extracted_channels_dataframe = pd.DataFrame(extracted_channels, index = channel_list, columns = trial_keys)
     
-    return extracted_channels_data_frame, time, dt # pandas data frame, list, float
-
-def getLooseRseal_old(
-    file_name,
-    channels_data_frame
-    ):
-    """
-    `getLooseRseal` calculates the seal resistance (Rseal) from the test pulse size and the cell's response.
-    Takes a data frame and returns the Rseal value across sweeps for the time of recording.
-    
-    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
-    :channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
-    """
-
-    # Initialize variables to build results data frame:
-    file_id = [file_name.split('.')[0]] # Get the file name without the extension
-    seal_resistance = []
-    trial_keys = []
-
-    for sweep in channels_data_frame.columns:
-        
-        ## Load data: Output A (command) and Channel B (recording in Voltage Clamp)
-        # sweep_IA = np.array(channels_data_frame.at['Channel A', sweep]) # Not needed as we record in Voltage Clamp
-        sweep_IB = np.array(channels_data_frame.at['Channel B', sweep])
-        sweep_OA = np.array(channels_data_frame.at['Output A', sweep])
-
-        ## Get the indices corresponding to the test_pulse using the Output Channel
-        test_pulse = np.where(sweep_OA < 0)
-        test_pulse_OA_indices = test_pulse[0]
-
-        ## Get test_pulse magnitude
-        # Use the indices of the test_pulse command (Output A) to define baseline period and test period
-        sweep_OA_baseline = np.mean(sweep_OA[:(test_pulse_OA_indices[0]-1)]) # -1 to stop baseline before command starts
-        sweep_OA_pulse = np.mean(sweep_OA[test_pulse_OA_indices])
-        test_pulse_command = sweep_OA_baseline - sweep_OA_pulse # mV
-
-        ## Get cell response to test_pulse:
-        # Use the test_pulse indices to get the baseline and cell response to calculate the seal resistance
-        # To be exact and account for the delays between digital command and output from the amplifier, you could add +1 to the first index to calculate the baseline.
-        sweep_IB_baseline = np.mean(sweep_IB[:(test_pulse_OA_indices[0])])
-        # Similary, to avoid using the values recorded while the test pulse command begins, you can skip a milisecond (+4 indices) to the beginning, to ensure you start averaging once the signal has reached the cell. 
-        # To be extra exact, you could add +2 to the last index so you use all the samples. 
-        # However, this shouldn't make a big difference, so we just skip the milisecond to avoid the transition period.
-        sweep_IB_pulse = np.mean(sweep_IB[(test_pulse_OA_indices[0]+4):(test_pulse_OA_indices[-1])])
-        test_pulse_membrane = sweep_IB_baseline - sweep_IB_pulse # pA
-
-        ## Get seal resistance = mV/pA
-        Rseal = (test_pulse_command / test_pulse_membrane) * 1000 # to get MOhm
-        # Append results
-        seal_resistance.append(Rseal)
-
-        ## Get trial name for results data frame
-        trial_keys.append(sweep)
-
-    # Create data frame of data:
-    extracted_Rseal_data_frame = pd.DataFrame([seal_resistance], index = file_id, columns = trial_keys)
-
-    return extracted_Rseal_data_frame # pandas data frame
+    return extracted_channels_dataframe, time, dt # pandas dataframe, list, float
 
 def getLooseRseal(
-    file_name,
-    channels_data_frame
+    channels_dataframe
     ):
     """
-    `getLooseRseal` calculates the seal resistance (Rseal) from the test pulse size and the cell's response. Takes a data frame and returns the Rseal value across sweeps for the time of recording.
+    `getLooseRseal` takes the dataframe containing the extracted channel data and calculates the seal resistance (Rseal) from the test pulse size and the cell's response to it.
+    It returns a dataframe with the Rseal value (MOhm) across sweeps for the time of recording (where the columns are sweeps) together with the magnitude of the test_pulse command (mV) and the response of the cell (pA). It also plots the calculated Rseal across sweeps.
     
-    :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
-    :channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    :channels_dataframe: dataframe with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
     """
 
-    # Initialize variables to build results data frame:
-    # file_id = [file_name.split('.')[0]] # Get the file name without the extension
+    # Initialize variables to build results dataframe:
     test_pulse_command = []
     test_pulse_membrane = []
     seal_resistance = []
     trial_keys = []
 
-
-    for sweep in channels_data_frame.columns:
-        
+    for sweep in channels_dataframe.columns:
         ## Load data: Output A (command) and Channel B (recording in Voltage Clamp)
-        # sweep_IA = np.array(channels_data_frame.at['Channel A', sweep]) # Not needed as we record in Voltage Clamp
-        sweep_IB = np.array(channels_data_frame.at['Channel B', sweep])
-        sweep_OA = np.array(channels_data_frame.at['Output A', sweep])
+        # sweep_IA = np.array(channels_dataframe.at['Channel A', sweep]) # Not needed as we record in Voltage Clamp
+        sweep_IB = np.array(channels_dataframe.at['Channel B', sweep])
+        sweep_OA = np.array(channels_dataframe.at['Output A', sweep])
 
         ## Get the indices corresponding to the test_pulse using the Output Channel
         test_pulse = np.where(sweep_OA < 0)
@@ -326,37 +272,38 @@ def getLooseRseal(
         test_pulse_membrane.append(tp_membrane)
         seal_resistance.append(Rseal)
 
-        ## Get trial name for results data frame
+        ## Get trial name for results dataframe
         trial_keys.append(sweep)
 
-    # Create data frame of data:
-    extracted_Rseal_data_frame = pd.DataFrame([test_pulse_command, test_pulse_membrane, seal_resistance], index = ['test_pulse_command', 'test_pulse_membrane', 'seal_resistance'], columns = trial_keys)
+    # Create dataframe of data:
+    Rseal_dataframe = pd.DataFrame([test_pulse_command, test_pulse_membrane, seal_resistance], index = ['test_pulse_command_mV', 'test_pulse_membrane_pA', 'seal_resistance_MOhm'], columns = trial_keys)
 
     # Plot Rseal across sweeps
     get_ipython().run_line_magic('matplotlib', 'qt')
     fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
-    plt.plot(seal_resistance, 'k')
+    plt.plot(Rseal_dataframe.loc['seal_resistance_MOhm'], 'k')
     plt.title('Seal Resistance across sweeps', fontsize = 14)
     plt.xlabel('sweep number', fontsize = 12)
     plt.ylabel('Seal Resistance [MOhm]', fontsize = 12)
-    plt.axis([0, len(seal_resistance), 0, round(np.mean(seal_resistance)*2)])
+    plt.axis([-1, len(Rseal_dataframe.loc['seal_resistance_MOhm']), 0, round(np.mean(Rseal_dataframe.loc['seal_resistance_MOhm'])*2)])
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
     # plt.show()
     plt.pause(5)
 
-    return extracted_Rseal_data_frame # pandas data frame
+    return Rseal_dataframe # pandas dataframe
 
 def concatenateSweeps(
-    channels_data_frame
+    channels_dataframe
     ):
     """
-    `concatenateSweeps` extracts the sweeps containing the recorded signal from `channels_data_frame` and concatenates them. It also creates a concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID. It returns two numpy.ndarrays for the concatenated data and the concatenated sweep IDs.
+    `concatenateSweeps` takes the sweeps containing the recorded signal from `channels_dataframe` and concatenates them. It also creates a concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID.
+    It returns two numpy.ndarrays with the concatenated data and the concatenated sweep IDs. It also plots the resulting concatenated sweeps for a quick overview of the data.
     
-    :channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    :channels_dataframe: dataframe with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
     """
 
     # Extract sweeps
-    sweep_IB = np.array(channels_data_frame.loc['Channel B', :])
+    sweep_IB = np.array(channels_dataframe.loc['Channel B', :])
     
     # Concatenate sweeps
     sweep_IB_concatenated = np.concatenate(sweep_IB)
@@ -366,7 +313,7 @@ def concatenateSweeps(
     
     for i, sweep in enumerate(sweep_IB):
         # get sweep ID as integer
-        sweep_key = int(channels_data_frame.columns[i])
+        sweep_key = int(channels_dataframe.columns[i])
         # create a pseudo-sweep of the same length as the data but consisting of the sweep ID
         sweep_keys_tmp = np.zeros(len(sweep), dtype = int) + sweep_key
         pseudo_sweep_keys.append(sweep_keys_tmp)
@@ -379,6 +326,7 @@ def concatenateSweeps(
     fig = plt.figure(figsize = (10, 5), dpi = 100) # Set figure size
     plt.plot(sweep_IB_concatenated, 'k')
     plt.title('Concatenated Sweeps', fontsize = 14)
+    plt.xlabel('samples', fontsize = 12)
     plt.ylabel('current [pA]', fontsize = 12)
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
     # plt.show()
@@ -395,7 +343,8 @@ def findSpikes(
     sampling_rate_khz = 25
     ):
     """
-    `findSpikes` uses scipy's `find_peaks` to detect peaks in the data and obtain their prominences. It then plots the distribution of prominences and allows the user to input the minimal and maximal prominence values to be used to detect peaks. It next runs `find_peaks` one more time with the user selected parameters and plots the data and the detected peaks. It returns the indices of peaks in the data that satisfy all given conditions, the properties of such peaks, and the parameters selected by the user.
+    `findSpikes` uses scipy's `find_peaks` on the concatenated sweeps to detect peaks in the data and obtain their prominences. It then plots the distribution of prominences and allows the user to input the minimal and maximal prominence values to be used to detect peaks. It next runs `find_peaks` one more time with the user selected parameters and plots the data and the detected peaks.
+    It returns an array with the indices of the detected peaks in the data that satisfy all given conditions, a dictionary with the properties of such peaks, and a dataframe with the parameters selected by the user.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
@@ -433,7 +382,7 @@ def findSpikes(
 
     # Get cell ID and parameters used
     file_id = [file_name.split('.')[0]] # Get the file name without the extension
-    parameters_find_peaks = pd.DataFrame([[prominence_min, prominence_max, wlen_ms/dt, wlen_ms]], columns = ['prominence_min', 'prominence_max', 'wlen [samples]', 'wlen [ms]'], index = file_id)
+    parameters_find_peaks = pd.DataFrame([[prominence_min, prominence_max, wlen_ms/dt, wlen_ms]], columns = ['prominence_min', 'prominence_max', 'wlen_samples', 'wlen_ms'], index = file_id)
 
     # Plot the data with the detected peaks.
     get_ipython().run_line_magic('matplotlib', 'qt') # avoid 'tk' here
@@ -457,14 +406,15 @@ def findSpikes(
     
     plt.close()
     
-    return peaks, peaks_properties, parameters_find_peaks # ndarray, dict, pandas data frame
+    return peaks, peaks_properties, parameters_find_peaks # ndarray, dict, pandas dataframe
 
 def cutSpikes(
     sweep_IB_concatenated,
     peaks
     ):
     """
-    `cutSpikes` cuts an interval of 10 ms around each peak for plotting and further analysis. It then calculates a baseline for each peak by averaging 1-3 ms, leaving out the first ms before the peak index as it will contain the spike itself. Finally, it subtracts the calculated value to baseline the cut spikes, which will facilitate visualisation and quality control. It returns three numpy arrays of the same length containing the cut spikes, the baseline before each peak, and the resulting baselined cut spikes.
+    `cutSpikes` takes the concatenated sweeps and cuts an interval of 10 ms around each detected peak for plotting and further analysis. It then calculates a baseline for each peak by averaging 3 ms before it, leaving out the first ms right before the peak index as it will contain the spike itself. Finally, it subtracts the calculated value to baseline the cut spikes, which will facilitate visualisation and quality control.
+    It returns three numpy arrays of the same length containing the cut spikes, the baseline before each peak, and the resulting baselined cut spikes. It also plots the cut and baselined spikes.
     
     :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
     :peaks: indices of detected spikes obtained from `findSpikes()`.
@@ -501,7 +451,8 @@ def plotSpikesQC(
     cut_spikes_baselined
     ):
     """
-    `plotSpikesQC` generates a summary plot that can be used to determine the metrics that can be used to choose parameters to quality check the detected spikes. The summary plot contains (1) a subplot with all the detected spikes after cutting and baselining, and (2) three subplots with the histograms of the main metrics that can be used to detect noise in the detected spikes, which are `width_heights`, `widths`, and `peak_heights`. It only outputs the plot for visualisation purposes and does not return any variable. 
+    `plotSpikesQC` generates a summary plot that can be used to identify the metrics useful for choosing the parameters to quality control the detected spikes. The summary plot contains (1) a subplot with all the detected spikes after cutting and baselining, and (2) three subplots with the histograms of the main metrics that can be used to detect noise in the detected spikes, which are `width_heights`, `widths`, and `peak_heights`.
+    It only outputs the plot for visualisation purposes and does not return any variable. 
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :peaks_properties: dictionary containing properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
@@ -557,7 +508,8 @@ def getSpikesQC(
     QC_ph_max = float('inf'),
     ):
     """
-    `getSpikesQC` allows to quality check the detected spikes by defining thresholds in three different metrics. It then generates a summary plot that can be used to assess whether the chosen metrics correctly remove the noise and leave the true spikes untouched. The summary plot contains (1) a subplot with all the detected spikes after cutting and baselining, coloring the noise traces according to the QC metric that excludes them, and (2) three subplots with the histograms of the metrics used, which are `width_heights`, `widths`, and `peak_heights`. If the result is satisfactory, it returns a data frame with the selected filters. 
+    `getSpikesQC` allows to perform quality control on the detected spikes by defining thresholds in three different metrics. It then generates a summary plot that can be used to assess whether the chosen metrics correctly remove the noise and leave the true spikes untouched. The summary plot contains (1) a subplot with all the detected spikes after cutting and baselining, coloring the noise traces according to the QC metric that excludes them, and (2) three subplots with the histograms of the metrics used, which are `width_heights`, `widths`, and `peak_heights`.
+    If the result is satisfactory, it returns a dataframe with the selected filters. 
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :peaks_properties: dictionary containing properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
@@ -635,7 +587,7 @@ def getSpikesQC(
     happy_QC = input("Are you happy with your choice of parameters for QC? y/n")
 
     if happy_QC == 'y':
-        parameters_QC = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, filter_by]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'filter_by'], index = cell_id)
+        parameters_QC = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, filter_by]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'filter_by'], index = file_id)
         print('QC completed')
     else:
         print('Try running getSpikesQC() again with different parameters')
@@ -644,7 +596,7 @@ def getSpikesQC(
 
     plt.close()
 
-    return parameters_QC # pandas data frame
+    return parameters_QC # pandas dataframe
 
 def denoiseSpikes(
     file_name,
@@ -660,7 +612,7 @@ def denoiseSpikes(
     QC_ph_max = float('inf'),
     ):
     """
-    `denoiseSpikes` removes detected peaks according to the chosen parameters. It first plots the cut, baselined, and denoised spikes to visualise whether the selected parameters lead to a successful denoising. It then removes the indices corresponding to noise from `peaks` and `cut_spikes_baselined`. It returns an array containing the `peaks_denoised` and another containing the `cut_spikes_baselined_denoised`, which can be used for downstream analysis to compute firing rate and other parameters. It also returns a data frame with the filters used for denoising.
+    `denoiseSpikes` removes detected peaks according to the chosen parameters. It first plots the cut, baselined, and denoised spikes to visualise whether the selected parameters lead to a successful denoising. It then removes the indices corresponding to noise from `peaks` and `cut_spikes_baselined`. It returns an array containing the `peaks_denoised` and another containing the `cut_spikes_baselined_denoised`, which can be used for downstream analysis to compute firing rate and other parameters. It also returns a dataframe with the filters used for denoising.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :peaks: indices of detected spikes obtained from `findSpikes()`.
@@ -714,7 +666,7 @@ def denoiseSpikes(
 
     if happy_denoise == 'y':
         print('denoising completed')
-        parameters_denoise = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, filter_by]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'filter_by'], index = cell_id)
+        parameters_denoise = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, filter_by]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'filter_by'], index = file_id)
     else:
         print('Try running denoiseSpikes() again with different parameters')
         plt.close()
@@ -722,7 +674,7 @@ def denoiseSpikes(
     
     plt.close()
 
-    return peaks_denoised, cut_spikes_baselined_denoised, parameters_denoise # ndarray, ndarray, pandas data frame
+    return peaks_denoised, cut_spikes_baselined_denoised, parameters_denoise # ndarray, ndarray, pandas dataframe
 
 def spikesQC(
     file_name,
@@ -741,7 +693,8 @@ def spikesQC(
     ):
 
     """
-    `spikesQC` is a combination of `getSpikesQC`and `denoiseSpikes`. It allows to quality check the detected spikes by defining thresholds in three different metrics that can be previously explored using `plotSpikesQC`. It first generates a summary plot that contains (1) a subplot with all the detected spikes after cutting and baselining, coloring the noise traces according to the QC metric that excludes them, and (2) three subplots with the histograms of the metrics used, which are `width_heights`, `widths`, and `peak_heights`. This allows the user to visualise whether the selected parameters lead to a successful denoising. It then removes the indices corresponding to noise from `peaks` and `cut_spikes_baselined` and generates a plot with all the detected spikes that meet the quality criteria. It returns several arrays containing the `peaks_QC`, `cut_spikes_QC`, `cut_spikes_holding_QC`, `cut_spikes_baselined_QC`, which can be used for downstream analysis to compute firing rate and other parameters. It also returns a data frame with the filters used for quality control.
+    `spikesQC` is a combination of `getSpikesQC`and `denoiseSpikes`. It allows to perform quality control on the detected spikes by defining thresholds in three different metrics that can be previously explored using `plotSpikesQC`. It first generates a summary plot that contains (1) a subplot with all the detected spikes after cutting and baselining, coloring the noise traces according to the QC metric that excludes them, and (2) three subplots with the histograms of the metrics used, which are `width_heights`, `widths`, and `peak_heights`. This allows the user to visualise whether the selected parameters lead to a successful denoising. It then removes the indices corresponding to noise from `peaks` and `cut_spikes_baselined` and generates a plot with all the detected spikes that meet the quality criteria.
+    It returns four arrays containing the `peaks_QC`, `cut_spikes_QC`, `cut_spikes_holding_QC`, and `cut_spikes_baselined_QC`, which can be used for downstream analysis to compute firing rate and other parameters. It also returns a dataframe with the filters used for quality control.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :peaks: indices of detected spikes obtained from `findSpikes()`.
@@ -868,7 +821,7 @@ def spikesQC(
     happy_QC = input("Are you happy with the results from this quality control? y/n")
 
     if happy_QC == 'y':
-        parameters_QC = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, filter_by]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'filter_by'], index = cell_id)
+        parameters_QC = pd.DataFrame([[QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, filter_by]], columns = ['QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'filter_by'], index = file_id)
         print('QC completed')
         print(f"The number of spikes removed during QC was: {len(noise_indices[0])}")
     else:
@@ -878,14 +831,15 @@ def spikesQC(
     
     plt.close()
 
-    return peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC # ndarray, ndarray, ndarray, ndarray,pandas data frame
+    return peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC # ndarray, ndarray, ndarray, ndarray,pandas dataframe
 
 def cleanSpikes(
     file_name,
     cut_spikes_baselined_QC
     ):
     """
-    `cleanSpikes` allows the user to identify and remove any spikes that have been incorrectly baselined by looking at the value of the peak. It returns an array containing all the spikes that are properly baselined, which can be used to compute an average spike and its main parameters.
+    `cleanSpikes` allows the user to identify and remove any spikes that have been incorrectly baselined by looking at the value of the peak. It first plots the baselined spikes and a histogram of all the peak values. It then asks the user to define a threshold above which a peak will be deemed incorrectly baselined and will be removed. It finally plots the remaining baselined spikes and colors the removed peaks in the histogram.
+    It returns an array containing all the spikes that are properly baselined, which can be used to compute an average spike and its main parameters. It also returns a dataframe with the filters used for spike clean up.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :cut_spikes_baselined_QC: array containing the detected spikes after baselining and removing noise.
@@ -962,22 +916,24 @@ def cleanSpikes(
     happy_clean = input("Are you happy with your choice of filter? y/n")
 
     if happy_clean == 'y':
+        parameters_clean = pd.DataFrame([[peak_min]], columns = ['peak_min_pA'], index = file_id)
         print('Clean up completed')
         print(f"The number of spikes removed was: {len(spikes_to_remove)}")
     else:
         print('Try running cleanSpikes() again')
         plt.close()
-        return None # return empty variables to prevent wrong results from being used
+        return None, None # return empty variables to prevent wrong results from being used
         
     plt.close()
 
-    return cut_spikes_baselined_clean # ndarray
+    return cut_spikes_baselined_clean, parameters_clean # ndarray, pandas dataframe
 
 def averageSpikes(
     cut_spikes_baselined_clean
     ):
     """
-    `averageSpikes` computes an average spike from all the detected spikes after baseline, QC, and clean up. It then generates a plot with all the detected spikes and the average overlayed. It returns an array with the values of the average spike that can be used to compute parameters of interest for further analysis.
+    `averageSpikes` computes an average spike from all the detected spikes after baseline, QC, and clean up. It then generates a plot with all the detected spikes and the average overlayed.
+    It returns an array with the values of the average spike that can be used to compute parameters of interest for further analysis.
     
     :cut_spikes_baselined_clean: array containing the detected spikes after baselining, quality control, and removing the spikes incorrectly baselined.
     """
@@ -1008,7 +964,8 @@ def getSpikeParameters(
     sampling_rate_khz = 25
     ):
     """
-    `getSpikeParameters` computes key parameters to characterise the average spike shape. It returns a data frame with the spike onset and total duration of the spike.
+    `getSpikeParameters` computes key parameters that can be used to characterise the average spike shape.
+    It returns a dataframe with the spike onset, end, and magnitude, as well as the total duration of the spike and the time from onset to peak.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :average_spike: array containing the values of the average spike.
@@ -1073,7 +1030,7 @@ def getSpikeParameters(
     happy_onset = input("Are you happy with the calculated onset and end? y/n")
 
     if happy_onset == 'y':
-        average_spike_parameters = pd.DataFrame([[spike_onset, spike_end, spike_length, spike_onset_to_peak, spike_magnitude]], columns = ['onset [sample]', 'end [sample]', 'length [ms]', 'onset to peak [ms]', 'magnitude [pA]'], index = cell_id)
+        parameters_avg_spike = pd.DataFrame([[spike_onset, spike_end, spike_length, spike_onset_to_peak, spike_magnitude]], columns = ['spike_onset_sample', 'spike_end_sample', 'spike_length_ms', 'spike_onset_to_peak_ms', 'spike_magnitude_pA'], index = file_id)
         print('spike parameters calculated')
         print(f'Spike onset at {spike_onset}')
         print(f'Spike end at {spike_end}')
@@ -1101,26 +1058,27 @@ def getSpikeParameters(
     # plt.show()
     plt.pause(5)
 
-    return average_spike_parameters # pandas data frame
+    return parameters_avg_spike # pandas dataframe
 
 def getFiringRate(
     file_name,
-    channels_data_frame,
+    channels_dataframe,
     sweep_IB_concatenated,
     pseudo_sweep_concatenated,
-    Rseal_data_frame,
+    Rseal_dataframe,
     peaks_QC,
     sampling_rate_khz = 25,
     n_bins = 100
     ):
     """
-    `getFiringRate` calculates the firing rate from the recorded cell following three approaches. Approach #1 calculates firing frequency by dividing total number of detected spikes over length of recording, approach #2 calculates firing frequency separately for each sweep, to examine how the firing rate changes over time, and approach #3 calculates firing frequency separately for each for a time window of our choice. It returns a separate data frame with the results from each approach.
+    `getFiringRate` calculates the firing rate from the recorded cell following three approaches. Approach #1 calculates firing frequency by dividing total number of detected spikes over length of recording, approach #2 calculates firing frequency separately for each sweep, to examine how the firing rate changes over time, and approach #3 calculates firing frequency separately for each time window of our choice.
+    It returns a separate dataframe with the results from each approach.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
-    :channels_data_frame: data frame with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
+    :channels_dataframe: dataframe with extracted data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
     :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
-    :pseudo_sweep_concatenated:concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID.
-    :Rseal_data_frame: data fram with the Rseal values across sweeps for the time of recording.
+    :pseudo_sweep_concatenated: concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID.
+    :Rseal_dataframe: dataframe with the Rseal values across sweeps for the time of recording.
     :peaks_QC: indices of the detected spikes obtained from `findSpikes()`, after quality control.
     :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
     :n_bins: number of bins in which to divide the total length of recording. Defaults to 100.
@@ -1137,7 +1095,7 @@ def getFiringRate(
     recording_length = len(sweep_IB_concatenated) * dt / 1000 # in seconds
     firing_frequency = n_spikes / recording_length # in Hz
 
-    firing_frequency_dataframe = pd.DataFrame([n_spikes, recording_length, firing_frequency], index = ['n_spikes', 'recording_length', 'firing_frequency'], columns = cell_id)
+    firing_frequency_dataframe = pd.DataFrame([[n_spikes, recording_length, firing_frequency]], columns = ['n_spikes', 'recording_length_s', 'firing_frequency_Hz'], index = file_id)
 
     print(f'Neuron with ID {cell_id[0]}')
     print(f'Detected a total of {n_spikes} spikes')
@@ -1152,12 +1110,12 @@ def getFiringRate(
     sweep_length = []
     sweep_firing_rate = []
 
-    for sweep in channels_data_frame.columns: 
+    for sweep in channels_dataframe.columns: 
         # Take the spikes that belong to the current sweep
         spikes_in_sweep_tmp = np.array([p for i, p in enumerate(peaks_QC) if pseudo_sweep_concatenated[peaks_QC[i]] == int(sweep)])
 
         # Get firing rate for the current sweep
-        sweep_length_s_tmp = len(channels_data_frame.loc['Channel B', sweep]) * dt / 1000 # in seconds
+        sweep_length_s_tmp = len(channels_dataframe.loc['Channel B', sweep]) * dt / 1000 # in seconds
         n_spikes_sweep_tmp = len(spikes_in_sweep_tmp)
         firing_rate_sweep_tmp = n_spikes_sweep_tmp / sweep_length_s_tmp
 
@@ -1193,7 +1151,7 @@ def getFiringRate(
         window_length.append(time_window_s)
         window_firing_rate.append(firing_rate_tmp)
 
-    spikes_by_window_dataframe = pd.DataFrame([spikes_by_window, n_spikes_window, window_length, window_firing_rate], index = ['spikes_by_window', 'n_spikes_window', 'window_length', 'window_firing_rate'], columns = range(n_bins))
+    spikes_by_window_dataframe = pd.DataFrame([spikes_by_window, n_spikes_window, window_length, window_firing_rate], index = ['spikes_by_window', 'n_spikes_window', 'window_length_s', 'window_firing_rate_Hz'], columns = range(n_bins))
 
     # Visualise results
     # Generate figure layout
@@ -1208,7 +1166,7 @@ def getFiringRate(
     axs[0,0].set_ylim(0, round(firing_frequency*2))
 
     # Check whether the sweep firing rate correlates with seal resistance
-    axs[0,1].scatter(Rseal_data_frame.loc['seal_resistance'], sweep_firing_rate)
+    axs[0,1].scatter(Rseal_dataframe.loc['seal_resistance_MOhm'], sweep_firing_rate)
     axs[0,1].set_title('Sweep firing rate vs Seal Resistance', fontsize = 12)
     axs[0,1].set_xlabel('Seal Resistance [MOhm]', fontsize = 10)
     axs[0,1].set_ylabel('Firing Rate [Hz]', fontsize = 10)
@@ -1228,7 +1186,7 @@ def getFiringRate(
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
     plt.pause(5)
 
-    return firing_frequency_dataframe, spikes_by_sweep_dataframe, spikes_by_window_dataframe # pandas data frame, pandas data frame, pandas data frame
+    return firing_frequency_dataframe, spikes_by_sweep_dataframe, spikes_by_window_dataframe # pandas dataframe, pandas dataframe, pandas dataframe
 
 def getInterspikeInterval(
     sweep_IB_concatenated,
@@ -1237,10 +1195,11 @@ def getInterspikeInterval(
     sampling_rate_khz = 25
     ):
     """
-    `getInterspikeInterval` calculates the interspike interval between all the detected spikes on a sweep by sweep basis. It returns a data frame with the results.
+    `getInterspikeInterval` calculates the interspike interval between all the detected spikes on a sweep by sweep basis. It generates a summary plot with a histogram of the calculated interspike intervals as well as a scatter plot of the relationship between the interspike interval and the average or standard deviation of the injected current between each pair of spikes.
+    It returns a dataframe containing the interspike interval together with the average and standard deviation of the  injected current between each pair of spikes.
     
     :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
-    :pseudo_sweep_concatenated:concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID.
+    :pseudo_sweep_concatenated: concatenated pseudo-sweep that has the same length and number of sweeps as the original data, with the difference that each sweep within the pseudo-sweep will be comprised of the number that reflects the real sweep ID.
     :peaks_QC: indices of the detected spikes obtained from `findSpikes()`, after quality control.
     :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
     """
@@ -1270,7 +1229,7 @@ def getInterspikeInterval(
     # Visualise results
     # Generate figure layout
     get_ipython().run_line_magic('matplotlib', 'qt')
-    fig = plt.figure(tight_layout = True, figsize = (12, 12), dpi = 100)
+    fig = plt.figure(tight_layout = True, figsize = (8, 8), dpi = 100)
     axs = fig.subplot_mosaic(
         """
         AA
@@ -1318,6 +1277,6 @@ def getInterspikeInterval(
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
     plt.pause(5)
 
-    interspike_interval_dataframe = pd.DataFrame([interspike_interval, holding_isi_avg, holding_isi_std], index = ['interspike_interval', 'holding_isi_avg', 'holding_isi_std'], columns = range(len(interspike_interval)))
+    interspike_interval_dataframe = pd.DataFrame([interspike_interval, holding_isi_avg, holding_isi_std], index = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'], columns = range(len(interspike_interval)))
 
-    return interspike_interval_dataframe # pandas data frame
+    return interspike_interval_dataframe # pandas dataframe
