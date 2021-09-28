@@ -1,7 +1,8 @@
 # %% [markdown]
-# ## 0 | Import packages and load test data
+# ## 0 | Import packages and load data
 
 # %%
+# Import packages
 import os
 import tkinter
 from tkinter.filedialog import askopenfilename, askopenfilenames, askdirectory
@@ -19,7 +20,6 @@ from IPython import get_ipython
 from utilities import * # includes functions importFile, openFile, openHDF5file, getLooseRseal, concatenateSweeps, findSpikes, cutSpikes, plotSpikesQC, spikesQC, cleanSpikes, averageSpikes, getSpikeParameters, getFiringRate, getInterspikeInterval, saveLooseSealResults
 print("done!")
 
-# %%
 # Load data for LIAM cell (contains spikes in test_pulse)
 channels_df, time, dt, folder_name, file_name = importFile(curated_channel = 'Sweeps_Analysis')
 print("file imported")
@@ -69,8 +69,10 @@ parameters_avg_spike = getSpikeParameters(file_name, average_spike, threshold_on
 # %%
 # Compute firing frequency
 firing_frequency_df, spikes_by_sweep_df, spikes_by_window_df = getFiringRate(file_name, channels_df, sweep_IB_concatenated, pseudo_sweep_concatenated, Rseal_df, peaks_QC, n_bins = 100)
+firing_frequency_df
 
 # %%
+# Compute interspike intervals
 interspike_interval_df = getInterspikeInterval(sweep_IB_concatenated, pseudo_sweep_concatenated, peaks_QC, sampling_rate_khz = 25)
 interspike_interval_df
 
