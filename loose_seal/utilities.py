@@ -633,16 +633,18 @@ def denoiseSpikes(
 
     # Use the selected parameters to find the indices of peaks that are not spikes
     noise_indices = []
-    
     if 'wh' in filter_by:
         noise_indices_wh = np.where((peaks_properties['width_heights'] < QC_wh_min) | (peaks_properties['width_heights'] > QC_wh_max))
-        noise_indices.append(noise_indices_wh[0])
-    elif 'pw' in filter_by:
+        if np.any(noise_indices_wh):
+            [noise_indices.append(noise_wh) for noise_wh in noise_indices_wh[0]]
+    if 'pw' in filter_by:
         noise_indices_pw = np.where((peaks_properties['widths'] < QC_pw_min) | (peaks_properties['widths'] > QC_pw_max))
-        noise_indices.append(noise_indices_pw[0])
-    elif 'ph' in filter_by:
+        if np.any(noise_indices_pw):
+            [noise_indices.append(noise_pw) for noise_pw in noise_indices_pw[0]]
+    if 'ph' in filter_by:
         noise_indices_ph = np.where((peaks_properties['peak_heights'] < QC_ph_min) | (peaks_properties['peak_heights'] > QC_ph_max))
-        noise_indices.append(noise_indices_ph[0])
+        if np.any(noise_indices_ph):
+            [noise_indices.append(noise_ph) for noise_ph in noise_indices_ph[0]]
 
     # Remove the indices corresponding to noise 
     cut_spikes_baselined_denoised = np.delete(cut_spikes_baselined, noise_indices, 0)
@@ -786,16 +788,18 @@ def spikesQC(
 
     # Use the selected parameters to find the indices of peaks that are not spikes
     noise_indices = []
-    
     if 'wh' in filter_by:
         noise_indices_wh = np.where((peaks_properties['width_heights'] < QC_wh_min) | (peaks_properties['width_heights'] > QC_wh_max))
-        noise_indices.append(noise_indices_wh[0])
-    elif 'pw' in filter_by:
+        if np.any(noise_indices_wh):
+            [noise_indices.append(noise_wh) for noise_wh in noise_indices_wh[0]]
+    if 'pw' in filter_by:
         noise_indices_pw = np.where((peaks_properties['widths'] < QC_pw_min) | (peaks_properties['widths'] > QC_pw_max))
-        noise_indices.append(noise_indices_pw[0])
-    elif 'ph' in filter_by:
+        if np.any(noise_indices_pw):
+            [noise_indices.append(noise_pw) for noise_pw in noise_indices_pw[0]]
+    if 'ph' in filter_by:
         noise_indices_ph = np.where((peaks_properties['peak_heights'] < QC_ph_min) | (peaks_properties['peak_heights'] > QC_ph_max))
-        noise_indices.append(noise_indices_ph[0])
+        if np.any(noise_indices_ph):
+            [noise_indices.append(noise_ph) for noise_ph in noise_indices_ph[0]]
 
     # Remove the indices corresponding to noise 
     peaks_QC = np.delete(peaks, noise_indices, 0)
