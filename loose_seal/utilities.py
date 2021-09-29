@@ -287,8 +287,8 @@ def getLooseRseal(
     plt.ylabel('Seal Resistance [MOhm]', fontsize = 12)
     plt.axis([-1, len(Rseal_dataframe.loc['seal_resistance_MOhm']), 0, round(np.mean(Rseal_dataframe.loc['seal_resistance_MOhm'])*2)])
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    # plt.show()
-    plt.pause(5)
+    plt.show()
+    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
     return Rseal_dataframe # pandas dataframe
 
@@ -329,8 +329,8 @@ def concatenateSweeps(
     plt.xlabel('samples', fontsize = 12)
     plt.ylabel('current [pA]', fontsize = 12)
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    # plt.show()
-    plt.pause(5)
+    plt.show()
+    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
     return sweep_IB_concatenated, pseudo_sweep_concatenated # ndarray, ndarray
 
@@ -369,7 +369,8 @@ def findSpikes(
     plt.text(0.95, 0.95, f'Parameters: wlen = {wlen_ms}ms', horizontalalignment='right', verticalalignment='top', transform = ax.transAxes)
     plt.xlabel('peak prominence [pA]', fontsize = 12)
     fig1.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    plt.pause(0.5) # Alternative to waitforbuttonpress() or plt.show(block = True)- does not close the figure and proceeds to input(). If we needed to interact with the histogram before inputing the desired values we could either increase the length of the pause or switch to plt.show(block = True), which would leave the figure open until we close it, and only then it proceeds to input().
+    plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
+    # plt.pause(0.5) # Alternative to waitforbuttonpress() or plt.show(block = True)- does not close the figure and proceeds to input(). If we needed to interact with the histogram before inputing the desired values we could either increase the length of the pause or switch to plt.show(block = True), which would leave the figure open until we close it, and only then it proceeds to input().
 
     # Based on the histogram above, select the interval of prominences that will contain the peaks from spikes and not from baseline noise.
     prominence_min = int(input("Enter the min value for the desired prominence"))
@@ -440,8 +441,8 @@ def cutSpikes(
     plt.ylabel('current [pA]', fontsize = 12)
     plt.xlim([((len(cut_spikes_baselined[0])/2)-45), ((len(cut_spikes_baselined[0])/2)+55)])
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    # plt.show()
-    plt.pause(5)
+    plt.show()
+    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
     return cut_spikes, cut_spikes_holding, cut_spikes_baselined # ndarray, ndarray, ndarray
 
@@ -492,8 +493,8 @@ def plotSpikesQC(
     
     # Move figure to top left corner
     fig.canvas.manager.window.move(0, 0)
-    # plt.show()
-    plt.pause(5)
+    plt.show()
+    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
 def getSpikesQC(
     file_name,
@@ -769,7 +770,8 @@ def spikesQC(
     
     # Move figure to top left corner
     fig.canvas.manager.window.move(0, 0)
-    plt.pause(0.5)
+    plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
+    # plt.pause(0.5)
     
     # Check whether chosen parameters are satisfactory
     happy_parameter = input("Are you happy with your choice of parameters for QC? y/n")
@@ -815,7 +817,8 @@ def spikesQC(
     plt.xlabel('samples', fontsize = 12)
     plt.ylabel('current [pA]', fontsize = 12)
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    plt.pause(0.5)
+    plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
+    # plt.pause(0.5)
     
     # Check whether QC is complete
     happy_QC = input("Are you happy with the results from this quality control? y/n")
@@ -910,7 +913,8 @@ def cleanSpikes(
     axs[1,1].set_title('Histogram of peak values for baselined spikes', fontsize = 12)
     axs[1,1].set_xlabel('peak value [pA]', fontsize = 12)
 
-    plt.pause(0.5)
+    #plt.pause(0.5)
+    plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
 
     # Check whether clean up is complete
     happy_clean = input("Are you happy with your choice of filter? y/n")
@@ -951,8 +955,8 @@ def averageSpikes(
     plt.ylabel('current [pA]', fontsize = 12)
     plt.xlim([((len(cut_spikes_baselined_clean[0])/2)-45), ((len(cut_spikes_baselined_clean[0])/2)+55)])
     fig.canvas.manager.window.move(0, 0)
-    # plt.show()
-    plt.pause(5)
+    plt.show()
+    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
     return average_spike # ndarray
 
@@ -1055,8 +1059,8 @@ def getSpikeParameters(
     plt.ylabel('current [pA]', fontsize = 12)
     plt.xlim([((len(average_spike)/2)-45), ((len(average_spike)/2)+55)])
     fig.canvas.manager.window.move(0, 0)
-    # plt.show()
-    plt.pause(5)
+    plt.show()
+    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
     return parameters_avg_spike # pandas dataframe
 
@@ -1184,7 +1188,8 @@ def getFiringRate(
     axs[1,1].text(0.5, 0.5, s = f'Neuron with ID\n{cell_id[0]}\n\nFiring rate of {round(firing_frequency, 2)} Hz', ha = 'center', va = 'center', wrap = True, in_layout = True)
 
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    plt.pause(5)
+    plt.show()
+    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
     return firing_frequency_dataframe, spikes_by_sweep_dataframe, spikes_by_window_dataframe # pandas dataframe, pandas dataframe, pandas dataframe
 
@@ -1275,7 +1280,8 @@ def getInterspikeInterval(
     axs['E'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['E'].set_ylabel('Holding current [std]', fontsize = 10)
     
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    plt.pause(5)
+    plt.show()
+    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
     interspike_interval_dataframe = pd.DataFrame([interspike_interval, holding_isi_avg, holding_isi_std], index = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'], columns = range(len(interspike_interval)))
 
