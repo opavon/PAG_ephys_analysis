@@ -121,185 +121,74 @@ cell_id = ['_'.join((file_id[0].split('_'))[0:5])] # Get cell id to print in plo
 # Find the peak magnitude and where the peak is, defined by the cutSpikes() function (should be sample 125)
 spike_magnitude = min(average_spike)
 average_spike_peak_index = int(np.where(average_spike == spike_magnitude)[0]) # needs to be an integer
-# Compute derivative of average spike and of all spikes
-average_spike_diff = np.diff(average_spike)
-average_spike_diff_peak_index = int(np.where(average_spike_diff == min(average_spike_diff))[0])
-cut_spikes_diff = np.diff(cut_spikes_baselined_clean)
 
 # %%
-# Compute baseline of derivative by averaging period before spike starts
-#average_spike_diff_baseline = abs(np.mean(average_spike_diff[average_spike_peak_index-100:average_spike_peak_index-25]))
-
-baseline_cut_spikes = ([cut_spikes_baselined_clean[s][(average_spike_peak_index-100):(average_spike_peak_index-25)] for s in range(len(cut_spikes_baselined_clean))])
-baseline_cut_spikes_conc = np.concatenate(baseline_cut_spikes)
-
-baseline_cut_spikes_diff = ([cut_spikes_diff[s][(average_spike_diff_peak_index-100):(average_spike_diff_peak_index-25)] for s in range(len(cut_spikes_diff))])
-baseline_cut_spikes_diff_conc = np.concatenate(baseline_cut_spikes_diff)
-
+# Compute baseline mean and std, and test for normality
 baseline_average_spike = average_spike[(average_spike_peak_index-100):(average_spike_peak_index-25)]
 baseline_average_spike_mean = np.mean(baseline_average_spike)
-baseline_average_spike_sd = np.std(baseline_average_spike_mean)
-baseline_average_spike_diff = average_spike_diff[(average_spike_diff_peak_index-100):(average_spike_diff_peak_index-25)]
+print(baseline_average_spike_mean)
+baseline_average_spike_sd = np.std(baseline_average_spike)
+print(baseline_average_spike_sd)
 
 # %%
 # Define threshold for onset
-onset_threshold_cut_spikes = np.percentile(baseline_cut_spikes_conc, 5)
-print(onset_threshold_cut_spikes)
-onset_threshold_cut_spikes_diff = np.percentile(baseline_cut_spikes_diff_conc, 5)
-print(onset_threshold_cut_spikes_diff)
-#onset_threshold_average_spike = np.percentile(baseline_average_spike, 5)
-onset_threshold_average_spike = np.std(baseline_average_spike)*-5
+onset_threshold_average_spike = baseline_average_spike_mean - (stats.norm.ppf(0.9973)*baseline_average_spike_sd)
 print(onset_threshold_average_spike)
-#onset_threshold_average_spike_diff = np.percentile(baseline_average_spike_diff, 5)
-onset_threshold_average_spike_diff = np.std(baseline_average_spike_diff)*-5
 
-print(onset_threshold_average_spike_diff)
-
-# %%
-# Calculate spike onset with each method
-for i, s in enumerate(average_spike[(average_spike_peak_index-25):average_spike_peak_index]): # i is the index, s is the value
-    if s < onset_threshold_cut_spikes:
-        onset_threshold_cut_spikes_index = i + (average_spike_peak_index-25)
-        break
-
+# Calculate spike onset
 for i, s in enumerate(average_spike[(average_spike_peak_index-25):average_spike_peak_index]): # i is the index, s is the value
     if s < onset_threshold_average_spike:
-        onset_threshold_average_spike_index = i + (average_spike_peak_index-25)
+        average_spike_onset_index = i + (average_spike_peak_index-25)
         break
 
-for i, s in enumerate(average_spike_diff[(average_spike_diff_peak_index-25):average_spike_diff_peak_index]): # i is the index, s is the value
-    if s < onset_threshold_cut_spikes_diff:
-        onset_threshold_cut_spikes_diff_index = i + (average_spike_diff_peak_index-25)
-        break
-
-for i, s in enumerate(average_spike_diff[(average_spike_diff_peak_index-25):average_spike_diff_peak_index]): # i is the index, s is the value
-    if s < onset_threshold_average_spike_diff:
-        onset_threshold_average_spike_diff_index = i + (average_spike_diff_peak_index-25)
-        break
-
-print(onset_threshold_cut_spikes_index)
-print(onset_threshold_average_spike_index)
-print(onset_threshold_cut_spikes_diff_index)
-print(onset_threshold_average_spike_diff_index)
-
-# %%
-# Plot the average spike and its derivative
-get_ipython().run_line_magic('matplotlib', 'qt')    
-fig, axs = plt.subplots (2, sharex=True, figsize = (7, 5), dpi = 100) # Set figure size
-
-axs[0].plot(cut_spikes_baselined_clean.T, 'k') # cut spikes
-axs[0].plot(average_spike, 'r') # average spike
-axs[0].plot(onset_threshold_cut_spikes_index, average_spike[onset_threshold_cut_spikes_index], "oc") # spike onset
-axs[0].plot(onset_threshold_average_spike_index, average_spike[onset_threshold_average_spike_index], "oy") # spike onset
-axs[0].set_ylabel('current [pA]', fontsize = 12)
-axs[0].axhline(y = -onset_threshold_cut_spikes, c = 'c', ls = '--') # horizontal dashed line at threshold for onset
-axs[0].axhline(y = onset_threshold_cut_spikes, c = 'c', ls = '--') # horizontal dashed line at threshold for onset
-axs[0].axhline(y = -onset_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at threshold for onset
-axs[0].axhline(y = onset_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at threshold for onset
-
-axs[1].plot(cut_spikes_diff.T, 'k') # derivative of all cut spikes
-axs[1].plot(average_spike_diff, 'c') # derivative of average spike
-axs[1].plot(onset_threshold_cut_spikes_diff_index, average_spike_diff[onset_threshold_cut_spikes_diff_index], "or") # spike onset
-axs[1].plot(onset_threshold_average_spike_diff_index, average_spike_diff[onset_threshold_average_spike_diff_index], "oy") # spike end
-axs[1].axhline(y = onset_threshold_cut_spikes_diff, c = 'r', ls = '--') # horizontal dashed line at threshold for onset
-axs[1].axhline(y = onset_threshold_average_spike_diff, c = 'y', ls = '--') # horizontal dashed line at threshold for onset
-
-plt.suptitle('Averaged spike with onset and its derivative', fontsize = 14)
-#plt.xlim([((len(average_spike)/2)-45), ((len(average_spike)/2)+55)])
-fig.canvas.manager.window.move(0, 0)
-plt.show()
+print(average_spike_onset_index)
 
 # %%
 # Define threshold for end
-end_min_threshold_cut_spikes = np.percentile(baseline_cut_spikes_conc, 2.5)
-end_max_threshold_cut_spikes = np.percentile(baseline_cut_spikes_conc, 97.5)
-print(end_min_threshold_cut_spikes)
-print(end_max_threshold_cut_spikes)
-
-end_min_threshold_cut_spikes_diff = np.percentile(baseline_cut_spikes_diff_conc, 2.5)
-end_max_threshold_cut_spikes_diff = np.percentile(baseline_cut_spikes_diff_conc, 97.5)
-print(end_min_threshold_cut_spikes_diff)
-print(end_max_threshold_cut_spikes_diff)
-
-end_min_threshold_average_spike = np.percentile(baseline_average_spike, 2.5)
-end_max_threshold_average_spike = np.percentile(baseline_average_spike, 97.5)
+end_min_threshold_average_spike = baseline_average_spike_mean - (stats.norm.ppf(0.99865)*baseline_average_spike_sd)
+end_max_threshold_average_spike = baseline_average_spike_mean + (stats.norm.ppf(0.99865)*baseline_average_spike_sd)
 print(end_min_threshold_average_spike)
 print(end_max_threshold_average_spike)
 
-end_min_threshold_average_spike_diff = np.percentile(baseline_average_spike_diff, 2.5)
-end_max_threshold_average_spike_diff = np.percentile(baseline_average_spike_diff, 97.5)
-print(end_min_threshold_average_spike_diff)
-print(end_max_threshold_average_spike_diff)
+# Calculate the spike end with the different methods
+for i, s in enumerate(average_spike[average_spike_peak_index:]): # i is the index, s is the value
+    if (end_min_threshold_average_spike < s < end_max_threshold_average_spike) and (end_min_threshold_average_spike < average_spike[average_spike_peak_index:][i+1] < end_max_threshold_average_spike) and (end_min_threshold_average_spike < average_spike[average_spike_peak_index:][i+2] < end_max_threshold_average_spike) and (end_min_threshold_average_spike < average_spike[average_spike_peak_index:][i+3] < end_max_threshold_average_spike) and (end_min_threshold_average_spike < average_spike[average_spike_peak_index:][i+4] < end_max_threshold_average_spike) and (end_min_threshold_average_spike < average_spike[average_spike_peak_index:][i+5] < end_max_threshold_average_spike):
+        average_spike_end_index = i + average_spike_peak_index
+        break
+
+print(average_spike_end_index)
+
+# # Calculate the spike end with the different methods
+# for i, s in enumerate(average_spike[::-1]): # i is the index, s is the value
+#     if (s < end_min_threshold_average_spike or s > end_max_threshold_average_spike) and (average_spike[::-1][i+1] < end_min_threshold_average_spike or average_spike[::-1][i+1] > end_max_threshold_average_spike) and (average_spike[::-1][i+2] < end_min_threshold_average_spike or average_spike[::-1][i+2] > end_max_threshold_average_spike):
+#         average_spike_end_index = len(average_spike) - i
+#         break
+
+# print(average_spike_end_index)
 
 # %%
-# Calculate the spike end with the different methods
 # Plot the average spike and its derivative
 get_ipython().run_line_magic('matplotlib', 'qt')    
-fig, axs = plt.subplots (2, sharex=True, figsize = (7, 5), dpi = 100) # Set figure size
-
-axs[0].plot(cut_spikes_baselined_clean.T, 'k') # cut spikes
-axs[0].plot(average_spike, 'r') # average spike
-#axs[0].plot(onset_threshold_cut_spikes_index, average_spike[onset_threshold_cut_spikes_index], "oc") # spike onset
-#axs[0].plot(onset_threshold_average_spike_index, average_spike[onset_threshold_average_spike_index], "oy") # spike onset
-axs[0].set_ylabel('current [pA]', fontsize = 12)
-axs[0].axhline(y = end_min_threshold_cut_spikes, c = 'c', ls = '--') # horizontal dashed line at threshold for onset
-axs[0].axhline(y = end_max_threshold_cut_spikes, c = 'c', ls = '--') # horizontal dashed line at threshold for onset
-axs[0].axhline(y = end_min_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at threshold for onset
-axs[0].axhline(y = end_max_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at threshold for onset
-
-axs[1].plot(cut_spikes_diff.T, 'k') # derivative of all cut spikes
-axs[1].plot(average_spike_diff, 'c') # derivative of average spike
-#axs[1].plot(onset_threshold_cut_spikes_diff_index, average_spike_diff[onset_threshold_cut_spikes_diff_index], "or") # spike onset
-#axs[1].plot(onset_threshold_average_spike_diff_index, average_spike_diff[onset_threshold_average_spike_diff_index], "oy") # spike end
-axs[1].axhline(y = end_min_threshold_cut_spikes_diff, c = 'r', ls = '--') # horizontal dashed line at threshold for onset
-axs[1].axhline(y = end_max_threshold_cut_spikes_diff, c = 'r', ls = '--') # horizontal dashed line at threshold for onset
-axs[1].axhline(y = end_min_threshold_average_spike_diff, c = 'y', ls = '--') # horizontal dashed line at threshold for onset
-axs[1].axhline(y = end_max_threshold_average_spike_diff, c = 'y', ls = '--') # horizontal dashed line at threshold for onset
-
-plt.suptitle('Averaged spike with and its derivative', fontsize = 14)
+fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
+plt.plot(cut_spikes_baselined_clean.T, 'k') # cut spikes
+plt.plot(average_spike, 'r') # average spike
+plt.plot(average_spike_onset_index, average_spike[average_spike_onset_index], "oc") # spike onset
+plt.plot(average_spike_end_index, average_spike[average_spike_end_index], "oy") # spike end
+plt.ylabel('current [pA]', fontsize = 12)
+plt.axhline(y = onset_threshold_average_spike, c = 'c', ls = '--') # horizontal dashed line at threshold for onset
+plt.axhline(y = end_min_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at threshold for onset
+plt.axhline(y = end_max_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at threshold for onset
+plt.suptitle('Averaged spike with onset and end', fontsize = 14)
 #plt.xlim([((len(average_spike)/2)-45), ((len(average_spike)/2)+55)])
 fig.canvas.manager.window.move(0, 0)
 plt.show()
 
 # %%
-##### Assess the average spike indices before the peak and keep those that cross the threshold
-for i, s in enumerate(average_spike_diff): # i is the index, s is the value
-    if s < threshold_onset:
-        spike_onset_diff_index = i
-        break
-##### Assess the derivative indices after the peak and keep those where the derivative is back to baseline (baseline defined by threshold_end)
-for i, s in enumerate(average_spike_diff[::-1]):
-    if s < threshold_min_end or s > threshold_max_end:
-        spike_end_diff_index = len(average_spike_diff)-i
-        break
-
 # Extract onset and end, calculate length and onset to peak
-spike_onset = spike_onset_diff_index + 1
-spike_end = spike_end_diff_index + 1
+spike_onset = average_spike_onset_index
+spike_end = average_spike_end_index
 spike_length = (spike_end - spike_onset) * dt
 spike_onset_to_peak = (average_spike_peak_index-spike_onset) * dt
-
-# Plot the average spike and its derivative
-get_ipython().run_line_magic('matplotlib', 'qt')    
-fig, axs = plt.subplots (2, sharex=True, figsize = (7, 5), dpi = 100) # Set figure size
-axs[0].plot(cut_spikes_baselined_clean.T, 'k') # cut spikes
-axs[0].plot(average_spike, 'r') # average spike
-axs[0].plot(spike_onset, average_spike[spike_onset], "oc") # spike onset
-axs[0].plot(spike_end, average_spike[spike_end], "oc") # spike end
-axs[0].set_ylabel('current [pA]', fontsize = 12)
-axs[0].axhline(y = 0, c = 'k', ls = '--') # horizontal dashed line at 0
-axs[1].plot(cut_spikes_diff.T, 'k') # derivative of all cut spikes
-axs[1].plot(average_spike_diff, 'c') # derivative of average spike
-axs[1].plot(spike_onset_diff_index, average_spike_diff[spike_onset_diff_index], "or") # spike onset
-axs[1].plot(spike_end_diff_index, average_spike_diff[spike_end_diff_index], "or") # spike end
-axs[1].axhline(y = threshold_onset, c = 'r', ls = '--') # horizontal dashed line at threshold for onset
-axs[1].axhline(y = threshold_min_end, c = 'r', ls = '--') # horizontal dashed line at min threshold for end
-axs[1].axhline(y = threshold_max_end, c = 'r', ls = '--') # horizontal dashed line at max threshold for end
-#axs[1].axhline(y = 0, c = 'k', ls = '--') # horizontal dashed line at 0
-plt.suptitle('Averaged spike with onset and end and its derivative', fontsize = 14)
-#plt.xlim([((len(average_spike)/2)-45), ((len(average_spike)/2)+55)])
-fig.canvas.manager.window.move(0, 0)
-plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
 
 # Check whether clean up is complete
 happy_onset = input("Are you happy with the calculated onset and end? y/n")
@@ -312,25 +201,4 @@ if happy_onset == 'y':
     print(f'Spike length of {spike_length} ms')
     print(f'Spike onset to peak of {spike_onset_to_peak} ms')
     print(f'Spike magnitude of {round(spike_magnitude, 2)} pA')
-else:
-    print('Try running getSpikeParameters() again')
-    plt.close()
-    return None # return empty variables to prevent wrong results from being used
-
-plt.close()
-
-# Plot the average spike with the calculated onset and end
-get_ipython().run_line_magic('matplotlib', 'qt')
-fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
-plt.plot(spike_onset, average_spike[spike_onset], "xr")
-plt.plot(spike_end, average_spike[spike_end], "xr")
-plt.plot(average_spike, 'k')
-plt.suptitle('Averaged spike with onset and end', fontsize = 14)
-plt.axhline(y = 0, c = 'k', ls = '--')
-plt.ylabel('current [pA]', fontsize = 12)
-plt.xlim([((len(average_spike)/2)-45), ((len(average_spike)/2)+55)])
-fig.canvas.manager.window.move(0, 0)
-plt.show()
-# plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
-
-return parameters_avg_spike # pandas dataframe
+# %%
