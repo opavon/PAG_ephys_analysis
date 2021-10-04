@@ -1178,7 +1178,7 @@ def getSpikeParameters(
         print(f'Spike length of {spike_length} ms')
         print(f'Spike onset to peak of {spike_onset_to_peak} ms')
         print(f'Spike magnitude of {round(spike_magnitude, 2)} pA')
-        print(f'Baseline difference between end and start is {baseline_average_spike_end_mean - baseline_average_spike_mean} pA')
+        print(f'Baseline difference between end and start is {round((baseline_average_spike_end_mean - baseline_average_spike_mean), 2)} pA')
     else:
         print('Try running getSpikeParameters() again')
         plt.close()
@@ -1408,15 +1408,15 @@ def getInterspikeInterval(
     axs['D'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['D'].set_ylabel('Holding current [pA]', fontsize = 10)
 
     # Keep only the std values below a certain threshold
-    subset_holding_std = np.array([isi_hold_std for i, isi_hold_std in enumerate(holding_isi_std) if (holding_isi_std[i] < 3)])
-    subset_isi_std = np.array([isi for i, isi in enumerate(interspike_interval) if (holding_isi_std[i] < 3)])
+    subset_holding_std = np.array([isi_hold_std for i, isi_hold_std in enumerate(holding_isi_std) if (holding_isi_std[i] < 10)])
+    subset_isi_std = np.array([isi for i, isi in enumerate(interspike_interval) if (holding_isi_std[i] < 10)])
 
     # Plot ISI vs Holding (std)
     axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'slope = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[3],2)}')
     # axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'Correlation = {np.round(np.corrcoef(subset_isi_std, subset_holding_std)[0,1], 2)}')
-    axs['E'].set_title('E) ISI vs Holding (<3 std in holding_avg)', fontsize = 12), axs['E'].legend()
+    axs['E'].set_title('E) ISI vs Holding (<10 std in holding_avg)', fontsize = 12), axs['E'].legend()
     axs['E'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['E'].set_ylabel('Holding current [std]', fontsize = 10)
-    axs['E'].set_ylim(0, 4)
+    axs['E'].set_ylim(0, None)
     
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
     plt.show()
