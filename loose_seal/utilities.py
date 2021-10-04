@@ -1165,7 +1165,7 @@ def getSpikeParameters(
     happy_onset = input("Are you happy with the calculated onset and end? y/n")
 
     if happy_onset == 'y':
-        parameters_avg_spike = pd.DataFrame([[spike_onset, spike_end, spike_length, spike_onset_to_peak, spike_magnitude, baseline_average_spike_mean, baseline_average_spike_std, baseline_average_spike_end_mean, baseline_average_spike_end_std]], columns = ['spike_onset_sample', 'spike_end_sample', 'spike_length_ms', 'spike_onset_to_peak_ms', 'spike_magnitude_pA', 'baseline_start_mean', 'baselin_start_std', 'baseline_end_mean', 'baseline_end_std'], index = file_id)
+        parameters_avg_spike = pd.DataFrame([[spike_onset, spike_end, spike_length, spike_onset_to_peak, spike_magnitude, baseline_average_spike_mean, baseline_average_spike_std, baseline_average_spike_end_mean, baseline_average_spike_end_std]], columns = ['spike_onset_sample', 'spike_end_sample', 'spike_length_ms', 'spike_onset_to_peak_ms', 'spike_magnitude_pA', 'baseline_start_mean', 'baseline_start_std', 'baseline_end_mean', 'baseline_end_std'], index = file_id)
         print('spike parameters calculated')
         print(f'Spike onset at {spike_onset}')
         print(f'Spike end at {spike_end}')
