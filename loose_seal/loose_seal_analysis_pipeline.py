@@ -21,7 +21,7 @@ from utilities import * # includes functions importFile, openFile, openHDF5file,
 print("done!")
 
 # %%
-# Load data for LIAM cell (contains spikes in test_pulse)
+# Load data
 channels_df, time, dt, folder_name, file_name = importFile(curated_channel = 'Sweeps_Analysis')
 print("file imported")
 
@@ -45,12 +45,23 @@ cut_spikes, cut_spikes_holding, cut_spikes_baselined = cutSpikes(sweep_IB_concat
 print("spikes cut")
 
 # %%
-# Examine cut spikes for quality check
-plotSpikesQC(file_name, peaks_properties, cut_spikes_baselined)
+# Examine cut spikes before quality control
+plotSpikesQC(file_name, peaks, peaks_properties, cut_spikes_baselined)
 
 # %%
 # Choose the QC metrics and remove detected peaks that correspond to noise and not spikes
-peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(file_name, peaks, peaks_properties, cut_spikes, cut_spikes_holding, cut_spikes_baselined, filter_by=['wh', 'pw', 'ph'], QC_wh_min=float('-inf'), QC_wh_max=float('inf'), QC_pw_min=float('-inf'), QC_pw_max=float('inf'), QC_ph_min=50, QC_ph_max=float('inf'))
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'), QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
 parameters_QC
 
 # %%
@@ -65,7 +76,8 @@ print("average spike calculated")
 
 # %%
 # Compute average spike parameters
-parameters_avg_spike = getSpikeParameters(file_name, average_spike, threshold_onset_factor = 0.04, threshold_end_factor = 50)
+parameters_avg_spike = getSpikeParameters(file_name, cut_spikes_baselined_clean, average_spike)
+parameters_avg_spike
 
 # %%
 # Compute firing frequency
@@ -74,7 +86,7 @@ firing_frequency_df
 
 # %%
 # Compute interspike intervals
-interspike_interval_df = getInterspikeInterval(sweep_IB_concatenated, pseudo_sweep_concatenated, peaks_QC, sampling_rate_khz = 25)
+interspike_interval_df = getInterspikeInterval(sweep_IB_concatenated, pseudo_sweep_concatenated, peaks_QC)
 interspike_interval_df
 
 # %%
@@ -85,3 +97,4 @@ vglut2_ctrl_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_
 vglut2_ptx_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vglut2_picrotoxin"
 
 saveLooseSealResults(vgat_ctrl_save_path, file_name, sweep_IB_concatenated, pseudo_sweep_concatenated, peaks, cut_spikes, cut_spikes_holding, cut_spikes_baselined, peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, cut_spikes_baselined_clean, average_spike, Rseal_df, peaks_properties, parameters_find_peaks, parameters_QC, parameters_clean, parameters_avg_spike, firing_frequency_df, spikes_by_sweep_df, spikes_by_window_df, interspike_interval_df)
+# %%
