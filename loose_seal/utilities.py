@@ -414,15 +414,15 @@ def cutSpikes(
     peaks
     ):
     """
-    `cutSpikes` takes the concatenated sweeps and cuts an interval of 10 ms around each detected peak for plotting and further analysis. It then calculates a baseline for each peak by averaging 3 ms before it, leaving out the first ms right before the peak index as it will contain the spike itself. Finally, it subtracts the calculated value to baseline the cut spikes, which will facilitate visualisation and quality control.
+    `cutSpikes` takes the concatenated sweeps and cuts an interval of 10 ms around each detected peak for plotting and further analysis. It then calculates a baseline for each peak by averaging 3 ms before it, leaving out the first 1 ms right before the peak index as it will contain the spike itself. Finally, it subtracts the calculated value to baseline the cut spikes, which will facilitate visualisation and quality control.
     It returns three numpy arrays of the same length containing the cut spikes, the baseline before each peak, and the resulting baselined cut spikes. It also plots the cut and baselined spikes.
     
     :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
     :peaks: indices of detected spikes obtained from `findSpikes()`.
     """
     
-    # Cut 125 samples (5 ms) before and after each peak
-    cut_spikes = np.array([sweep_IB_concatenated[(peaks[p]-125) : (peaks[p]+125)] for p in range(len(peaks))])
+    # Cut 150 samples (6 ms) before and after each peak
+    cut_spikes = np.array([sweep_IB_concatenated[(peaks[p]-150) : (peaks[p]+150)] for p in range(len(peaks))])
 
     # Get baseline for each spike by averaging 1-3 ms before each peak
     cut_spikes_holding = np.array([np.mean(sweep_IB_concatenated[(peaks[p]-100) : (peaks[p]-25)]) for p in range(len(peaks))])
@@ -1105,7 +1105,7 @@ def getSpikeParameters(
     file_id = [file_name.split('.')[0]] # Get the file name without the extension
     cell_id = ['_'.join((file_id[0].split('_'))[0:5])] # Get cell id to print in plot
 
-    # Find the peak magnitude and where the peak is, defined by the cutSpikes() function (should be sample 125)
+    # Find the peak magnitude and where the peak is, defined by the cutSpikes() function (should be sample 150)
     spike_magnitude = min(average_spike)
     average_spike_peak_index = int(np.where(average_spike == min(average_spike))[0]) # needs to be an integer
     
@@ -1120,7 +1120,7 @@ def getSpikeParameters(
     baseline_average_spike_end_std = np.std(baseline_average_spike_end)
 
     # Define threshold for onset: we set a one-tailed threshold (the spike will always go negative) at the value that corresponds to the mean minus "x" times the std. "x" is defined by using the norm.ppf() function from scipy.stats, which takes a percentage and returns a standard deviation multiplier for what value that percentage occurs at.
-    onset_threshold_average_spike = baseline_average_spike_mean - (stats.norm.ppf(0.9999)*baseline_average_spike_std)
+    onset_threshold_average_spike = baseline_average_spike_mean - (stats.norm.ppf(0.999)*baseline_average_spike_std)
 
     # Calculate spike onset, starting at the index where the baseline epoch ends
     for i, s in enumerate(average_spike[(average_spike_peak_index-24):]): # i is the index, s is the value
@@ -1128,15 +1128,9 @@ def getSpikeParameters(
             average_spike_onset_index = i + (average_spike_peak_index-24)
             break # once you find the index, break the loop
 
-    # Calculate spike onset, starting at the index where the baseline epoch ends
-    for i, s in enumerate(average_spike[(average_spike_peak_index-25):average_spike_peak_index]): # i is the index, s is the value
-        if s < onset_threshold_average_spike:
-            average_spike_onset_index = i + (average_spike_peak_index-25)
-            break # once you find the index, break the loop
-
     # Define threshold for end: we set a two-tailed threshold (we cannot know from which side the spike will return to baseline, as this will depend on any currents present after the action potential ends) at the value that corresponds to the mean minus "x" times the std. "x" is defined by using the norm.ppf() function from scipy.stats, which takes a percentage and returns a standard deviation multiplier for what value that percentage occurs at.
-    end_min_threshold_average_spike = baseline_average_spike_end_mean - (stats.norm.ppf(0.99995)*baseline_average_spike_end_std)
-    end_max_threshold_average_spike = baseline_average_spike_end_mean + (stats.norm.ppf(0.99995)*baseline_average_spike_end_std)
+    end_min_threshold_average_spike = baseline_average_spike_end_mean - (stats.norm.ppf(0.9995)*baseline_average_spike_end_std)
+    end_max_threshold_average_spike = baseline_average_spike_end_mean + (stats.norm.ppf(0.9995)*baseline_average_spike_end_std)
 
     # Calculate the spike end, starting at the index where the baseline epoch ends: one way to do this is to start from the back of the average spike trace and find the point after which n consecutive samples fall outside the baseline distribution:
     for i, s in enumerate(average_spike[::-1][len(baseline_average_spike_end):]): # i is the index, s is the value
@@ -1157,7 +1151,7 @@ def getSpikeParameters(
     plt.axhline(y = end_min_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at negative threshold for end
     plt.axhline(y = end_max_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at positive threshold for end
     plt.suptitle('Averaged spike with onset and end', fontsize = 14)
-    plt.xlim([((len(average_spike)/2)-65), ((len(average_spike)/2)+75)])
+    plt.xlim([((len(average_spike)/2)-50), ((len(average_spike)/2)+75)])
     fig.canvas.manager.window.move(0, 0)
     plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
 
