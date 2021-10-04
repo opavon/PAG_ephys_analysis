@@ -1091,7 +1091,7 @@ def getSpikeParameters(
     ):
     """
     `getSpikeParameters` computes key parameters that can be used to characterise the average spike shape.
-    It returns a dataframe with the spike onset, end, and magnitude, as well as the total duration of the spike and the time from onset to peak.
+    It returns a dataframe with the spike onset, end, and magnitude, as well as the total duration of the spike and the time from onset to peak. It also returns the average and standard deviation of the start and end baselines used to calculate the thresholds, which can be used to detect any differences in the baseline before and after the average spike.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
     :cut_spikes_baselined_clean: array containing the detected spikes after baselining, quality control, and removing the spikes incorrectly baselined.
@@ -1109,13 +1109,24 @@ def getSpikeParameters(
     spike_magnitude = min(average_spike)
     average_spike_peak_index = int(np.where(average_spike == min(average_spike))[0]) # needs to be an integer
     
-    # Compute the mean and std of the 3ms period used to baseline the cut spikes
+    # Compute the mean and std of the 3ms period of the average spike equivalent to the one used to baseline the cut spikes. This will be used to detect the onset of the spike.
     baseline_average_spike = average_spike[(average_spike_peak_index-100):(average_spike_peak_index-25)]
     baseline_average_spike_mean = np.mean(baseline_average_spike)
     baseline_average_spike_std = np.std(baseline_average_spike)
 
+    # Compute the mean and std of the last 3ms period from the average spike trace. This will be used to detect the end of the spike.
+    baseline_average_spike_end = average_spike[(-76):(-1)]
+    baseline_average_spike_end_mean = np.mean(baseline_average_spike_end)
+    baseline_average_spike_end_std = np.std(baseline_average_spike_end)
+
     # Define threshold for onset: we set a one-tailed threshold (the spike will always go negative) at the value that corresponds to the mean minus "x" times the std. "x" is defined by using the norm.ppf() function from scipy.stats, which takes a percentage and returns a standard deviation multiplier for what value that percentage occurs at.
-    onset_threshold_average_spike = baseline_average_spike_mean - (stats.norm.ppf(0.9973)*baseline_average_spike_std)
+    onset_threshold_average_spike = baseline_average_spike_mean - (stats.norm.ppf(0.9999)*baseline_average_spike_std)
+
+    # Calculate spike onset, starting at the index where the baseline epoch ends
+    for i, s in enumerate(average_spike[(average_spike_peak_index-24):]): # i is the index, s is the value
+        if (s < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+1] < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+2] < onset_threshold_average_spike):
+            average_spike_onset_index = i + (average_spike_peak_index-24)
+            break # once you find the index, break the loop
 
     # Calculate spike onset, starting at the index where the baseline epoch ends
     for i, s in enumerate(average_spike[(average_spike_peak_index-25):average_spike_peak_index]): # i is the index, s is the value
@@ -1124,20 +1135,15 @@ def getSpikeParameters(
             break # once you find the index, break the loop
 
     # Define threshold for end: we set a two-tailed threshold (we cannot know from which side the spike will return to baseline, as this will depend on any currents present after the action potential ends) at the value that corresponds to the mean minus "x" times the std. "x" is defined by using the norm.ppf() function from scipy.stats, which takes a percentage and returns a standard deviation multiplier for what value that percentage occurs at.
-    end_min_threshold_average_spike = baseline_average_spike_mean - (stats.norm.ppf(0.99865)*baseline_average_spike_std)
-    end_max_threshold_average_spike = baseline_average_spike_mean + (stats.norm.ppf(0.99865)*baseline_average_spike_std)
+    end_min_threshold_average_spike = baseline_average_spike_end_mean - (stats.norm.ppf(0.99995)*baseline_average_spike_end_std)
+    end_max_threshold_average_spike = baseline_average_spike_end_mean + (stats.norm.ppf(0.99995)*baseline_average_spike_end_std)
 
-    # Calculate the spike end: one way to do this is to compare the values after the peak and find the point where n consecutive samples fall back within the baseline distribution.
-    for i, s in enumerate(average_spike[average_spike_peak_index:]): # i is the index, s is the value
-        if (end_min_threshold_average_spike < s < end_max_threshold_average_spike) and (end_min_threshold_average_spike < average_spike[average_spike_peak_index:][i+1] < end_max_threshold_average_spike) and (end_min_threshold_average_spike < average_spike[average_spike_peak_index:][i+2] < end_max_threshold_average_spike) and (end_min_threshold_average_spike < average_spike[average_spike_peak_index:][i+3] < end_max_threshold_average_spike) and (end_min_threshold_average_spike < average_spike[average_spike_peak_index:][i+4] < end_max_threshold_average_spike) and (end_min_threshold_average_spike < average_spike[average_spike_peak_index:][i+5] < end_max_threshold_average_spike):
-            average_spike_end_index = i + average_spike_peak_index
-            break
-
-    # Another method to calculate the spike end is to start from the back of the average spike trace and find the point after which n consecutive samples fall outside the baseline distribution:
-    # for i, s in enumerate(average_spike[::-1]): # i is the index, s is the value
-    #     if (s < end_min_threshold_average_spike or s > end_max_threshold_average_spike) and (average_spike[::-1][i+1] < end_min_threshold_average_spike or average_spike[::-1][i+1] > end_max_threshold_average_spike) and (average_spike[::-1][i+2] < end_min_threshold_average_spike or average_spike[::-1][i+2] > end_max_threshold_average_spike):
-    #         average_spike_end_index = len(average_spike) - i
-    #         break
+    # Calculate the spike end, starting at the index where the baseline epoch ends: one way to do this is to start from the back of the average spike trace and find the point after which n consecutive samples fall outside the baseline distribution:
+    for i, s in enumerate(average_spike[::-1][len(baseline_average_spike_end):]): # i is the index, s is the value
+            # Take the index where the 
+            if (s < end_min_threshold_average_spike or s > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+1] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+1] > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+2] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+2] > end_max_threshold_average_spike):
+                average_spike_end_index = (len(average_spike)-1) - (i+len(baseline_average_spike_end))
+                break
 
     # Plot the average spike with its onset and end
     get_ipython().run_line_magic('matplotlib', 'qt')    
@@ -1148,10 +1154,10 @@ def getSpikeParameters(
     plt.plot(average_spike_end_index, average_spike[average_spike_end_index], "oy") # spike end
     plt.ylabel('current [pA]', fontsize = 12)
     plt.axhline(y = onset_threshold_average_spike, c = 'c', ls = '--') # horizontal dashed line at threshold for onset
-    plt.axhline(y = end_min_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at negative threshold for onset
-    plt.axhline(y = end_max_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at positive threshold for onset
+    plt.axhline(y = end_min_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at negative threshold for end
+    plt.axhline(y = end_max_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at positive threshold for end
     plt.suptitle('Averaged spike with onset and end', fontsize = 14)
-    #plt.xlim([((len(average_spike)/2)-45), ((len(average_spike)/2)+55)])
+    plt.xlim([((len(average_spike)/2)-65), ((len(average_spike)/2)+75)])
     fig.canvas.manager.window.move(0, 0)
     plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
 
@@ -1165,13 +1171,14 @@ def getSpikeParameters(
     happy_onset = input("Are you happy with the calculated onset and end? y/n")
 
     if happy_onset == 'y':
-        parameters_avg_spike = pd.DataFrame([[spike_onset, spike_end, spike_length, spike_onset_to_peak, spike_magnitude]], columns = ['spike_onset_sample', 'spike_end_sample', 'spike_length_ms', 'spike_onset_to_peak_ms', 'spike_magnitude_pA'], index = file_id)
+        parameters_avg_spike = pd.DataFrame([[spike_onset, spike_end, spike_length, spike_onset_to_peak, spike_magnitude, baseline_average_spike_mean, baseline_average_spike_std, baseline_average_spike_end_mean, baseline_average_spike_end_std]], columns = ['spike_onset_sample', 'spike_end_sample', 'spike_length_ms', 'spike_onset_to_peak_ms', 'spike_magnitude_pA', 'baseline_start_mean', 'baselin_start_std', 'baseline_end_mean', 'baseline_end_std'], index = file_id)
         print('spike parameters calculated')
         print(f'Spike onset at {spike_onset}')
         print(f'Spike end at {spike_end}')
         print(f'Spike length of {spike_length} ms')
         print(f'Spike onset to peak of {spike_onset_to_peak} ms')
         print(f'Spike magnitude of {round(spike_magnitude, 2)} pA')
+        print(f'Baseline difference between end and start is {baseline_average_spike_end_mean - baseline_average_spike_mean} pA')
     else:
         print('Try running getSpikeParameters() again')
         plt.close()
@@ -1273,36 +1280,47 @@ def getFiringRate(
         window_firing_rate.append(firing_rate_tmp)
 
     spikes_by_window_dataframe = pd.DataFrame([spikes_by_window, n_spikes_window, window_length, window_firing_rate], index = ['spikes_by_window', 'n_spikes_window', 'window_length_s', 'window_firing_rate_Hz'], columns = range(n_bins))
-
+    
     # Visualise results
     # Generate figure layout
     get_ipython().run_line_magic('matplotlib', 'qt')
-    fig, axs = plt.subplots (2, 2, tight_layout = True, figsize = (7, 5), dpi = 100)
+    fig = plt.figure(tight_layout = True, figsize = (7, 10), dpi = 100)
+    axs = fig.subplot_mosaic(
+        """
+        BB
+        CC
+        DD
+        """
+    )
 
-    # Plot firing rate by sweep throughout the recording.
-    axs[0,0].plot(spikes_by_sweep_keys, sweep_firing_rate, 'k')
-    axs[0,0].set_title('Firing rate across sweeps', fontsize = 12)
-    axs[0,0].set_xlabel('sweep number', fontsize = 10)
-    axs[0,0].set_ylabel('Firing Rate [Hz]', fontsize = 10)
-    axs[0,0].set_ylim(0, round(firing_frequency*2))
+    # Print cell ID and average Firing rate as a title
+    fig.suptitle(f'Neuron with ID: {cell_id[0]}\n\nFiring rate of {round(firing_frequency, 2)} Hz\n', fontsize = 14)
+    # Alternatively, you could have an empty plot as below
+    # Plot firing rate for the recorded neuron.
+    # axs['A'].axis('off')
+    # axs['A'].text(0.5, 0.5, s = f'Neuron with ID\n{cell_id[0]}\n\nFiring rate of {round(firing_frequency, 2)} Hz', ha = 'center', va = 'center', wrap = True, in_layout = True)
+
+    # Plot firing rate by sweep throughout the recording
+    axs['B'].plot(spikes_by_sweep_keys, sweep_firing_rate, 'k')
+    axs['B'].set_title('Firing rate across sweeps', fontsize = 12)
+    axs['B'].set_xlabel('sweep number', fontsize = 10)
+    axs['B'].set_ylabel('Firing Rate [Hz]', fontsize = 10)
+    axs['B'].set_ylim(-1, round(1+(max(sweep_firing_rate))))
+
+    # Plot firing rate by bin throughout the recording
+    axs['C'].plot(window_firing_rate, 'k')
+    axs['C'].set_title(f'Firing rate across {round(time_window_s, 2)} s bins', fontsize = 12)
+    axs['C'].set_xlabel('time bin #', fontsize = 10)
+    axs['C'].set_ylabel('Firing Rate [Hz]', fontsize = 10)
+    axs['C'].set_ylim(-1, round(1+(max(window_firing_rate))))
 
     # Check whether the sweep firing rate correlates with seal resistance
-    axs[0,1].scatter(Rseal_dataframe.loc['seal_resistance_MOhm'], sweep_firing_rate)
-    axs[0,1].set_title('Sweep firing rate vs Seal Resistance', fontsize = 12)
-    axs[0,1].set_xlabel('Seal Resistance [MOhm]', fontsize = 10)
-    axs[0,1].set_ylabel('Firing Rate [Hz]', fontsize = 10)
-    axs[0,1].set_ylim(0, round(firing_frequency*2))
-
-    # Plot firing rate by bin throughout the recording.
-    axs[1,0].plot(window_firing_rate, 'k')
-    axs[1,0].set_title(f'Firing rate across {round(time_window_s, 2)} s bins', fontsize = 12)
-    axs[1,0].set_xlabel('time bin #', fontsize = 10)
-    axs[1,0].set_ylabel('Firing Rate [Hz]', fontsize = 10)
-    axs[1,0].set_ylim(0, round(firing_frequency*2))
-
-    # Plot firing rate for the recorded neuron.
-    axs[1,1].axis('off')
-    axs[1,1].text(0.5, 0.5, s = f'Neuron with ID\n{cell_id[0]}\n\nFiring rate of {round(firing_frequency, 2)} Hz', ha = 'center', va = 'center', wrap = True, in_layout = True)
+    axs['D'].scatter(Rseal_dataframe.loc['seal_resistance_MOhm'], sweep_firing_rate, label = f'slope = {np.round(stats.linregress(sweep_firing_rate, Rseal_dataframe.loc["seal_resistance_MOhm"])[0],5)}\npvalue = {np.round(stats.linregress(sweep_firing_rate, Rseal_dataframe.loc["seal_resistance_MOhm"])[3],2)}')
+    axs['D'].set_title('Sweep firing rate vs Seal Resistance', fontsize = 12)
+    axs['D'].set_xlabel('Seal Resistance [MOhm]', fontsize = 10)
+    axs['D'].set_ylabel('Firing Rate [Hz]', fontsize = 10)
+    axs['D'].legend()
+    axs['D'].set_ylim(-1, round(1+(max(sweep_firing_rate))))
 
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
     plt.show()
@@ -1364,37 +1382,41 @@ def getInterspikeInterval(
     axs['A'].hist(interspike_interval, bins = 50, density = False, histtype = 'bar', log = False, color = 'k')
     axs['A'].set_title('A) ISI of detected spikes', fontsize = 12)
     axs['A'].set_xlabel('Interspike Interval [ms]', fontsize = 10)
-    axs['A'].set_xlim([0, None])
+    axs['A'].set_xlim([-1, None])
 
-    # Plot ISI vs Holding (mean)
+    # Plot ISI vs Holding (avg)
     axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Slope = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[3],2)}')
     # axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_avg)[0,1], 2)}')
     axs['B'].set_title('B) ISI vs Holding (avg)', fontsize = 12), axs['B'].legend()
     axs['B'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['B'].set_ylabel('Holding current [pA]', fontsize = 10)
 
     # Plot ISI vs Holding (std)
-    axs['C'].scatter(interspike_interval, holding_isi_std, label = f'Slope = {np.round(stats.linregress(interspike_interval, holding_isi_std)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_std)[3],2)}')
+    axs['C'].scatter(interspike_interval, holding_isi_std, label = f'slope = {np.round(stats.linregress(interspike_interval, holding_isi_std)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_std)[3],2)}')
     # axs['C'].scatter(interspike_interval, holding_isi_std, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_std)[0,1], 2)}')
     axs['C'].set_title('C) ISI vs Holding (std)', fontsize = 12), axs['C'].legend()
     axs['C'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['C'].set_ylabel('Holding current [std]', fontsize = 10)
+    axs['C'].set_ylim(-1, None)
 
-    test_holding_avg = np.array([isi_hold_avg for i, isi_hold_avg in enumerate(holding_isi_avg) if (-50 < holding_isi_avg[i] < 50)])
-    test_isi_avg = np.array([isi for i, isi in enumerate(interspike_interval) if (-50 < holding_isi_avg[i] < 50)])
+    # Keep only the avg values between a certain interval (to ensure any spikes occurring during the test pulse are not driving any correlation here)
+    subset_holding_avg = np.array([isi_hold_avg for i, isi_hold_avg in enumerate(holding_isi_avg) if (-50 < holding_isi_avg[i] < 50)])
+    subset_isi_avg = np.array([isi for i, isi in enumerate(interspike_interval) if (-50 < holding_isi_avg[i] < 50)])
 
     # Plot ISI vs Holding (avg)
-    axs['D'].scatter(test_isi_avg, test_holding_avg, label = f'Slope = {np.round(stats.linregress(test_isi_avg, test_holding_avg)[0],5)}\npvalue = {np.round(stats.linregress(test_isi_avg, test_holding_avg)[3],2)}')
-    # axs['D'].scatter(test_isi_avg, test_holding_avg, label = f'Correlation = {np.round(np.corrcoef(test_isi_avg, test_holding_avg)[0,1], 2)}')
+    axs['D'].scatter(subset_isi_avg, subset_holding_avg, label = f'slope = {np.round(stats.linregress(subset_isi_avg, subset_holding_avg)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_avg, subset_holding_avg)[3],2)}')
+    # axs['D'].scatter(subset_isi_avg, subset_holding_avg, label = f'Correlation = {np.round(np.corrcoef(subset_isi_avg, subset_holding_avg)[0,1], 2)}')
     axs['D'].set_title('D) ISI vs Holding (±50pA injected)', fontsize = 12), axs['D'].legend()
     axs['D'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['D'].set_ylabel('Holding current [pA]', fontsize = 10)
 
-    test_holding_std = np.array([isi_hold_std for i, isi_hold_std in enumerate(holding_isi_std) if (holding_isi_std[i] < 20)])
-    test_isi_std = np.array([isi for i, isi in enumerate(interspike_interval) if (holding_isi_std[i] < 20)])
+    # Keep only the std values below a certain threshold
+    subset_holding_std = np.array([isi_hold_std for i, isi_hold_std in enumerate(holding_isi_std) if (holding_isi_std[i] < 3)])
+    subset_isi_std = np.array([isi for i, isi in enumerate(interspike_interval) if (holding_isi_std[i] < 3)])
 
     # Plot ISI vs Holding (std)
-    axs['E'].scatter(test_isi_std, test_holding_std, label = f'Slope = {np.round(stats.linregress(test_isi_std, test_holding_std)[0],5)}\npvalue = {np.round(stats.linregress(test_isi_std, test_holding_std)[3],2)}')
-    # axs['E'].scatter(test_isi_std, test_holding_std, label = f'Correlation = {np.round(np.corrcoef(test_isi_std, test_holding_std)[0,1], 2)}')
-    axs['E'].set_title('E) ISI vs Holding (<20 std in holding_avg)', fontsize = 12), axs['E'].legend()
+    axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'slope = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[3],2)}')
+    # axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'Correlation = {np.round(np.corrcoef(subset_isi_std, subset_holding_std)[0,1], 2)}')
+    axs['E'].set_title('E) ISI vs Holding (<3 std in holding_avg)', fontsize = 12), axs['E'].legend()
     axs['E'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['E'].set_ylabel('Holding current [std]', fontsize = 10)
+    axs['E'].set_ylim(0, 4)
     
     fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
     plt.show()
