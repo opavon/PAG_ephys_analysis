@@ -918,13 +918,24 @@ def spikesQC(
     # Remove duplicates from noise_indices
     noise_indices_to_delete = np.unique(noise_indices)
 
-    # Remove the indices corresponding to noise 
-    peaks_QC = np.delete(peaks, noise_indices_to_delete, 0)
-    cut_spikes_QC = np.delete(cut_spikes, noise_indices_to_delete, 0)
-    cut_spikes_holding_QC = np.delete(cut_spikes_holding, noise_indices_to_delete, 0)
-    cut_spikes_baselined_QC = np.delete(cut_spikes_baselined, noise_indices_to_delete, 0)
-    print(f"The number of detected spikes was: {np.size(cut_spikes_baselined, 0)}")
-    print(f"The number of QCed spikes is: {np.size(cut_spikes_baselined_QC, 0)}")
+    # Check if there are any spikes to remove:
+    if not np.any(np.size(noise_indices_to_delete, 0)):
+        print(f"There are no spikes to remove")
+        # Populate the QCed variables
+        peaks_QC = peaks
+        cut_spikes_QC = cut_spikes
+        cut_spikes_holding_QC = cut_spikes_holding
+        cut_spikes_baselined_QC = cut_spikes_baselined
+        print(f"The number of detected spikes was: {np.size(cut_spikes_baselined, 0)}")
+        print(f"The number of QCed spikes is: {np.size(cut_spikes_baselined_QC, 0)}")
+    else:    
+        # Remove the indices corresponding to noise 
+        peaks_QC = np.delete(peaks, noise_indices_to_delete, 0)
+        cut_spikes_QC = np.delete(cut_spikes, noise_indices_to_delete, 0)
+        cut_spikes_holding_QC = np.delete(cut_spikes_holding, noise_indices_to_delete, 0)
+        cut_spikes_baselined_QC = np.delete(cut_spikes_baselined, noise_indices_to_delete, 0)
+        print(f"The number of detected spikes was: {np.size(cut_spikes_baselined, 0)}")
+        print(f"The number of QCed spikes is: {np.size(cut_spikes_baselined_QC, 0)}")
 
     # Check if there are any spikes left:
     if not np.any(np.size(peaks_QC, 0)):
@@ -980,7 +991,7 @@ def cleanSpikes(
     if not np.any(np.size(cut_spikes_baselined_QC, 0)):
         print(f"There are no detected spikes left that meet the quality criteria")
         cut_spikes_baselined_clean = cut_spikes_baselined_QC
-        parameters_clean = pd.DataFrame([['NA']], columns = ['peak_min_pA'], index = file_id)
+        parameters_clean = pd.DataFrame([['NA', 'NA']], columns = ['peak_min_pA', 'peak_max_pA'], index = file_id)
         return cut_spikes_baselined_clean, parameters_clean # ndarray, pandas dataframe
     else:
         # Stack the nested array to access same position in all spikes
