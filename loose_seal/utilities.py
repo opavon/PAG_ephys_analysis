@@ -661,15 +661,15 @@ def denoiseSpikes(
     noise_indices = []
     if 'wh' in filter_by:
         noise_indices_wh = np.where((peaks_properties['width_heights'] < QC_wh_min) | (peaks_properties['width_heights'] > QC_wh_max))
-        if np.any(noise_indices_wh):
+        if np.any(np.size(noise_indices_wh, 0)):
             [noise_indices.append(noise_wh) for noise_wh in noise_indices_wh[0]]
     if 'pw' in filter_by:
         noise_indices_pw = np.where((peaks_properties['widths'] < QC_pw_min) | (peaks_properties['widths'] > QC_pw_max))
-        if np.any(noise_indices_pw):
+        if np.any(np.size(noise_indices_pw, 0)):
             [noise_indices.append(noise_pw) for noise_pw in noise_indices_pw[0]]
     if 'ph' in filter_by:
         noise_indices_ph = np.where((peaks_properties['peak_heights'] < QC_ph_min) | (peaks_properties['peak_heights'] > QC_ph_max))
-        if np.any(noise_indices_ph):
+        if np.any(np.size(noise_indices_ph, 0)):
             [noise_indices.append(noise_ph) for noise_ph in noise_indices_ph[0]]
 
     # Remove the indices corresponding to noise 
@@ -888,31 +888,31 @@ def spikesQC(
     noise_indices = []
     if 'p' in filter_by:
         noise_indices_p = np.where((peaks_properties['prominences'] < QC_p_min) | (peaks_properties['prominences'] > QC_p_max))
-        if np.any(noise_indices_p):
+        if np.any(np.size(noise_indices_p, 0)):
             [noise_indices.append(noise_p) for noise_p in noise_indices_p[0]]
     if 'wh' in filter_by:
         noise_indices_wh = np.where((peaks_properties['width_heights'] < QC_wh_min) | (peaks_properties['width_heights'] > QC_wh_max))
-        if np.any(noise_indices_wh):
+        if np.any(np.size(noise_indices_wh, 0)):
             [noise_indices.append(noise_wh) for noise_wh in noise_indices_wh[0]]
     if 'pw' in filter_by:
         noise_indices_pw = np.where((peaks_properties['widths'] < QC_pw_min) | (peaks_properties['widths'] > QC_pw_max))
-        if np.any(noise_indices_pw):
+        if np.any(np.size(noise_indices_pw, 0)):
             [noise_indices.append(noise_pw) for noise_pw in noise_indices_pw[0]]
     if 'ph' in filter_by:
         noise_indices_ph = np.where((peaks_properties['peak_heights'] < QC_ph_min) | (peaks_properties['peak_heights'] > QC_ph_max))
-        if np.any(noise_indices_ph):
+        if np.any(np.size(noise_indices_ph, 0)):
             [noise_indices.append(noise_ph) for noise_ph in noise_indices_ph[0]]
     if 'pb' in filter_by:
         noise_indices_pb = np.where((cut_spikes_stack[:,cut_spikes_peak_index] < QC_pb_min) | (cut_spikes_stack[:,cut_spikes_peak_index] > QC_pb_max))
-        if np.any(noise_indices_pb):
+        if np.any(np.size(noise_indices_pb, 0)):
             [noise_indices.append(noise_pb) for noise_pb in noise_indices_pb[0]]
     if 'lb' in filter_by:
         noise_indices_lb = np.where(((peaks - peaks_properties['left_bases']) < QC_lb_min) | ((peaks - peaks_properties['left_bases']) > QC_lb_max))
-        if np.any(noise_indices_lb):
+        if np.any(np.size(noise_indices_lb, 0)):
             [noise_indices.append(noise_lb) for noise_lb in noise_indices_lb[0]]
     if 'rb' in filter_by:
         noise_indices_rb = np.where(((peaks_properties['right_bases'] - peaks) < QC_rb_min) | ((peaks_properties['right_bases'] - peaks) > QC_rb_max))
-        if np.any(noise_indices_rb):
+        if np.any(np.size(noise_indices_rb, 0)):
             [noise_indices.append(noise_rb) for noise_rb in noise_indices_rb[0]]
 
     # Remove duplicates from noise_indices
@@ -923,23 +923,27 @@ def spikesQC(
     cut_spikes_QC = np.delete(cut_spikes, noise_indices_to_delete, 0)
     cut_spikes_holding_QC = np.delete(cut_spikes_holding, noise_indices_to_delete, 0)
     cut_spikes_baselined_QC = np.delete(cut_spikes_baselined, noise_indices_to_delete, 0)
-    print(f"The number of detected spikes was: {len(cut_spikes_baselined)}")
-    print(f"The number of QCed spikes is: {len(cut_spikes_baselined_QC)}")
+    print(f"The number of detected spikes was: {np.size(cut_spikes_baselined, 0)}")
+    print(f"The number of QCed spikes is: {np.size(cut_spikes_baselined_QC, 0)}")
 
-    # Plot cut, baselined, and QCed spikes to check whether denoising is complete.
-    import matplotlib.cm as cm
-    denoised_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined_QC)))
-    get_ipython().run_line_magic('matplotlib', 'qt') # avoid 'tk' here
-    fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
-    for s in range(len(cut_spikes_baselined_QC)):
-        plt.plot(cut_spikes_baselined_QC[s], color = denoised_spikes_colors[s])
-    plt.xlim([((len(cut_spikes_baselined_QC[0])/2)-45), ((len(cut_spikes_baselined_QC[0])/2)+55)])
-    plt.title('Cut, baselined, and QCed spikes', fontsize = 14)
-    plt.xlabel('samples', fontsize = 12)
-    plt.ylabel('current [pA]', fontsize = 12)
-    fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
-    # plt.pause(0.5)
+    # Check if there are any spikes left:
+    if not np.any(np.size(peaks_QC, 0)):
+        print(f"There are no detected spikes left that meet the quality criteria")
+    else:
+        # Plot cut, baselined, and QCed spikes to check whether denoising is complete.
+        import matplotlib.cm as cm
+        denoised_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined_QC)))
+        get_ipython().run_line_magic('matplotlib', 'qt') # avoid 'tk' here
+        fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
+        for s in range(len(cut_spikes_baselined_QC)):
+            plt.plot(cut_spikes_baselined_QC[s], color = denoised_spikes_colors[s])
+        plt.xlim([((len(cut_spikes_baselined_QC[0])/2)-45), ((len(cut_spikes_baselined_QC[0])/2)+55)])
+        plt.title('Cut, baselined, and QCed spikes', fontsize = 14)
+        plt.xlabel('samples', fontsize = 12)
+        plt.ylabel('current [pA]', fontsize = 12)
+        fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
+        plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
+        # plt.pause(0.5)
     
     # Check whether QC is complete
     happy_QC = input("Are you happy with the results from this quality control? y/n")
@@ -947,7 +951,7 @@ def spikesQC(
     if happy_QC == 'y':
         parameters_QC = pd.DataFrame([[QC_p_min, QC_p_max, QC_wh_min, QC_wh_max, QC_pw_min, QC_pw_max, QC_ph_min, QC_ph_max, QC_pb_min, QC_pb_max, QC_lb_min, QC_lb_max, QC_rb_min, QC_rb_max, filter_by]], columns = ['QC_p_min', 'QC_p_max', 'QC_wh_min', 'QC_wh_max', 'QC_pw_min', 'QC_pw_max', 'QC_ph_min', 'QC_ph_max', 'QC_pb_min', 'QC_pb_max', 'QC_lb_min', 'QC_lb_max', 'QC_rb_min', 'QC_rb_max', 'filter_by'], index = file_id)
         print('QC completed')
-        print(f"The number of spikes removed during QC was: {len(noise_indices_to_delete)}")
+        print(f"The number of spikes removed during QC was: {np.size(noise_indices_to_delete, 0)}")
     else:
         print('Try running spikesQC() again with different parameters')
         plt.close()
@@ -955,7 +959,7 @@ def spikesQC(
     
     plt.close()
 
-    return peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC # ndarray, ndarray, ndarray, ndarray,pandas dataframe
+    return peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC # ndarray, ndarray, ndarray, ndarray, pandas dataframe
 
 def cleanSpikes(
     file_name,
@@ -969,89 +973,100 @@ def cleanSpikes(
     :cut_spikes_baselined_QC: array containing the detected spikes after baselining and removing noise.
     """
     
-    # Stack the nested array to access same position in all spikes
-    cut_spikes_stack = np.vstack(cut_spikes_baselined_QC)
-    cut_spikes_peak_index = int(len(cut_spikes_baselined_QC[0])/2) # get the index where the peak is
-
     file_id = [file_name.split('.')[0]] # Get the file name without the extension
     cell_id = ['_'.join((file_id[0].split('_'))[0:5])] # Get cell id to print in plot
 
-    # Get color palette and generate one color for each spike
-    import matplotlib.cm as cm
-    denoised_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined_QC)))
-
-    # Generate figure layout
-    get_ipython().run_line_magic('matplotlib', 'qt')
-    fig, axs = plt.subplots (2, 2, tight_layout = True, figsize = (7, 5), dpi = 100) # Set figure size
-
-    # Plot cut, baselined, and QCed spikes
-    for s in range(len(cut_spikes_baselined_QC)):
-        axs[0,0].plot(cut_spikes_baselined_QC[s], color = denoised_spikes_colors[s])
-    axs[0,0].set_title('Cut, baselined, and QCed spikes', fontsize = 12)
-    axs[0,0].set_xlim([((len(cut_spikes_baselined_QC[0])/2)-45), ((len(cut_spikes_baselined_QC[0])/2)+55)])
-    axs[0,0].set_xlabel('samples', fontsize = 12)
-    axs[0,0].set_ylabel('current [pA]', fontsize = 12)
-
-    # Plot Histogram of the peak values for each baselined spike
-    axs[0,1].hist(cut_spikes_stack[:,cut_spikes_peak_index], bins = 200, density = False, histtype = 'bar', log = True, color = 'k')
-    axs[0,1].set_title('Histogram of peak values for baselined spikes', fontsize = 12)
-    axs[0,1].set_xlabel('peak value [pA]', fontsize = 12)
-
-    # Add title
-    plt.suptitle(f'Baselined spikes from {cell_id[0]}', fontsize = 14)
-
-    # Move figure to top left corner
-    fig.canvas.manager.window.move(0, 0)
-    plt.pause(0.5)
-
-    # Based on the histogram above, select the peak value threshold that will identify spikes that were not properly baselined
-    peak_min = int(input("Enter the peak value above which to exclude incorrectly baselined spikes"))
-
-    # Select the spikes that couldn't be properly baselined
-    spikes_indices_to_remove = np.where(cut_spikes_stack[:,cut_spikes_peak_index] > peak_min)
-    # Remove duplicates from spikes_indices_to_remove
-    spikes_to_remove = np.unique(spikes_indices_to_remove)
-    # Remove spikes that couldn't be properly baselined
-    cut_spikes_baselined_clean = np.delete(cut_spikes_baselined_QC, spikes_to_remove, 0)
-    print(f"The number of QCed spikes was: {len(cut_spikes_baselined_QC)}")
-    print(f"The number of clean spikes is: {len(cut_spikes_baselined_clean)}")
-
-    # Now show the results
-    clean_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined_clean)))
-
-    # Plot cut, baselined, QCed, and clean spikes
-    for s in range(len(cut_spikes_baselined_clean)):
-        axs[1,0].plot(cut_spikes_baselined_clean[s], color = clean_spikes_colors[s])
-    axs[1,0].set_title('Cut, baselined, QCed, and cleaned spikes', fontsize = 12)
-    axs[1,0].set_xlim([((len(cut_spikes_baselined_clean[0])/2)-45), ((len(cut_spikes_baselined_clean[0])/2)+55)])
-    axs[1,0].set_xlabel('samples', fontsize = 12)
-    axs[1,0].set_ylabel('current [pA]', fontsize = 12)
-
-    # Plot Histogram of the peak values for each baselined spike
-    n_1, bins_1, patches_1 = axs[1,1].hist(cut_spikes_stack[:,cut_spikes_peak_index], bins = 200, density = False, histtype = 'bar', log = True)
-    for i in range(len(patches_1)):
-        if (bins_1[i] > peak_min):
-                patches_1[i].set_facecolor('r')
-        else:
-            patches_1[i].set_facecolor('lightgray')
-    axs[1,1].set_title('Histogram of peak values for baselined spikes', fontsize = 12)
-    axs[1,1].set_xlabel('peak value [pA]', fontsize = 12)
-
-    plt.pause(0.5)
-
-    # Check whether clean up is complete
-    happy_clean = input("Are you happy with your choice of filter? y/n")
-
-    if happy_clean == 'y':
-        parameters_clean = pd.DataFrame([[peak_min]], columns = ['peak_min_pA'], index = file_id)
-        print('Clean up completed')
-        print(f"The number of spikes removed was: {len(spikes_to_remove)}")
+    # Check if there are any spikes left:
+    if not np.any(np.size(cut_spikes_baselined_QC, 0)):
+        print(f"There are no detected spikes left that meet the quality criteria")
+        cut_spikes_baselined_clean = cut_spikes_baselined_QC
+        parameters_clean = pd.DataFrame([['NA']], columns = ['peak_min_pA'], index = file_id)
+        return cut_spikes_baselined_clean, parameters_clean # ndarray, pandas dataframe
     else:
-        print('Try running cleanSpikes() again')
+        # Stack the nested array to access same position in all spikes
+        cut_spikes_stack = np.vstack(cut_spikes_baselined_QC)
+        cut_spikes_peak_index = int(len(cut_spikes_baselined_QC[0])/2) # get the index where the peak is
+
+        # Get color palette and generate one color for each spike
+        import matplotlib.cm as cm
+        denoised_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined_QC)))
+
+        # Generate figure layout
+        get_ipython().run_line_magic('matplotlib', 'qt')
+        fig, axs = plt.subplots (2, 2, tight_layout = True, figsize = (7, 5), dpi = 100) # Set figure size
+
+        # Plot cut, baselined, and QCed spikes
+        for s in range(len(cut_spikes_baselined_QC)):
+            axs[0,0].plot(cut_spikes_baselined_QC[s], color = denoised_spikes_colors[s])
+        axs[0,0].set_title('Cut, baselined, and QCed spikes', fontsize = 12)
+        axs[0,0].set_xlim([((len(cut_spikes_baselined_QC[0])/2)-45), ((len(cut_spikes_baselined_QC[0])/2)+55)])
+        axs[0,0].set_xlabel('samples', fontsize = 12)
+        axs[0,0].set_ylabel('current [pA]', fontsize = 12)
+
+        # Plot Histogram of the peak values for each baselined spike
+        axs[0,1].hist(cut_spikes_stack[:,cut_spikes_peak_index], bins = 200, density = False, histtype = 'bar', log = True, color = 'k')
+        axs[0,1].set_title('Histogram of peak values for baselined spikes', fontsize = 12)
+        axs[0,1].set_xlabel('peak value [pA]', fontsize = 12)
+
+        # Add title
+        plt.suptitle(f'Baselined spikes from {cell_id[0]}', fontsize = 14)
+
+        # Move figure to top left corner
+        fig.canvas.manager.window.move(0, 0)
+        plt.pause(0.5)
+
+        # Based on the histogram above, select the peak value threshold that will identify spikes that were not properly baselined
+        peak_min = int(input("Enter the peak value above which to exclude incorrectly baselined spikes"))
+
+        # Select the spikes that couldn't be properly baselined
+        spikes_indices_to_remove = np.where(cut_spikes_stack[:,cut_spikes_peak_index] > peak_min)
+        # Remove duplicates from spikes_indices_to_remove
+        spikes_to_remove = np.unique(spikes_indices_to_remove)
+        # Remove spikes that couldn't be properly baselined
+        cut_spikes_baselined_clean = np.delete(cut_spikes_baselined_QC, spikes_to_remove, 0)
+        print(f"The number of QCed spikes was: {np.size(cut_spikes_baselined_QC, 0)}")
+        print(f"The number of clean spikes is: {np.size(cut_spikes_baselined_clean, 0)}")
+
+        # Check if there are any spikes left:
+        if not np.any(np.size(cut_spikes_baselined_clean, 0)):
+            print(f"There are no detected spikes left that meet the quality criteria")
+        else:
+            # Now show the results
+            clean_spikes_colors = cm.viridis(np.linspace(0, 1, len(cut_spikes_baselined_clean)))
+
+            # Plot cut, baselined, QCed, and clean spikes
+            for s in range(len(cut_spikes_baselined_clean)):
+                axs[1,0].plot(cut_spikes_baselined_clean[s], color = clean_spikes_colors[s])
+            axs[1,0].set_title('Cut, baselined, QCed, and cleaned spikes', fontsize = 12)
+            axs[1,0].set_xlim([((len(cut_spikes_baselined_clean[0])/2)-45), ((len(cut_spikes_baselined_clean[0])/2)+55)])
+            axs[1,0].set_xlabel('samples', fontsize = 12)
+            axs[1,0].set_ylabel('current [pA]', fontsize = 12)
+
+            # Plot Histogram of the peak values for each baselined spike
+            n_1, bins_1, patches_1 = axs[1,1].hist(cut_spikes_stack[:,cut_spikes_peak_index], bins = 200, density = False, histtype = 'bar', log = True)
+            for i in range(len(patches_1)):
+                if (bins_1[i] > peak_min):
+                        patches_1[i].set_facecolor('r')
+                else:
+                    patches_1[i].set_facecolor('lightgray')
+            axs[1,1].set_title('Histogram of peak values for baselined spikes', fontsize = 12)
+            axs[1,1].set_xlabel('peak value [pA]', fontsize = 12)
+
+            plt.pause(0.5)
+
+        # Check whether clean up is complete
+        happy_clean = input("Are you happy with your choice of filter? y/n")
+
+        if happy_clean == 'y':
+            parameters_clean = pd.DataFrame([[peak_min]], columns = ['peak_min_pA'], index = file_id)
+            print('Clean up completed')
+            print(f"The number of spikes removed was: {np.size(spikes_to_remove, 0)}")
+        else:
+            print('Try running cleanSpikes() again')
+            plt.close()
+            return None, None # return empty variables to prevent wrong results from being used
+            
         plt.close()
-        return None, None # return empty variables to prevent wrong results from being used
-        
-    plt.close()
 
     return cut_spikes_baselined_clean, parameters_clean # ndarray, pandas dataframe
 
@@ -1064,26 +1079,32 @@ def averageSpikes(
     
     :cut_spikes_baselined_clean: array containing the detected spikes after baselining, quality control, and removing the spikes incorrectly baselined.
     """
- 
-    # Compute average from all detected spikes after baseline, QC, denoising, and clean up
-    average_spike = np.array(np.mean(cut_spikes_baselined_clean, 0))
-    
-    # Plot the detected spikes and the computed average
-    get_ipython().run_line_magic('matplotlib', 'qt')
-    fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
-    for s in range(len(cut_spikes_baselined_clean)):
-        plt.plot(cut_spikes_baselined_clean[s], 'k')
-    plt.plot(average_spike, color = 'r')
-    plt.title('Cut spikes with average in red', fontsize = 14)
-    plt.ylabel('current [pA]', fontsize = 12)
-    plt.xlim([((len(cut_spikes_baselined_clean[0])/2)-45), ((len(cut_spikes_baselined_clean[0])/2)+55)])
-    fig.canvas.manager.window.move(0, 0)
-    plt.show()
-    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
+    # Check if there are any spikes left:
+    if not np.any(np.size(cut_spikes_baselined_clean, 0)):
+        average_spike = cut_spikes_baselined_clean
+        print("There are no spikes to average")
+    else:
+        # Compute average from all detected spikes after baseline, QC, denoising, and clean up
+        average_spike = np.array(np.mean(cut_spikes_baselined_clean, 0))
+        print("average spike calculated")
+
+        # Plot the detected spikes and the computed average
+        get_ipython().run_line_magic('matplotlib', 'qt')
+        fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
+        for s in range(len(cut_spikes_baselined_clean)):
+            plt.plot(cut_spikes_baselined_clean[s], 'k')
+        plt.plot(average_spike, color = 'r')
+        plt.title('Cut spikes with average in red', fontsize = 14)
+        plt.ylabel('current [pA]', fontsize = 12)
+        plt.xlim([((len(cut_spikes_baselined_clean[0])/2)-45), ((len(cut_spikes_baselined_clean[0])/2)+55)])
+        fig.canvas.manager.window.move(0, 0)
+        plt.show()
+        # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
+    
     return average_spike # ndarray
 
-def getSpikeParameters(
+def getSpikeParameters( 
     file_name,
     cut_spikes_baselined_clean,
     average_spike,
@@ -1105,80 +1126,85 @@ def getSpikeParameters(
     file_id = [file_name.split('.')[0]] # Get the file name without the extension
     cell_id = ['_'.join((file_id[0].split('_'))[0:5])] # Get cell id to print in plot
 
-    # Find the peak magnitude and where the peak is, defined by the cutSpikes() function (should be sample 150)
-    spike_magnitude = min(average_spike)
-    average_spike_peak_index = int(np.where(average_spike == min(average_spike))[0]) # needs to be an integer
-    
-    # Compute the mean and std of the 3ms period of the average spike equivalent to the one used to baseline the cut spikes. This will be used to detect the onset of the spike.
-    baseline_average_spike = average_spike[(average_spike_peak_index-100):(average_spike_peak_index-25)]
-    baseline_average_spike_mean = np.mean(baseline_average_spike)
-    baseline_average_spike_std = np.std(baseline_average_spike)
-
-    # Compute the mean and std of the last 3ms period from the average spike trace. This will be used to detect the end of the spike.
-    baseline_average_spike_end = average_spike[(-76):(-1)]
-    baseline_average_spike_end_mean = np.mean(baseline_average_spike_end)
-    baseline_average_spike_end_std = np.std(baseline_average_spike_end)
-
-    # Define threshold for onset: we set a one-tailed threshold (the spike will always go negative) at the value that corresponds to the mean minus "x" times the std. "x" is defined by using the norm.ppf() function from scipy.stats, which takes a percentage and returns a standard deviation multiplier for what value that percentage occurs at.
-    onset_threshold_average_spike = baseline_average_spike_mean - (stats.norm.ppf(0.999)*baseline_average_spike_std)
-
-    # Calculate spike onset, starting at the index where the baseline epoch ends
-    for i, s in enumerate(average_spike[(average_spike_peak_index-24):]): # i is the index, s is the value
-        if (s < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+1] < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+2] < onset_threshold_average_spike):
-            average_spike_onset_index = i + (average_spike_peak_index-24)
-            break # once you find the index, break the loop
-
-    # Define threshold for end: we set a two-tailed threshold (we cannot know from which side the spike will return to baseline, as this will depend on any currents present after the action potential ends) at the value that corresponds to the mean minus "x" times the std. "x" is defined by using the norm.ppf() function from scipy.stats, which takes a percentage and returns a standard deviation multiplier for what value that percentage occurs at.
-    end_min_threshold_average_spike = baseline_average_spike_end_mean - (stats.norm.ppf(0.9995)*baseline_average_spike_end_std)
-    end_max_threshold_average_spike = baseline_average_spike_end_mean + (stats.norm.ppf(0.9995)*baseline_average_spike_end_std)
-
-    # Calculate the spike end, starting at the index where the baseline epoch ends: one way to do this is to start from the back of the average spike trace and find the point after which n consecutive samples fall outside the baseline distribution:
-    for i, s in enumerate(average_spike[::-1][len(baseline_average_spike_end):]): # i is the index, s is the value
-            # Take the index where the 
-            if (s < end_min_threshold_average_spike or s > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+1] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+1] > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+2] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+2] > end_max_threshold_average_spike):
-                average_spike_end_index = (len(average_spike)-1) - (i+len(baseline_average_spike_end))
-                break
-
-    # Plot the average spike with its onset and end
-    get_ipython().run_line_magic('matplotlib', 'qt')    
-    fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
-    plt.plot(cut_spikes_baselined_clean.T, 'k') # cut spikes
-    plt.plot(average_spike, 'r') # average spike
-    plt.plot(average_spike_onset_index, average_spike[average_spike_onset_index], "oc") # spike onset
-    plt.plot(average_spike_end_index, average_spike[average_spike_end_index], "oy") # spike end
-    plt.ylabel('current [pA]', fontsize = 12)
-    plt.axhline(y = onset_threshold_average_spike, c = 'c', ls = '--') # horizontal dashed line at threshold for onset
-    plt.axhline(y = end_min_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at negative threshold for end
-    plt.axhline(y = end_max_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at positive threshold for end
-    plt.suptitle('Averaged spike with onset and end', fontsize = 14)
-    plt.xlim([((len(average_spike)/2)-50), ((len(average_spike)/2)+75)])
-    fig.canvas.manager.window.move(0, 0)
-    plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
-
-    # Extract onset and end, calculate length and onset to peak
-    spike_onset = average_spike_onset_index
-    spike_end = average_spike_end_index
-    spike_length = (spike_end - spike_onset) * dt
-    spike_onset_to_peak = (average_spike_peak_index-spike_onset) * dt
-
-    # Check whether spike analysis is complete
-    happy_onset = input("Are you happy with the calculated onset and end? y/n")
-
-    if happy_onset == 'y':
-        parameters_avg_spike = pd.DataFrame([[spike_onset, spike_end, spike_length, spike_onset_to_peak, spike_magnitude, baseline_average_spike_mean, baseline_average_spike_std, baseline_average_spike_end_mean, baseline_average_spike_end_std]], columns = ['spike_onset_sample', 'spike_end_sample', 'spike_length_ms', 'spike_onset_to_peak_ms', 'spike_magnitude_pA', 'baseline_start_mean', 'baseline_start_std', 'baseline_end_mean', 'baseline_end_std'], index = file_id)
-        print('spike parameters calculated')
-        print(f'Spike onset at {spike_onset}')
-        print(f'Spike end at {spike_end}')
-        print(f'Spike length of {spike_length} ms')
-        print(f'Spike onset to peak of {spike_onset_to_peak} ms')
-        print(f'Spike magnitude of {round(spike_magnitude, 2)} pA')
-        print(f'Baseline difference between end and start is {round((baseline_average_spike_end_mean - baseline_average_spike_mean), 2)} pA')
+    # Check if there are any spikes:
+    if not np.any(np.size(cut_spikes_baselined_clean, 0)):
+        parameters_avg_spike = pd.DataFrame([['NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA']], columns = ['spike_onset_sample', 'spike_end_sample', 'spike_length_ms', 'spike_onset_to_peak_ms', 'spike_magnitude_pA', 'baseline_start_mean', 'baseline_start_std', 'baseline_end_mean', 'baseline_end_std'], index = file_id)
+        print(f"There are no spikes to analyse")
     else:
-        print('Try running getSpikeParameters() again')
-        plt.close()
-        return None # return empty variables to prevent wrong results from being used
+        # Find the peak magnitude and where the peak is, defined by the cutSpikes() function (should be sample 150)
+        spike_magnitude = min(average_spike)
+        average_spike_peak_index = int(np.where(average_spike == min(average_spike))[0]) # needs to be an integer
+        
+        # Compute the mean and std of the 3ms period of the average spike equivalent to the one used to baseline the cut spikes. This will be used to detect the onset of the spike.
+        baseline_average_spike = average_spike[(average_spike_peak_index-100):(average_spike_peak_index-25)]
+        baseline_average_spike_mean = np.mean(baseline_average_spike)
+        baseline_average_spike_std = np.std(baseline_average_spike)
 
-    plt.close()
+        # Compute the mean and std of the last 3ms period from the average spike trace. This will be used to detect the end of the spike.
+        baseline_average_spike_end = average_spike[(-76):(-1)]
+        baseline_average_spike_end_mean = np.mean(baseline_average_spike_end)
+        baseline_average_spike_end_std = np.std(baseline_average_spike_end)
+
+        # Define threshold for onset: we set a one-tailed threshold (the spike will always go negative) at the value that corresponds to the mean minus "x" times the std. "x" is defined by using the norm.ppf() function from scipy.stats, which takes a percentage and returns a standard deviation multiplier for what value that percentage occurs at.
+        onset_threshold_average_spike = baseline_average_spike_mean - (stats.norm.ppf(0.999)*baseline_average_spike_std)
+
+        # Calculate spike onset, starting at the index where the baseline epoch ends
+        for i, s in enumerate(average_spike[(average_spike_peak_index-24):]): # i is the index, s is the value
+            if (s < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+1] < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+2] < onset_threshold_average_spike):
+                average_spike_onset_index = i + (average_spike_peak_index-24)
+                break # once you find the index, break the loop
+
+        # Define threshold for end: we set a two-tailed threshold (we cannot know from which side the spike will return to baseline, as this will depend on any currents present after the action potential ends) at the value that corresponds to the mean minus "x" times the std. "x" is defined by using the norm.ppf() function from scipy.stats, which takes a percentage and returns a standard deviation multiplier for what value that percentage occurs at.
+        end_min_threshold_average_spike = baseline_average_spike_end_mean - (stats.norm.ppf(0.9995)*baseline_average_spike_end_std)
+        end_max_threshold_average_spike = baseline_average_spike_end_mean + (stats.norm.ppf(0.9995)*baseline_average_spike_end_std)
+
+        # Calculate the spike end, starting at the index where the baseline epoch ends: one way to do this is to start from the back of the average spike trace and find the point after which n consecutive samples fall outside the baseline distribution:
+        for i, s in enumerate(average_spike[::-1][len(baseline_average_spike_end):]): # i is the index, s is the value
+                # Take the index where the 
+                if (s < end_min_threshold_average_spike or s > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+1] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+1] > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+2] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+2] > end_max_threshold_average_spike):
+                    average_spike_end_index = (len(average_spike)-1) - (i+len(baseline_average_spike_end))
+                    break
+
+        # Plot the average spike with its onset and end
+        get_ipython().run_line_magic('matplotlib', 'qt')    
+        fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
+        plt.plot(cut_spikes_baselined_clean.T, 'k') # cut spikes
+        plt.plot(average_spike, 'r') # average spike
+        plt.plot(average_spike_onset_index, average_spike[average_spike_onset_index], "oc") # spike onset
+        plt.plot(average_spike_end_index, average_spike[average_spike_end_index], "oy") # spike end
+        plt.ylabel('current [pA]', fontsize = 12)
+        plt.axhline(y = onset_threshold_average_spike, c = 'c', ls = '--') # horizontal dashed line at threshold for onset
+        plt.axhline(y = end_min_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at negative threshold for end
+        plt.axhline(y = end_max_threshold_average_spike, c = 'y', ls = '--') # horizontal dashed line at positive threshold for end
+        plt.suptitle('Averaged spike with onset and end', fontsize = 14)
+        plt.xlim([((len(average_spike)/2)-50), ((len(average_spike)/2)+75)])
+        fig.canvas.manager.window.move(0, 0)
+        plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
+
+        # Extract onset and end, calculate length and onset to peak
+        spike_onset = average_spike_onset_index
+        spike_end = average_spike_end_index
+        spike_length = (spike_end - spike_onset) * dt
+        spike_onset_to_peak = (average_spike_peak_index-spike_onset) * dt
+
+        # Check whether spike analysis is complete
+        happy_onset = input("Are you happy with the calculated onset and end? y/n")
+
+        if happy_onset == 'y':
+            parameters_avg_spike = pd.DataFrame([[spike_onset, spike_end, spike_length, spike_onset_to_peak, spike_magnitude, baseline_average_spike_mean, baseline_average_spike_std, baseline_average_spike_end_mean, baseline_average_spike_end_std]], columns = ['spike_onset_sample', 'spike_end_sample', 'spike_length_ms', 'spike_onset_to_peak_ms', 'spike_magnitude_pA', 'baseline_start_mean', 'baseline_start_std', 'baseline_end_mean', 'baseline_end_std'], index = file_id)
+            print('spike parameters calculated')
+            print(f'Spike onset at {spike_onset}')
+            print(f'Spike end at {spike_end}')
+            print(f'Spike length of {spike_length} ms')
+            print(f'Spike onset to peak of {spike_onset_to_peak} ms')
+            print(f'Spike magnitude of {round(spike_magnitude, 2)} pA')
+            print(f'Baseline difference between end and start is {round((baseline_average_spike_end_mean - baseline_average_spike_mean), 2)} pA')
+        else:
+            print('Try running getSpikeParameters() again')
+            plt.close()
+            return None # return empty variables to prevent wrong results from being used
+
+        plt.close()
 
     return parameters_avg_spike # pandas dataframe
 
@@ -1275,50 +1301,52 @@ def getFiringRate(
 
     spikes_by_window_dataframe = pd.DataFrame([spikes_by_window, n_spikes_window, window_length, window_firing_rate], index = ['spikes_by_window', 'n_spikes_window', 'window_length_s', 'window_firing_rate_Hz'], columns = range(n_bins))
     
-    # Visualise results
-    # Generate figure layout
-    get_ipython().run_line_magic('matplotlib', 'qt')
-    fig = plt.figure(tight_layout = True, figsize = (7, 10), dpi = 100)
-    axs = fig.subplot_mosaic(
-        """
-        BB
-        CC
-        DD
-        """
-    )
+    # Check if there are any spikes, otherwise no need to plot:
+    if np.any(np.size(peaks_QC, 0)):
+        # Visualise results
+        # Generate figure layout
+        get_ipython().run_line_magic('matplotlib', 'qt')
+        fig = plt.figure(tight_layout = True, figsize = (7, 10), dpi = 100)
+        axs = fig.subplot_mosaic(
+            """
+            BB
+            CC
+            DD
+            """
+        )
 
-    # Print cell ID and average Firing rate as a title
-    fig.suptitle(f'Neuron with ID: {cell_id[0]}\n\nFiring rate of {round(firing_frequency, 2)} Hz\n', fontsize = 14)
-    # Alternatively, you could have an empty plot as below
-    # Plot firing rate for the recorded neuron.
-    # axs['A'].axis('off')
-    # axs['A'].text(0.5, 0.5, s = f'Neuron with ID\n{cell_id[0]}\n\nFiring rate of {round(firing_frequency, 2)} Hz', ha = 'center', va = 'center', wrap = True, in_layout = True)
+        # Print cell ID and average Firing rate as a title
+        fig.suptitle(f'Neuron with ID: {cell_id[0]}\n\nFiring rate of {round(firing_frequency, 2)} Hz\n', fontsize = 14)
+        # Alternatively, you could have an empty plot as below
+        # Plot firing rate for the recorded neuron.
+        # axs['A'].axis('off')
+        # axs['A'].text(0.5, 0.5, s = f'Neuron with ID\n{cell_id[0]}\n\nFiring rate of {round(firing_frequency, 2)} Hz', ha = 'center', va = 'center', wrap = True, in_layout = True)
 
-    # Plot firing rate by sweep throughout the recording
-    axs['B'].plot(spikes_by_sweep_keys, sweep_firing_rate, 'k')
-    axs['B'].set_title('Firing rate across sweeps', fontsize = 12)
-    axs['B'].set_xlabel('sweep number', fontsize = 10)
-    axs['B'].set_ylabel('Firing Rate [Hz]', fontsize = 10)
-    axs['B'].set_ylim(-1, round(1+(max(sweep_firing_rate))))
+        # Plot firing rate by sweep throughout the recording
+        axs['B'].plot(spikes_by_sweep_keys, sweep_firing_rate, 'k')
+        axs['B'].set_title('Firing rate across sweeps', fontsize = 12)
+        axs['B'].set_xlabel('sweep number', fontsize = 10)
+        axs['B'].set_ylabel('Firing Rate [Hz]', fontsize = 10)
+        axs['B'].set_ylim(-1, round(1+(max(sweep_firing_rate))))
 
-    # Plot firing rate by bin throughout the recording
-    axs['C'].plot(window_firing_rate, 'k')
-    axs['C'].set_title(f'Firing rate across {round(time_window_s, 2)} s bins', fontsize = 12)
-    axs['C'].set_xlabel('time bin #', fontsize = 10)
-    axs['C'].set_ylabel('Firing Rate [Hz]', fontsize = 10)
-    axs['C'].set_ylim(-1, round(1+(max(window_firing_rate))))
+        # Plot firing rate by bin throughout the recording
+        axs['C'].plot(window_firing_rate, 'k')
+        axs['C'].set_title(f'Firing rate across {round(time_window_s, 2)} s bins', fontsize = 12)
+        axs['C'].set_xlabel('time bin #', fontsize = 10)
+        axs['C'].set_ylabel('Firing Rate [Hz]', fontsize = 10)
+        axs['C'].set_ylim(-1, round(1+(max(window_firing_rate))))
 
-    # Check whether the sweep firing rate correlates with seal resistance
-    axs['D'].scatter(Rseal_dataframe.loc['seal_resistance_MOhm'], sweep_firing_rate, label = f'slope = {np.round(stats.linregress(sweep_firing_rate, Rseal_dataframe.loc["seal_resistance_MOhm"])[0],5)}\npvalue = {np.round(stats.linregress(sweep_firing_rate, Rseal_dataframe.loc["seal_resistance_MOhm"])[3],2)}')
-    axs['D'].set_title('Sweep firing rate vs Seal Resistance', fontsize = 12)
-    axs['D'].set_xlabel('Seal Resistance [MOhm]', fontsize = 10)
-    axs['D'].set_ylabel('Firing Rate [Hz]', fontsize = 10)
-    axs['D'].legend()
-    axs['D'].set_ylim(-1, round(1+(max(sweep_firing_rate))))
+        # Check whether the sweep firing rate correlates with seal resistance
+        axs['D'].scatter(Rseal_dataframe.loc['seal_resistance_MOhm'], sweep_firing_rate, label = f'slope = {np.round(stats.linregress(sweep_firing_rate, Rseal_dataframe.loc["seal_resistance_MOhm"])[0],5)}\npvalue = {np.round(stats.linregress(sweep_firing_rate, Rseal_dataframe.loc["seal_resistance_MOhm"])[3],2)}')
+        axs['D'].set_title('Sweep firing rate vs Seal Resistance', fontsize = 12)
+        axs['D'].set_xlabel('Seal Resistance [MOhm]', fontsize = 10)
+        axs['D'].set_ylabel('Firing Rate [Hz]', fontsize = 10)
+        axs['D'].legend()
+        axs['D'].set_ylim(-1, round(1+(max(sweep_firing_rate))))
 
-    fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    plt.show()
-    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
+        fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
+        plt.show()
+        # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
     return firing_frequency_dataframe, spikes_by_sweep_dataframe, spikes_by_window_dataframe # pandas dataframe, pandas dataframe, pandas dataframe
 
@@ -1340,83 +1368,88 @@ def getInterspikeInterval(
     # Get delta_t from sampling rate:
     dt = 1/sampling_rate_khz
 
-    # Initialise variables
-    interspike_interval = []
-    holding_isi_avg = []
-    holding_isi_std = []
+    # Check if there are at least two spikes, otherwise no need to calculate interspike intervals:
+    if not (np.size(peaks_QC, 0) > 2):
+        interspike_interval_dataframe = pd.DataFrame([['NA'], ['NA'], ['NA']], index = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'], columns = range(1))
+        print(f"There are not enough spikes to obtain interspike intervals")
+    else:
+        # Initialise variables
+        interspike_interval = []
+        holding_isi_avg = []
+        holding_isi_std = []
+        
+        for p in range(len(peaks_QC)-1):
+            # Check that both spikes you are evaluating are in the same sweep:
+            if pseudo_sweep_concatenated[peaks_QC[p]] == pseudo_sweep_concatenated[peaks_QC[p+1]]:
+                # Calculate interspike interval
+                interspike_tmp = peaks_QC[p+1] - peaks_QC[p] # get number of samples between spikes
+                interspike_tmp_ms = interspike_tmp * dt # convert to ms
+                interspike_interval.append(interspike_tmp_ms) # append results
 
-    for p in range(len(peaks_QC)-1):
-        # Check that both spikes you are evaluating are in the same sweep:
-        if pseudo_sweep_concatenated[peaks_QC[p]] == pseudo_sweep_concatenated[peaks_QC[p+1]]:
-            # Calculate interspike interval
-            interspike_tmp = peaks_QC[p+1] - peaks_QC[p] # get number of samples between spikes
-            interspike_tmp_ms = interspike_tmp * dt # convert to ms
-            interspike_interval.append(interspike_tmp_ms) # append results
+                # Calculate average and standard deviation of the holding/baseline/injected current between both spikes
+                # average the period between 2 ms after first spike until 2 ms before second spike
+                holding_avg_tmp = np.mean(sweep_IB_concatenated[peaks_QC[p]+50 : peaks_QC[p+1]-50])
+                holding_std_tmp = np.std(sweep_IB_concatenated[peaks_QC[p]+50 : peaks_QC[p+1]-50])            
+                holding_isi_avg.append(holding_avg_tmp) # append results
+                holding_isi_std.append(holding_std_tmp) # append results
+        
+        # Visualise results
+        # Generate figure layout
+        get_ipython().run_line_magic('matplotlib', 'qt')
+        fig = plt.figure(tight_layout = True, figsize = (8, 8), dpi = 100)
+        axs = fig.subplot_mosaic(
+            """
+            AA
+            BC
+            DE
+            """
+        )
 
-            # Calculate average and standard deviation of the holding/baseline/injected current between both spikes
-            # average the period between 2 ms after first spike until 2 ms before second spike
-            holding_avg_tmp = np.mean(sweep_IB_concatenated[peaks_QC[p]+50 : peaks_QC[p+1]-50])
-            holding_std_tmp = np.std(sweep_IB_concatenated[peaks_QC[p]+50 : peaks_QC[p+1]-50])            
-            holding_isi_avg.append(holding_avg_tmp) # append results
-            holding_isi_std.append(holding_std_tmp) # append results
-    
-    # Visualise results
-    # Generate figure layout
-    get_ipython().run_line_magic('matplotlib', 'qt')
-    fig = plt.figure(tight_layout = True, figsize = (8, 8), dpi = 100)
-    axs = fig.subplot_mosaic(
-        """
-        AA
-        BC
-        DE
-        """
-    )
+        # Plot histogram of interspike intervals
+        axs['A'].hist(interspike_interval, bins = 50, density = False, histtype = 'bar', log = False, color = 'k')
+        axs['A'].set_title('A) ISI of detected spikes', fontsize = 12)
+        axs['A'].set_xlabel('Interspike Interval [ms]', fontsize = 10)
+        axs['A'].set_xlim([-1, None])
 
-    # Plot histogram of interspike intervals
-    axs['A'].hist(interspike_interval, bins = 50, density = False, histtype = 'bar', log = False, color = 'k')
-    axs['A'].set_title('A) ISI of detected spikes', fontsize = 12)
-    axs['A'].set_xlabel('Interspike Interval [ms]', fontsize = 10)
-    axs['A'].set_xlim([-1, None])
+        # Plot ISI vs Holding (avg)
+        axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Slope = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[3],2)}')
+        # axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_avg)[0,1], 2)}')
+        axs['B'].set_title('B) ISI vs Holding (avg)', fontsize = 12), axs['B'].legend()
+        axs['B'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['B'].set_ylabel('Holding current [pA]', fontsize = 10)
 
-    # Plot ISI vs Holding (avg)
-    axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Slope = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[3],2)}')
-    # axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_avg)[0,1], 2)}')
-    axs['B'].set_title('B) ISI vs Holding (avg)', fontsize = 12), axs['B'].legend()
-    axs['B'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['B'].set_ylabel('Holding current [pA]', fontsize = 10)
+        # Plot ISI vs Holding (std)
+        axs['C'].scatter(interspike_interval, holding_isi_std, label = f'slope = {np.round(stats.linregress(interspike_interval, holding_isi_std)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_std)[3],2)}')
+        # axs['C'].scatter(interspike_interval, holding_isi_std, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_std)[0,1], 2)}')
+        axs['C'].set_title('C) ISI vs Holding (std)', fontsize = 12), axs['C'].legend()
+        axs['C'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['C'].set_ylabel('Holding current [std]', fontsize = 10)
+        axs['C'].set_ylim(-1, None)
 
-    # Plot ISI vs Holding (std)
-    axs['C'].scatter(interspike_interval, holding_isi_std, label = f'slope = {np.round(stats.linregress(interspike_interval, holding_isi_std)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_std)[3],2)}')
-    # axs['C'].scatter(interspike_interval, holding_isi_std, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_std)[0,1], 2)}')
-    axs['C'].set_title('C) ISI vs Holding (std)', fontsize = 12), axs['C'].legend()
-    axs['C'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['C'].set_ylabel('Holding current [std]', fontsize = 10)
-    axs['C'].set_ylim(-1, None)
+        # Keep only the avg values between a certain interval (to ensure any spikes occurring during the test pulse are not driving any correlation here)
+        subset_holding_avg = np.array([isi_hold_avg for i, isi_hold_avg in enumerate(holding_isi_avg) if (-50 < holding_isi_avg[i] < 50)])
+        subset_isi_avg = np.array([isi for i, isi in enumerate(interspike_interval) if (-50 < holding_isi_avg[i] < 50)])
 
-    # Keep only the avg values between a certain interval (to ensure any spikes occurring during the test pulse are not driving any correlation here)
-    subset_holding_avg = np.array([isi_hold_avg for i, isi_hold_avg in enumerate(holding_isi_avg) if (-50 < holding_isi_avg[i] < 50)])
-    subset_isi_avg = np.array([isi for i, isi in enumerate(interspike_interval) if (-50 < holding_isi_avg[i] < 50)])
+        # Plot ISI vs Holding (avg)
+        axs['D'].scatter(subset_isi_avg, subset_holding_avg, label = f'slope = {np.round(stats.linregress(subset_isi_avg, subset_holding_avg)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_avg, subset_holding_avg)[3],2)}')
+        # axs['D'].scatter(subset_isi_avg, subset_holding_avg, label = f'Correlation = {np.round(np.corrcoef(subset_isi_avg, subset_holding_avg)[0,1], 2)}')
+        axs['D'].set_title('D) ISI vs Holding (±50pA injected)', fontsize = 12), axs['D'].legend()
+        axs['D'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['D'].set_ylabel('Holding current [pA]', fontsize = 10)
 
-    # Plot ISI vs Holding (avg)
-    axs['D'].scatter(subset_isi_avg, subset_holding_avg, label = f'slope = {np.round(stats.linregress(subset_isi_avg, subset_holding_avg)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_avg, subset_holding_avg)[3],2)}')
-    # axs['D'].scatter(subset_isi_avg, subset_holding_avg, label = f'Correlation = {np.round(np.corrcoef(subset_isi_avg, subset_holding_avg)[0,1], 2)}')
-    axs['D'].set_title('D) ISI vs Holding (±50pA injected)', fontsize = 12), axs['D'].legend()
-    axs['D'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['D'].set_ylabel('Holding current [pA]', fontsize = 10)
+        # Keep only the std values below a certain threshold
+        subset_holding_std = np.array([isi_hold_std for i, isi_hold_std in enumerate(holding_isi_std) if (holding_isi_std[i] < 10)])
+        subset_isi_std = np.array([isi for i, isi in enumerate(interspike_interval) if (holding_isi_std[i] < 10)])
 
-    # Keep only the std values below a certain threshold
-    subset_holding_std = np.array([isi_hold_std for i, isi_hold_std in enumerate(holding_isi_std) if (holding_isi_std[i] < 10)])
-    subset_isi_std = np.array([isi for i, isi in enumerate(interspike_interval) if (holding_isi_std[i] < 10)])
+        # Plot ISI vs Holding (std)
+        axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'slope = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[3],2)}')
+        # axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'Correlation = {np.round(np.corrcoef(subset_isi_std, subset_holding_std)[0,1], 2)}')
+        axs['E'].set_title('E) ISI vs Holding (<10 std in holding_avg)', fontsize = 12), axs['E'].legend()
+        axs['E'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['E'].set_ylabel('Holding current [std]', fontsize = 10)
+        axs['E'].set_ylim(0, None)
+        
+        fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
+        plt.show()
+        # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
-    # Plot ISI vs Holding (std)
-    axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'slope = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[3],2)}')
-    # axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'Correlation = {np.round(np.corrcoef(subset_isi_std, subset_holding_std)[0,1], 2)}')
-    axs['E'].set_title('E) ISI vs Holding (<10 std in holding_avg)', fontsize = 12), axs['E'].legend()
-    axs['E'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['E'].set_ylabel('Holding current [std]', fontsize = 10)
-    axs['E'].set_ylim(0, None)
-    
-    fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-    plt.show()
-    # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
-
-    interspike_interval_dataframe = pd.DataFrame([interspike_interval, holding_isi_avg, holding_isi_std], index = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'], columns = range(len(interspike_interval)))
+        interspike_interval_dataframe = pd.DataFrame([interspike_interval, holding_isi_avg, holding_isi_std], index = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'], columns = range(len(interspike_interval)))
 
     return interspike_interval_dataframe # pandas dataframe
 
