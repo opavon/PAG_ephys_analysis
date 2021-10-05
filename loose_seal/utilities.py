@@ -1015,11 +1015,12 @@ def cleanSpikes(
         fig.canvas.manager.window.move(0, 0)
         plt.pause(0.5)
 
-        # Based on the histogram above, select the peak value threshold that will identify spikes that were not properly baselined
-        peak_min = int(input("Enter the peak value above which to exclude incorrectly baselined spikes"))
+        # Based on the histogram above, select the min and max peak values that will identify spikes that were not properly baselined
+        peak_min = int(input("Enter the peak value below which to exclude incorrectly baselined spikes"))
+        peak_max = int(input("Enter the peak value above which to exclude incorrectly baselined spikes"))
 
         # Select the spikes that couldn't be properly baselined
-        spikes_indices_to_remove = np.where(cut_spikes_stack[:,cut_spikes_peak_index] > peak_min)
+        spikes_indices_to_remove = np.where((cut_spikes_stack[:,cut_spikes_peak_index] < peak_min) | (cut_spikes_stack[:,cut_spikes_peak_index] > peak_max))
         # Remove duplicates from spikes_indices_to_remove
         spikes_to_remove = np.unique(spikes_indices_to_remove)
         # Remove spikes that couldn't be properly baselined
@@ -1045,8 +1046,10 @@ def cleanSpikes(
             # Plot Histogram of the peak values for each baselined spike
             n_1, bins_1, patches_1 = axs[1,1].hist(cut_spikes_stack[:,cut_spikes_peak_index], bins = 200, density = False, histtype = 'bar', log = True)
             for i in range(len(patches_1)):
-                if (bins_1[i] > peak_min):
+                if (bins_1[i] < peak_min):
                         patches_1[i].set_facecolor('r')
+                elif (bins_1[i] > peak_max):
+                        patches_1[i].set_facecolor('r')                
                 else:
                     patches_1[i].set_facecolor('lightgray')
             axs[1,1].set_title('Histogram of peak values for baselined spikes', fontsize = 12)
@@ -1058,7 +1061,7 @@ def cleanSpikes(
         happy_clean = input("Are you happy with your choice of filter? y/n")
 
         if happy_clean == 'y':
-            parameters_clean = pd.DataFrame([[peak_min]], columns = ['peak_min_pA'], index = file_id)
+            parameters_clean = pd.DataFrame([[peak_min, peak_max]], columns = ['peak_min_pA', 'peak_max_pA'], index = file_id)
             print('Clean up completed')
             print(f"The number of spikes removed was: {np.size(spikes_to_remove, 0)}")
         else:
