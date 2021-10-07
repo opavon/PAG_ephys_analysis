@@ -1164,7 +1164,7 @@ def getSpikeParameters(
 
         # Calculate spike onset, starting at the index where the baseline epoch ends
         for i, s in enumerate(average_spike[(average_spike_peak_index-24):]): # i is the index, s is the value
-            if (s < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+1] < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+2] < onset_threshold_average_spike):
+            if (s < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+1] < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+2] < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+3] < onset_threshold_average_spike) and (average_spike[(average_spike_peak_index-24):][i+4] < onset_threshold_average_spike):
                 average_spike_onset_index = i + (average_spike_peak_index-24)
                 break # once you find the index, break the loop
 
@@ -1175,7 +1175,7 @@ def getSpikeParameters(
         # Calculate the spike end, starting at the index where the baseline epoch ends: one way to do this is to start from the back of the average spike trace and find the point after which n consecutive samples fall outside the baseline distribution:
         for i, s in enumerate(average_spike[::-1][len(baseline_average_spike_end):]): # i is the index, s is the value
                 # Take the index where the 
-                if (s < end_min_threshold_average_spike or s > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+1] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+1] > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+2] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+2] > end_max_threshold_average_spike):
+                if (s < end_min_threshold_average_spike or s > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+1] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+1] > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+2] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+2] > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+3] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+3] > end_max_threshold_average_spike) and (average_spike[::-1][len(baseline_average_spike_end):][i+4] < end_min_threshold_average_spike or average_spike[::-1][len(baseline_average_spike_end):][i+4] > end_max_threshold_average_spike):
                     average_spike_end_index = (len(average_spike)-1) - (i+len(baseline_average_spike_end))
                     break
 
