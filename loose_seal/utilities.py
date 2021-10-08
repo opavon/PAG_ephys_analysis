@@ -1209,7 +1209,7 @@ def getSpikeParameters(
             print('spike parameters calculated')
             print(f'Spike onset at {spike_onset}')
             print(f'Spike end at {spike_end}')
-            print(f'Spike length of {spike_length} ms')
+            print(f'Spike length of {round(spike_length, 2)} ms')
             print(f'Spike onset to peak of {spike_onset_to_peak} ms')
             print(f'Spike magnitude of {round(spike_magnitude, 2)} pA')
             print(f'Baseline difference between end and start is {round((baseline_average_spike_end_mean - baseline_average_spike_mean), 2)} pA')
@@ -1407,63 +1407,67 @@ def getInterspikeInterval(
                 holding_isi_avg.append(holding_avg_tmp) # append results
                 holding_isi_std.append(holding_std_tmp) # append results
         
-        # Visualise results
-        # Generate figure layout
-        get_ipython().run_line_magic('matplotlib', 'qt')
-        fig = plt.figure(tight_layout = True, figsize = (8, 8), dpi = 100)
-        axs = fig.subplot_mosaic(
-            """
-            AA
-            BC
-            DE
-            """
-        )
+        if not (np.size(interspike_interval, 0)):
+            interspike_interval_dataframe = pd.DataFrame([['NA'], ['NA'], ['NA']], index = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'], columns = range(1))
+            print(f"There are not enough spikes in the same sweep to obtain interspike intervals")
+        else:
+            # Visualise results
+            # Generate figure layout
+            get_ipython().run_line_magic('matplotlib', 'qt')
+            fig = plt.figure(tight_layout = True, figsize = (8, 8), dpi = 100)
+            axs = fig.subplot_mosaic(
+                """
+                AA
+                BC
+                DE
+                """
+            )
 
-        # Plot histogram of interspike intervals
-        axs['A'].hist(interspike_interval, bins = 50, density = False, histtype = 'bar', log = False, color = 'k')
-        axs['A'].set_title('A) ISI of detected spikes', fontsize = 12)
-        axs['A'].set_xlabel('Interspike Interval [ms]', fontsize = 10)
-        axs['A'].set_xlim([-1, None])
+            # Plot histogram of interspike intervals
+            axs['A'].hist(interspike_interval, bins = 50, density = False, histtype = 'bar', log = False, color = 'k')
+            axs['A'].set_title('A) ISI of detected spikes', fontsize = 12)
+            axs['A'].set_xlabel('Interspike Interval [ms]', fontsize = 10)
+            axs['A'].set_xlim([-1, None])
 
-        # Plot ISI vs Holding (avg)
-        axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Slope = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[3],2)}')
-        # axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_avg)[0,1], 2)}')
-        axs['B'].set_title('B) ISI vs Holding (avg)', fontsize = 12), axs['B'].legend()
-        axs['B'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['B'].set_ylabel('Holding current [pA]', fontsize = 10)
+            # Plot ISI vs Holding (avg)
+            axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Slope = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_avg)[3],2)}')
+            # axs['B'].scatter(interspike_interval, holding_isi_avg, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_avg)[0,1], 2)}')
+            axs['B'].set_title('B) ISI vs Holding (avg)', fontsize = 12), axs['B'].legend()
+            axs['B'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['B'].set_ylabel('Holding current [pA]', fontsize = 10)
 
-        # Plot ISI vs Holding (std)
-        axs['C'].scatter(interspike_interval, holding_isi_std, label = f'slope = {np.round(stats.linregress(interspike_interval, holding_isi_std)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_std)[3],2)}')
-        # axs['C'].scatter(interspike_interval, holding_isi_std, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_std)[0,1], 2)}')
-        axs['C'].set_title('C) ISI vs Holding (std)', fontsize = 12), axs['C'].legend()
-        axs['C'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['C'].set_ylabel('Holding current [std]', fontsize = 10)
-        axs['C'].set_ylim(-1, None)
+            # Plot ISI vs Holding (std)
+            axs['C'].scatter(interspike_interval, holding_isi_std, label = f'slope = {np.round(stats.linregress(interspike_interval, holding_isi_std)[0],5)}\npvalue = {np.round(stats.linregress(interspike_interval, holding_isi_std)[3],2)}')
+            # axs['C'].scatter(interspike_interval, holding_isi_std, label = f'Correlation = {np.round(np.corrcoef(interspike_interval, holding_isi_std)[0,1], 2)}')
+            axs['C'].set_title('C) ISI vs Holding (std)', fontsize = 12), axs['C'].legend()
+            axs['C'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['C'].set_ylabel('Holding current [std]', fontsize = 10)
+            axs['C'].set_ylim(-1, None)
 
-        # Keep only the avg values between a certain interval (to ensure any spikes occurring during the test pulse are not driving any correlation here)
-        subset_holding_avg = np.array([isi_hold_avg for i, isi_hold_avg in enumerate(holding_isi_avg) if (-50 < holding_isi_avg[i] < 50)])
-        subset_isi_avg = np.array([isi for i, isi in enumerate(interspike_interval) if (-50 < holding_isi_avg[i] < 50)])
+            # Keep only the avg values between a certain interval (to ensure any spikes occurring during the test pulse are not driving any correlation here)
+            subset_holding_avg = np.array([isi_hold_avg for i, isi_hold_avg in enumerate(holding_isi_avg) if (-50 < holding_isi_avg[i] < 50)])
+            subset_isi_avg = np.array([isi for i, isi in enumerate(interspike_interval) if (-50 < holding_isi_avg[i] < 50)])
 
-        # Plot ISI vs Holding (avg)
-        axs['D'].scatter(subset_isi_avg, subset_holding_avg, label = f'slope = {np.round(stats.linregress(subset_isi_avg, subset_holding_avg)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_avg, subset_holding_avg)[3],2)}')
-        # axs['D'].scatter(subset_isi_avg, subset_holding_avg, label = f'Correlation = {np.round(np.corrcoef(subset_isi_avg, subset_holding_avg)[0,1], 2)}')
-        axs['D'].set_title('D) ISI vs Holding (±50pA injected)', fontsize = 12), axs['D'].legend()
-        axs['D'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['D'].set_ylabel('Holding current [pA]', fontsize = 10)
+            # Plot ISI vs Holding (avg)
+            axs['D'].scatter(subset_isi_avg, subset_holding_avg, label = f'slope = {np.round(stats.linregress(subset_isi_avg, subset_holding_avg)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_avg, subset_holding_avg)[3],2)}')
+            # axs['D'].scatter(subset_isi_avg, subset_holding_avg, label = f'Correlation = {np.round(np.corrcoef(subset_isi_avg, subset_holding_avg)[0,1], 2)}')
+            axs['D'].set_title('D) ISI vs Holding (±50pA injected)', fontsize = 12), axs['D'].legend()
+            axs['D'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['D'].set_ylabel('Holding current [pA]', fontsize = 10)
 
-        # Keep only the std values below a certain threshold
-        subset_holding_std = np.array([isi_hold_std for i, isi_hold_std in enumerate(holding_isi_std) if (holding_isi_std[i] < 10)])
-        subset_isi_std = np.array([isi for i, isi in enumerate(interspike_interval) if (holding_isi_std[i] < 10)])
+            # Keep only the std values below a certain threshold
+            subset_holding_std = np.array([isi_hold_std for i, isi_hold_std in enumerate(holding_isi_std) if (holding_isi_std[i] < 10)])
+            subset_isi_std = np.array([isi for i, isi in enumerate(interspike_interval) if (holding_isi_std[i] < 10)])
 
-        # Plot ISI vs Holding (std)
-        axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'slope = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[3],2)}')
-        # axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'Correlation = {np.round(np.corrcoef(subset_isi_std, subset_holding_std)[0,1], 2)}')
-        axs['E'].set_title('E) ISI vs Holding (<10 std in holding_avg)', fontsize = 12), axs['E'].legend()
-        axs['E'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['E'].set_ylabel('Holding current [std]', fontsize = 10)
-        axs['E'].set_ylim(0, None)
-        
-        fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
-        plt.show()
-        # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
+            # Plot ISI vs Holding (std)
+            axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'slope = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[0],5)}\npvalue = {np.round(stats.linregress(subset_isi_std, subset_holding_std)[3],2)}')
+            # axs['E'].scatter(subset_isi_std, subset_holding_std, label = f'Correlation = {np.round(np.corrcoef(subset_isi_std, subset_holding_std)[0,1], 2)}')
+            axs['E'].set_title('E) ISI vs Holding (<10 std in holding_avg)', fontsize = 12), axs['E'].legend()
+            axs['E'].set_xlabel('Interspike Interval [ms]', fontsize = 10), axs['E'].set_ylabel('Holding current [std]', fontsize = 10)
+            axs['E'].set_ylim(0, None)
+            
+            fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
+            plt.show()
+            # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
-        interspike_interval_dataframe = pd.DataFrame([interspike_interval, holding_isi_avg, holding_isi_std], index = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'], columns = range(len(interspike_interval)))
+            interspike_interval_dataframe = pd.DataFrame([interspike_interval, holding_isi_avg, holding_isi_std], index = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'], columns = range(len(interspike_interval)))
 
     return interspike_interval_dataframe # pandas dataframe
 
