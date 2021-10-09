@@ -72,7 +72,6 @@ parameters_clean
 # %%
 # Compute average spike
 average_spike = averageSpikes(cut_spikes_baselined_clean)
-print("average spike calculated")
 
 # %%
 # Compute average spike parameters
