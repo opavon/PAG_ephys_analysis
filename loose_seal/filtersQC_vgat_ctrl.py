@@ -270,8 +270,344 @@ peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, paramet
     QC_rb_min = float('-inf'), QC_rb_max = float('inf')
     )
 
+
 ##### dmpag #####
 
+# dmpag_vgat_171114_c2_LIAK_OP_clear_VC_1
+# prominence (35-200), peak (-140-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 3, QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_171117_c4_LIAU_OP_clear_VC_1
+# prominence (75-500), peak (-420-320)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 2.5, QC_pw_max = 10,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_171117_c5_LIAV_OP_clear_VC_1
+# prominence (40-300), peak (-300-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 2, QC_pw_max = 8,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_171123_c4_LIBC_OP_clear_VC_1
+# prominence (100-300), peak (-300-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'), QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_171123_c5_LIBD_OP_clear_VC_1
+# prominence (50-350), peak (-400-225)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'), QC_pw_max = 25,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_171130_c3_LIBJ_OP_clear_VC_2
+# prominence (40-150), peak (-200-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'), QC_pw_max = 40,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_171218_c3_LIBV_OP_clear_VC_2
+# prominence (75-300), peak (-300-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 4, QC_pw_max = 10,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_171218_c7_LIBZ_OP_clear_VC_2
+# prominence (150-350), peak (-300-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'), QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_190124_c1_LICI_OP_VC_clear_nointerval_2
+# prominence (100-160), peak (-300-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 3, QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 8, QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_190201_c4_LICQ_OP_VC_clear_nointerval_1
+# prominence (100-350), peak (-400-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 3, QC_pw_max = 10,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = 4, QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_190201_c4_LICQ_OP_VC_clear_nointerval_2
+# prominence (40-250), peak (-300-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'), QC_pw_max = 10,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 5, QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = 10
+    )
+
+# dmpag_vgat_200717_c8_LIDB_OP_VC_clear_nointerval_1
+# prominence (38-95), peak (-100-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 3.35, QC_pw_max =  float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 5.5, QC_lb_max = float('inf'),
+    QC_rb_min = 4, QC_rb_max = 20
+    )
+
+# dmpag_vgat_201008_c1_LIDT_OP_VC_clear_nointerval_1
+# prominence (100-350), peak (-350-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'), QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_201008_c1_LIDT_OP_VC_clear_nointerval_2
+# prominence (50-150), peak (-100-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 3, QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = 11.5
+    )
+
+# dmpag_vgat_201029_c1_LIEB_OP_VC_clear_nointerval_2
+# prominence (40-105), peak (-74-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 4, QC_pw_max = 50,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 4, QC_lb_max = float('inf'),
+    QC_rb_min = 5, QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_201029_c3_LIED_OP_VC_clear_nointerval_1
+# prominence (39-100), peak (-100-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 5, QC_pw_max = 10,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 5, QC_lb_max = float('inf'),
+    QC_rb_min = 4, QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_201029_c3_LIED_OP_VC_clear_nointerval_2
+# prominence (50-100), peak (-100-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = 51.8, QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 4, QC_pw_max = 20,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 5, QC_lb_max = float('inf'),
+    QC_rb_min = 5, QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_201102_c1_LIEE_OP_VC_clear_nointerval_1
+# prominence (100-300), peak (-300-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 3, QC_pw_max = 100,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 10, QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_201126_c1_LIEI_OP_VC_clear_nointerval_1
+# prominence (39-100), peak (-200-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 3.9, QC_pw_max = 20,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 6.1, QC_lb_max =  float('inf'),
+    QC_rb_min = 4, QC_rb_max = 65
+    )
+
+# dmpag_vgat_201202_c1_LIEM_OP_VC_clear_nointerval_1
+# prominence (60-125), peak (-150-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 4, QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 4, QC_lb_max = float('inf'),
+    QC_rb_min = 4, QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_201202_c2_LIEN_OP_VC_clear_nointerval_2
+# prominence (280-500), peak (-500-100)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 3, QC_pw_max = 50,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 5, QC_lb_max = float('inf'),
+    QC_rb_min = 4, QC_rb_max = float('inf')
+    )
+
+# dmpag_vgat_201202_c3_LIEO_OP_VC_clear_nointerval_1
+# prominence (40-92), peak (-100-0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 4.5, QC_pw_max = 15,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
+
+
+
 ##### lpag #####
+
+
+
 
 ##### vlpag #####
