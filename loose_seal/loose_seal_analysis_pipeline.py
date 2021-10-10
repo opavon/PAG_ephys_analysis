@@ -41,7 +41,7 @@ peaks, peaks_properties, parameters_find_peaks = findSpikes(file_name, sweep_IB_
 
 # %%
 # Cut spikes
-cut_spikes, cut_spikes_holding, cut_spikes_baselined = cutSpikes(sweep_IB_concatenated, peaks)
+peaks, peaks_properties, cut_spikes, cut_spikes_holding, cut_spikes_baselined = cutSpikes(sweep_IB_concatenated, peaks, peaks_properties)
 print("spikes cut")
 
 # %%
@@ -95,5 +95,5 @@ vgat_kynac_ptx_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loo
 vglut2_ctrl_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vglut2_control"
 vglut2_ptx_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vglut2_picrotoxin"
 
-saveLooseSealResults(vgat_ctrl_save_path, file_name, sweep_IB_concatenated, pseudo_sweep_concatenated, peaks, cut_spikes, cut_spikes_holding, cut_spikes_baselined, peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, cut_spikes_baselined_clean, average_spike, Rseal_df, peaks_properties, parameters_find_peaks, parameters_QC, parameters_clean, parameters_avg_spike, firing_frequency_df, spikes_by_sweep_df, spikes_by_window_df, interspike_interval_df)
+saveLooseSealResults(vgat_kynac_ptx_save_path, file_name, sweep_IB_concatenated, pseudo_sweep_concatenated, peaks, cut_spikes, cut_spikes_holding, cut_spikes_baselined, peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, cut_spikes_baselined_clean, average_spike, Rseal_df, peaks_properties, parameters_find_peaks, parameters_QC, parameters_clean, parameters_avg_spike, firing_frequency_df, spikes_by_sweep_df, spikes_by_window_df, interspike_interval_df)
 # %%

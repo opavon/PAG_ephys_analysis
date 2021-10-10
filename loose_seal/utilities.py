@@ -411,7 +411,8 @@ def findSpikes(
 
 def cutSpikes(
     sweep_IB_concatenated,
-    peaks
+    peaks,
+    peaks_properties
     ):
     """
     `cutSpikes` takes the concatenated sweeps and cuts an interval of 10 ms around each detected peak for plotting and further analysis. It then calculates a baseline for each peak by averaging 3 ms before it, leaving out the first 1 ms right before the peak index as it will contain the spike itself. Finally, it subtracts the calculated value to baseline the cut spikes, which will facilitate visualisation and quality control.
@@ -419,9 +420,27 @@ def cutSpikes(
     
     :sweep_IB_concatenated: numpy array containing the concatenated data from a loose-seal recording (e.g. gap-free protocol with a short test pulse in the beginning).
     :peaks: indices of detected spikes obtained from `findSpikes()`.
+    :peaks_properties: dictionary containing properties of the peaks returned by scipy's `find_peaks` in `findSpikes`.
     """
     
-    # Cut 150 samples (6 ms) before and after each peak
+    # Check whether the first and last peak are too close to the edge 
+    if (peaks[0] < 150) and ((len(sweep_IB_concatenated) - peaks[-1]) > 150):
+        # Exclude first peak
+        peaks = peaks[1:]
+        for item in peaks_properties:
+            peaks_properties[item] = peaks_properties[item][1:]
+    elif (peaks[0] > 150) and ((len(sweep_IB_concatenated) - peaks[-1]) < 150):
+        # Exclude last peak
+        peaks = peaks[:-1]
+        for item in peaks_properties:
+            peaks_properties[item] = peaks_properties[item][:-1]
+    elif (peaks[0] < 150) and ((len(sweep_IB_concatenated) - peaks[-1]) < 150):
+        # Exclude first and last peak
+        peaks = peaks[1:-1]
+        for item in peaks_properties:
+            peaks_properties[item] = peaks_properties[item][1:-1]
+
+    # Cut 150 samples (6 ms) before and after each peak if possible.
     cut_spikes = np.array([sweep_IB_concatenated[(peaks[p]-150) : (peaks[p]+150)] for p in range(len(peaks))])
 
     # Get baseline for each spike by averaging 1-3 ms before each peak
@@ -444,7 +463,7 @@ def cutSpikes(
     plt.show()
     # plt.pause(5) # Use this if you are running the full script so it gives you a few seconds to see the plot before it moves to the next chunk of code.
 
-    return cut_spikes, cut_spikes_holding, cut_spikes_baselined # ndarray, ndarray, ndarray
+    return peaks, peaks_properties, cut_spikes, cut_spikes_holding, cut_spikes_baselined # ndarray, dict, ndarray, ndarray, ndarray
 
 def plotSpikesQC(
     file_name,
