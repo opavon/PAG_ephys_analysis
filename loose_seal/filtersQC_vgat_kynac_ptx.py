@@ -695,90 +695,155 @@ peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, paramet
 
 ##### lpag #####
 
-# 
-# prominence (), peak (NA)
+# lpag_vgat_201125_c4_LDIBL_OP_VC_clear_nointerval_1
+# prominence (55, 120), peak (-150, 0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 3.6, QC_pw_max = 20,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
 
+# lpag_vgat_201125_c7_LDIBO_OP_VC_clear_nointerval_1
+# prominence (100, 180), peak (-200, 0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'), QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
 
-# 
-# prominence (), peak (NA)
+# lpag_vgat_201201_c6_LDIBY_OP_VC_clear_nointerval_3
+# prominence (43, 90), peak (-100, 0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 4.5, QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = 5, QC_rb_max = float('inf')
+    )
 
+# lpag_vgat_201203_c6_LDICH_OP_VC_clear_nointerval_1
+# prominence (50, 150), peak (-85, 0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'), QC_pw_max = 15,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
 
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
+# lpag_vgat_201215_c4_LDICM_OP_VC_clear_nointerval_1
+# prominence (135, 300), peak (-300, 0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 4, QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = -100,
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
 
 
 ##### vlpag #####
 
+# vlpag_vgat_190123_c1_LDIAE_OP_VC_clear_nointerval_2
+# prominence (80, 160), peak (-150, 0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 3, QC_pw_max = 10,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
 
-# 
-# prominence (), peak (NA)
+# vlpag_vgat_201202_c6_LDICB_OP_VC_clear_nointerval_1
+# prominence (100, 250), peak (-200, 0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 7, QC_pw_max = 20,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = -90,
+    QC_lb_min = 9, QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
 
+# vlpag_vgat_201203_c3_LDICE_OP_VC_clear_nointerval_1
+# prominence (55, 125), peak (-100, 0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 5, QC_pw_max = 10,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = 6, QC_lb_max = float('inf'),
+    QC_rb_min = 6, QC_rb_max = float('inf')
+    )
 
-# 
-# prominence (), peak (NA)
+# vlpag_vgat_201215_c6_LDICO_OP_VC_clear_nointerval_2
+# prominence (60, 120), peak (-150, 0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = 4, QC_pw_max = float('inf'),
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
 
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
-# 
-# prominence (), peak (NA)
-
-
+# vlpag_vgat_201215_c7_LDICP_OP_VC_clear_nointerval_1
+# prominence (140, 400), peak (-350, 0)
+peaks_QC, cut_spikes_QC, cut_spikes_holding_QC, cut_spikes_baselined_QC, parameters_QC = spikesQC(
+    file_name, peaks, peaks_properties,
+    cut_spikes, cut_spikes_holding, cut_spikes_baselined,
+    filter_by = ['p', 'wh', 'pw', 'ph', 'pb', 'lb', 'rb'],
+    QC_p_min = float('-inf'), QC_p_max = float('inf'),
+    QC_wh_min = float('-inf'), QC_wh_max = float('inf'),
+    QC_pw_min = float('-inf'), QC_pw_max = 6,
+    QC_ph_min = float('-inf'), QC_ph_max = float('inf'),
+    QC_pb_min = float('-inf'), QC_pb_max = float('inf'),
+    QC_lb_min = float('-inf'), QC_lb_max = float('inf'),
+    QC_rb_min = float('-inf'), QC_rb_max = float('inf')
+    )
