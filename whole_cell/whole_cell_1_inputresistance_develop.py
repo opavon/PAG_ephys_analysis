@@ -46,12 +46,14 @@ axs = fig.subplot_mosaic(
 for sweep in range(len(sweep_IA)):
         axs['A'].plot(sweep_IA[sweep], color = sweep_colors[sweep])
 axs['A'].set_title('Channel A', fontsize = 12)
-axs['A'].set_ylabel('current [pA]')
+axs['A'].set_ylabel('voltage [mV]')
+axs['A'].set_xlim([0, (len(sweep_IA[0]))])
 
 for sweep in range(len(sweep_OA)):
         axs['B'].plot(sweep_OA[sweep], color = sweep_colors[sweep])
 axs['B'].set_title('Output A', fontsize = 12)
-axs['B'].set_ylabel('Voltage [mV]')
+axs['B'].set_ylabel('current [pA]')
+axs['B'].set_xlim([0, (len(sweep_IA[0]))])
 
 fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
 plt.show()
