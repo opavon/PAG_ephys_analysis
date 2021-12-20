@@ -246,11 +246,11 @@ def getInputResistance(
     trial_keys = []
 
     # Calculate the input resistance on a sweep-by-sweep basis:
-    for sweep in channels_df.columns:
+    for sweep in channels_dataframe.columns:
         ## Load sweep data: Channel A (recording in current-clamp) and Output B (command)
-        sweep_IA = np.array(channels_df.at['Channel A', sweep])
-        # sweep_IB = np.array(channels_df.at['Channel B', sweep]) # Not needed as we recorded in current-clamp
-        sweep_OA = np.array(channels_df.at['Output A', sweep])
+        sweep_IA = np.array(channels_dataframe.at['Channel A', sweep])
+        # sweep_IB = np.array(channels_dataframe.at['Channel B', sweep]) # Not needed as we recorded in current-clamp
+        sweep_OA = np.array(channels_dataframe.at['Output A', sweep])
 
         ## Get the indices corresponding to the test_pulse using the Output Channel
         test_pulse = np.where(sweep_OA < 0)
