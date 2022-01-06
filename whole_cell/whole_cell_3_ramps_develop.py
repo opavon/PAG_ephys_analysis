@@ -64,7 +64,7 @@ plt.show()
 get_ipython().run_line_magic('matplotlib', 'qt')
 fig = plt.figure(figsize = (7, 5), dpi = 100) # Set figure size
 for sweep in range(len(sweep_IA)):
-    plt.plot(sweep_IA[sweep][6300:31250], sweep_IB[sweep][6300:31250])
+    plt.plot(sweep_IA[sweep][6400:31250], sweep_IB[sweep][6400:31250])
 plt.title(file_name, fontsize = 12)
 plt.xlabel('voltage [mV]')
 plt.ylabel('current [pA]')
