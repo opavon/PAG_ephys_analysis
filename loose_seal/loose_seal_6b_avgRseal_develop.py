@@ -20,7 +20,6 @@ from IPython import get_ipython
 from utilities import * # includes functions importFile, openFile, openHDF5file, getLooseRseal, concatenateSweeps, findSpikes, cutSpikes, plotSpikesQC, spikesQC, cleanSpikes, averageSpikes, getSpikeParameters, getFiringRate, getInterspikeInterval, saveLooseSealResults, combineJSONresults
 print("done!")
 
-# %%
 # Paths to results
 vgat_ctrl_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vgat_control"
 vgat_kynac_ptx_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vgat_kynurenic_picrotoxin"
@@ -42,17 +41,3 @@ results_data = np.load(os.path.join(vgat_ctrl_save_path, "dlpag_vgat_171113_c5_L
 
 print([key for key in results_data])
 
-# %% 
-
-# Load .json files containing combined results
-vgat_ctrl_df = pd.read_json(os.path.join(vgat_ctrl_save_path, 'vgat_control_pooled_df_firing_frequency.json')) # read data frame from json file
-vgat_kynac_ptx_df = pd.read_json(os.path.join(vgat_kynac_ptx_save_path, 'vgat_kynurenic_picrotoxin_pooled_df_firing_frequency.json')) # read data frame from json file
-vglut2_ctrl_df = pd.read_json(os.path.join(vglut2_ctrl_save_path, 'vglut2_control_pooled_df_firing_frequency.json')) # read data frame from json file
-vglut2_ptx_df = pd.read_json(os.path.join(vglut2_ptx_save_path, 'vglut2_picrotoxin_pooled_df_firing_frequency.json')) # read data frame from json file
-
-print(len(vgat_ctrl_df))
-print(len(vgat_kynac_ptx_df))
-print(len(vglut2_ctrl_df))
-print(len(vglut2_ptx_df))
-
-# %%
