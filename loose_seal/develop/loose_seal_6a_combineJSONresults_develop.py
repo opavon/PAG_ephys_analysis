@@ -101,12 +101,12 @@ for folder in folders_to_check:
             vgat_kynac_ptx_temp_list.append(temp) # append the data frame to the list
         vgat_kynac_ptx_df = pd.concat(vgat_kynac_ptx_temp_list) # concatenate all the data frames in the list
     if 'vglut2_control' in folder:
-        vlut2_ctrl_temp_list = [] # an empty list to store the data frames
-        vlut2_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]
-        for file in vlut2_ctrl_results_files:
+        vglut2_ctrl_temp_list = [] # an empty list to store the data frames
+        vglut2_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]
+        for file in vglut2_ctrl_results_files:
             temp = pd.read_json(os.path.join(folder, file)) # read data frame from json file
-            vlut2_ctrl_temp_list.append(temp) # append the data frame to the list
-        vlut2_ctrl_df = pd.concat(vlut2_ctrl_temp_list) # concatenate all the data frames in the list
+            vglut2_ctrl_temp_list.append(temp) # append the data frame to the list
+        vglut2_ctrl_df = pd.concat(vglut2_ctrl_temp_list) # concatenate all the data frames in the list
     if 'vglut2_picrotoxin' in folder:
         vglut2_ptx_temp_list = [] # an empty list to store the data frames
         vglut2_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]
@@ -117,7 +117,7 @@ for folder in folders_to_check:
 
 print(len(vgat_ctrl_df))
 print(len(vgat_kynac_ptx_df))
-print(len(vlut2_ctrl_df))
+print(len(vglut2_ctrl_df))
 print(len(vglut2_ptx_df))
 
 # %%
@@ -193,12 +193,12 @@ folders_to_check = [vgat_ctrl_save_path, vgat_kynac_ptx_save_path, vglut2_ctrl_s
 results_type = '_df_firing_frequency'
 
 # Run function
-vgat_ctrl_df, vgat_kynac_ptx_df, vlut2_ctrl_df, vglut2_ptx_df = combineJSONresults(folders_to_check, results_type)
+vgat_ctrl_df, vgat_kynac_ptx_df, vglut2_ctrl_df, vglut2_ptx_df = combineJSONresults(folders_to_check, results_type)
 
 # Print results
 print(len(vgat_ctrl_df))
 print(len(vgat_kynac_ptx_df))
-print(len(vlut2_ctrl_df))
+print(len(vglut2_ctrl_df))
 print(len(vglut2_ptx_df))
 
 # %%
