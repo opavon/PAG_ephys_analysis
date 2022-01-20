@@ -1583,13 +1583,15 @@ def saveLooseSealResults(
 
 def combineJSONresults(
     folders_to_check,
-    results_type
+    results_type,
+    save_type
     ):
     """
-    `combineJSONresults` finds the .json files of that match the criteria in each celltype_condition folder, loads the results they contain, combines them into a single dataframe, and saves them as a new .json file. It returns one separate dataframe for the pooled results of each folder. For example, if we set `results_type = '_df_firing_frequency'` it will load the results from all the JSON files in a folder containing that type of data and will combine them into a single dataframe that can be used for statistical analysis and plotting.
+    `combineJSONresults` finds the .json files that match the criteria in each celltype_condition folder, loads the results they contain, combines them into a single dataframe, and saves them as a new .json file. It returns one separate dataframe for the pooled results of each folder. For example, if we set `results_type = '_df_firing_frequency'` it will load the results from all the JSON files in a folder containing that type of data and will combine them into a single dataframe that can be used for statistical analysis and plotting.
     
     :folders_to_check: a list containing the paths to the four folders to check.
     :results_type: a string containing the type of result (without its .json extension) to load and combine.
+    :save_type: a string containing the type of result you are saving. For example, if `results_type = "_df_firing_frequency"`, setting `save_type = "_firing_frequency"` will avoid errors if we re-run the function.
     """
     # Check conditions
     if not len(folders_to_check) == 4:
@@ -1599,40 +1601,39 @@ def combineJSONresults(
     for folder in folders_to_check:
         if 'vgat_control' in folder:
             vgat_ctrl_temp_list = [] # an empty list to store the data frames
-            vgat_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]
+            vgat_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vgat_ctrl_results_files:
                 temp_1 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 vgat_ctrl_temp_list.append(temp_1) # append the data frame to the list
             vgat_ctrl_df = pd.concat(vgat_ctrl_temp_list) # concatenate all the data frames in the list
-            vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + results_type + '.json')) # save combined results as new .json file
+            vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + save_type + '.json')) # save combined results as new .json file
         
         if 'vgat_kynurenic_picrotoxin' in folder:
             vgat_kynac_ptx_temp_list = [] # an empty list to store the data frames
-            vgat_kynac_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]
+            vgat_kynac_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vgat_kynac_ptx_results_files:
                 temp_2 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 vgat_kynac_ptx_temp_list.append(temp_2) # append the data frame to the list
             vgat_kynac_ptx_df = pd.concat(vgat_kynac_ptx_temp_list) # concatenate all the data frames in the list
-            vgat_kynac_ptx_df.to_json(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + results_type + '.json')) # save combined results as new .json file
+            vgat_kynac_ptx_df.to_json(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
 
-        
         if 'vglut2_control' in folder:
             vglut2_ctrl_temp_list = [] # an empty list to store the data frames
-            vglut2_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]
+            vglut2_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vglut2_ctrl_results_files:
                 temp_3 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 vglut2_ctrl_temp_list.append(temp_3) # append the data frame to the list
             vglut2_ctrl_df = pd.concat(vglut2_ctrl_temp_list) # concatenate all the data frames in the list
-            vglut2_ctrl_df.to_json(os.path.join(folder, 'vglut2_control_pooled' + results_type + '.json')) # save combined results as new .json file
+            vglut2_ctrl_df.to_json(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.json')) # save combined results as new .json file
         
         if 'vglut2_picrotoxin' in folder:
             vglut2_ptx_temp_list = [] # an empty list to store the data frames
-            vglut2_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]
+            vglut2_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vglut2_ptx_results_files:
                 temp_4 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 vglut2_ptx_temp_list.append(temp_4) # append the data frame to the list
             vglut2_ptx_df = pd.concat(vglut2_ptx_temp_list) # concatenate all the data frames in the list
-            vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + results_type + '.json')) # save combined results as new .json file
+            vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
     
     print('results saved')
     
