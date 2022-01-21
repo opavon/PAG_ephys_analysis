@@ -17,7 +17,7 @@ from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from IPython import get_ipython
-from utilities import * # includes functions combineJSONresults, getAvgRsealResults
+from utilities import * # includes functions combineJSONresults, getAvgRsealResults, getSpikeHalfWidth
 print("done!")
 
 # %% [markdown]
@@ -26,11 +26,12 @@ print("done!")
 # Once we have run the previous steps for each recording and we have extracted our results, we can proceed to pool them across cell_type and condition.
 
 # %%
-# ## 2.1 | Set paths to subfolders where extracted results files are stored
+# ## 2.0 | Set paths to subfolders where extracted results files are stored
 vgat_ctrl_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vgat_control"
 vgat_kynac_ptx_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vgat_kynurenic_picrotoxin"
 vglut2_ctrl_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vglut2_control"
 vglut2_ptx_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vglut2_picrotoxin"
+print("done!")
 
 # %%
 # ## 2.1 | Get average seal resistance for each cell and combine the results in one data frame for each cell type and condition
@@ -56,7 +57,7 @@ print(len(vglut2_ptx_Rseal_df))
 vgat_ctrl_Rseal_df
 
 # %%
-# ## 2.1 | Pool the data frames containing the firing frequency for each cell type and condition
+# ## 2.2 | Pool the data frames containing the firing frequency for each cell type and condition
 
 # Choose folders
 folders_to_check = [vgat_ctrl_save_path, 
@@ -77,3 +78,33 @@ print(len(vgat_kynac_ptx_firing_frequency_df))
 print(len(vglut2_ctrl_firing_frequency_df))
 print(len(vglut2_ptx_firing_frequency_df))
 vgat_ctrl_firing_frequency_df
+
+# %%
+# ## 2.3 | Load the average spike, calculate the half-width, append to the results data frame, and then pool the data frames for each cell type and condition
+
+# Choose folders
+folders_to_check = [vgat_ctrl_save_path, 
+                    vgat_kynac_ptx_save_path, 
+                    vglut2_ctrl_save_path, 
+                    vglut2_ptx_save_path]
+
+# Choose type of results and suffix for saved file
+results_type_avg_spike = '_df_parameters_avg_spike'
+save_type_avg_spike = '_avg_spike'
+
+# Run function
+vgat_ctrl_avg_spike_df, vgat_kynac_ptx_avg_spike_df, vglut2_ctrl_avg_spike_df, vglut2_ptx_avg_spike_df = getSpikeHalfWidth(folders_to_check, results_type_avg_spike, save_type_avg_spike)
+
+# Print results number of cells in each group and inspect one of the resulting data frames
+print(len(vgat_ctrl_avg_spike_df))
+print(len(vgat_kynac_ptx_avg_spike_df))
+print(len(vglut2_ctrl_avg_spike_df))
+print(len(vglut2_ptx_avg_spike_df))
+vgat_ctrl_avg_spike_df
+
+# %%
+# ## 2.4 | Pool the data frames containing the interspike intervals for each cell type and condition
+
+temp = pd.read_json(os.path.join(vgat_ctrl_save_path, "dlpag_vgat_171113_c5_LIAI_OP_clear_VC_1_df_interspike_interval.json")) # read data frame from json file
+
+# %%
