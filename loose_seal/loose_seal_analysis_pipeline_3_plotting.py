@@ -54,11 +54,22 @@ print(len(vglut2_ctrl_df))
 print(len(vglut2_ptx_df))
 
 # %%
+# Load data from excel file
+vgat_ctrl_summary_data = pd.read_excel("D:\\Dropbox (UCL)\\Project_paginhibition\\analysis\\loose_seal\\loose_seal_metadata\\PAG_data_summary_loose_seal.xlsx", sheet_name = "vgat_control", header = 0, index_col = 23
+)
+
+# Inspect first 5 rows of data
+vgat_ctrl_summary_data
+
+# %%
 sns.violinplot(data = [vgat_ctrl_df['firing_frequency_Hz'],
     vgat_kynac_ptx_df['firing_frequency_Hz'],
     vglut2_ctrl_df['firing_frequency_Hz'],
     vglut2_ptx_df['firing_frequency_Hz']]
 )
+
+
+
 
 # %%
 # Code from Philip Shamash to generate the kde plot
