@@ -1661,7 +1661,7 @@ def getAvgRsealResults(
             vgat_ctrl_temp_list = [] # an empty list to store the data frames
             vgat_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vgat_ctrl_results_files:
-                # Get the cell ID and assign it to the row label
+                # Get the cell ID
                 temp_file_id = [file.split('.')[0]]
                 temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-2])]
 
@@ -1677,7 +1677,7 @@ def getAvgRsealResults(
             vgat_kynac_ptx_temp_list = [] # an empty list to store the data frames
             vgat_kynac_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vgat_kynac_ptx_results_files:
-                # Get the cell ID and assign it to the row label
+                # Get the cell ID
                 temp_file_id = [file.split('.')[0]]
                 temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-2])]
 
@@ -1693,7 +1693,7 @@ def getAvgRsealResults(
             vglut2_ctrl_temp_list = [] # an empty list to store the data frames
             vglut2_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vglut2_ctrl_results_files:
-                # Get the cell ID and assign it to the row label
+                # Get the cell ID
                 temp_file_id = [file.split('.')[0]]
                 temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-2])]
 
@@ -1709,7 +1709,7 @@ def getAvgRsealResults(
             vglut2_ptx_temp_list = [] # an empty list to store the data frames
             vglut2_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vglut2_ptx_results_files:
-                # Get the cell ID and assign it to the row label
+                # Get the cell ID
                 temp_file_id = [file.split('.')[0]]
                 temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-2])]
 
@@ -1723,4 +1723,256 @@ def getAvgRsealResults(
     
     print('results saved')
     
+    return vgat_ctrl_df, vgat_kynac_ptx_df, vglut2_ctrl_df, vglut2_ptx_df # pandas dataframes
+
+def getSpikeHalfWidth( 
+    folders_to_check,
+    results_type = "_df_parameters_avg_spike",
+    save_type = '_avg_spike',
+    sampling_rate_khz = 25
+    ):
+    """
+    `getSpikeHalfWidth` loads the data extracted from a cell, computes the half-width of its average spike, and appends the result in the JSON file containing the Spike Parameters.
+    It returns a dataframe with the spike onset, end, and magnitude, as well as the total duration of the spike, the time from onset to peak, and the half-width. It also returns the average and standard deviation of the start and end baselines used to calculate the thresholds, which can be used to detect any differences in the baseline before and after the average spike.
+    
+    :folders_to_check: a list containing the paths to the four folders to check.
+    :results_type: a string containing the type of result (without its .json extension) to load and combine. Should be '_df_parameters_avg_spike'.
+    :save_type: a string to append to the saved file. 
+    :sampling_rate_khz: sampling rate in KHz. Defaults to 25 KHz.
+    """
+
+    # Check conditions
+    if not len(folders_to_check) == 4:
+        print(f"Please provide the path to the four folders corresponding to: vgat_control, vgat_kynurenic_picrotoxin, vglut2_control, vglut2_picrotoxin")
+        return None, None, None, None
+
+    dt = 1 / sampling_rate_khz # calculate dt from sampling rate
+
+    for folder in folders_to_check:
+        if 'vgat_control' in folder:
+            vgat_ctrl_temp_list = [] # an empty list to store the data frames
+            vgat_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
+            for file in vgat_ctrl_results_files:
+                # Get the cell ID
+                temp_file_id = [file.split('.')[0]]
+                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-4])]
+
+                temp_1_avg_spike_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
+
+                # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
+                if isinstance(temp_1_avg_spike_results["spike_magnitude_pA"][0], float):
+                    temp_1_npz_results = np.load(os.path.join(folder, temp_cell_id[0] + '_results.npz')) # load data from current cell ID
+                    temp_1_avg_spike = temp_1_npz_results["average_spike"] # retrieve average spike
+                    temp_1_avg_spike_peak_index = int(np.where(temp_1_avg_spike == min(temp_1_avg_spike))[0]) # find peak indez
+                    
+                    # Compute the half_peak value (baseline to peak divided by two) that will be used to measure the half-width
+                    temp_1_half_peak = (temp_1_avg_spike_results["spike_magnitude_pA"][0] - temp_1_avg_spike_results['baseline_start_mean'][0]) / 2
+
+                    # Now, we need to get the first time we cross the half_peak value (before the peak), and the second time (after the peak). To do this, we are going to split the spike in two halves, and do the procedure separately.
+                    from scipy.interpolate import interp1d # load function to interpolate
+                    temp_1_avg_spike_first_half = temp_1_avg_spike[:temp_1_avg_spike_peak_index] # get first half of average spike
+                    temp_1_f1 = interp1d(temp_1_avg_spike_first_half, 
+                                        range(0, len(temp_1_avg_spike_first_half)), 
+                                        kind = "linear") # make function to interpolate
+                    temp_half_width_start = temp_1_f1(temp_1_half_peak) # find value corresponding to the half_peak
+                    
+                    temp_1_avg_spike_second_half = temp_1_avg_spike[temp_1_avg_spike_peak_index:] # get second half of average spike
+                    temp_1_f2 = interp1d(temp_1_avg_spike_second_half, 
+                                        range(temp_1_avg_spike_peak_index, 
+                                        temp_1_avg_spike_peak_index+len(temp_1_avg_spike_second_half)), 
+                                        kind = "linear") # make function to interpolate
+                    temp_half_width_end = temp_1_f2(temp_1_half_peak) # find value corresponding to the half_peak
+
+                    # Subtract beginning from end and multiply by the sampling rate to obtain the half_width in ms
+                    temp_1_half_width_interpolated = (temp_half_width_end - temp_half_width_start) * dt
+
+                    # Append the results to the data frame
+                    temp_1_avg_spike_results["half_width_start"] = temp_half_width_start
+                    temp_1_avg_spike_results["half_width_end"] = temp_half_width_end
+                    temp_1_avg_spike_results["half_width_ms"] = temp_1_half_width_interpolated
+                    temp_1_avg_spike_results["avg_spike"] = [temp_1_avg_spike]
+                
+                # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "spike_magnitude_pA" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
+                if isinstance(temp_1_avg_spike_results["spike_magnitude_pA"][0], str):
+                    # Append the 'NA' to the data frame
+                    temp_1_avg_spike_results["half_width_start"] = 'NA'
+                    temp_1_avg_spike_results["half_width_end"] = 'NA'
+                    temp_1_avg_spike_results["half_width_ms"] = 'NA'
+                    temp_1_avg_spike_results["avg_spike"] = 'NA'
+
+                vgat_ctrl_temp_list.append(temp_1_avg_spike_results) # append the data frame to the list
+            
+            vgat_ctrl_df = pd.concat(vgat_ctrl_temp_list) # concatenate all the data frames in the list
+            vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + save_type + '.json')) # save combined results as new .json file
+        
+        if 'vgat_kynurenic_picrotoxin' in folder:
+            vgat_kynac_ptx_temp_list = [] # an empty list to store the data frames
+            vgat_kynac_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
+            for file in vgat_kynac_ptx_results_files:
+                # Get the cell ID
+                temp_file_id = [file.split('.')[0]]
+                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-4])]
+
+                temp_2_avg_spike_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
+
+                # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
+                if isinstance(temp_2_avg_spike_results["spike_magnitude_pA"][0], float):
+                    temp_2_npz_results = np.load(os.path.join(folder, temp_cell_id[0] + '_results.npz')) # load data from current cell ID
+                    temp_2_avg_spike = temp_2_npz_results["average_spike"] # retrieve average spike
+                    temp_2_avg_spike_peak_index = int(np.where(temp_2_avg_spike == min(temp_2_avg_spike))[0]) # find peak indez
+                    
+                    # Compute the half_peak value (baseline to peak divided by two) that will be used to measure the half-width
+                    temp_2_half_peak = (temp_2_avg_spike_results["spike_magnitude_pA"][0] - temp_2_avg_spike_results['baseline_start_mean'][0]) / 2
+
+                    # Now, we need to get the first time we cross the half_peak value (before the peak), and the second time (after the peak). To do this, we are going to split the spike in two halves, and do the procedure separately.
+                    from scipy.interpolate import interp1d # load function to interpolate
+                    temp_2_avg_spike_first_half = temp_2_avg_spike[:temp_2_avg_spike_peak_index] # get first half of average spike
+                    temp_2_f1 = interp1d(temp_2_avg_spike_first_half, 
+                                        range(0, len(temp_2_avg_spike_first_half)), 
+                                        kind = "linear") # make function to interpolate
+                    temp_half_width_start = temp_2_f1(temp_2_half_peak) # find value corresponding to the half_peak
+                    
+                    temp_2_avg_spike_second_half = temp_2_avg_spike[temp_2_avg_spike_peak_index:] # get second half of average spike
+                    temp_2_f2 = interp1d(temp_2_avg_spike_second_half, 
+                                        range(temp_2_avg_spike_peak_index, 
+                                        temp_2_avg_spike_peak_index+len(temp_2_avg_spike_second_half)), 
+                                        kind = "linear") # make function to interpolate
+                    temp_half_width_end = temp_2_f2(temp_2_half_peak) # find value corresponding to the half_peak
+
+                    # Subtract beginning from end and multiply by the sampling rate to obtain the half_width in ms
+                    temp_2_half_width_interpolated = (temp_half_width_end - temp_half_width_start) * dt
+
+                    # Append the results to the data frame
+                    temp_2_avg_spike_results["half_width_start"] = temp_half_width_start
+                    temp_2_avg_spike_results["half_width_end"] = temp_half_width_end
+                    temp_2_avg_spike_results["half_width_ms"] = temp_2_half_width_interpolated
+                    temp_2_avg_spike_results["avg_spike"] = [temp_2_avg_spike]
+                
+                # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "spike_magnitude_pA" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
+                if isinstance(temp_2_avg_spike_results["spike_magnitude_pA"][0], str):
+                    # Append the 'NA' to the data frame
+                    temp_2_avg_spike_results["half_width_start"] = 'NA'
+                    temp_2_avg_spike_results["half_width_end"] = 'NA'
+                    temp_2_avg_spike_results["half_width_ms"] = 'NA'
+                    temp_2_avg_spike_results["avg_spike"] = 'NA'
+
+                vgat_kynac_ptx_temp_list.append(temp_2_avg_spike_results) # append the data frame to the list
+            
+            vgat_kynac_ptx_df = pd.concat(vgat_kynac_ptx_temp_list) # concatenate all the data frames in the list
+            vgat_kynac_ptx_df.to_json(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+
+        if 'vglut2_control' in folder:
+            vglut2_ctrl_temp_list = [] # an empty list to store the data frames
+            vglut2_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
+            for file in vglut2_ctrl_results_files:
+                # Get the cell ID
+                temp_file_id = [file.split('.')[0]]
+                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-4])]
+
+                temp_3_avg_spike_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
+
+                # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
+                if isinstance(temp_3_avg_spike_results["spike_magnitude_pA"][0], float):
+                    temp_3_npz_results = np.load(os.path.join(folder, temp_cell_id[0] + '_results.npz')) # load data from current cell ID
+                    temp_3_avg_spike = temp_3_npz_results["average_spike"] # retrieve average spike
+                    temp_3_avg_spike_peak_index = int(np.where(temp_3_avg_spike == min(temp_3_avg_spike))[0]) # find peak indez
+                    
+                    # Compute the half_peak value (baseline to peak divided by two) that will be used to measure the half-width
+                    temp_3_half_peak = (temp_3_avg_spike_results["spike_magnitude_pA"][0] - temp_3_avg_spike_results['baseline_start_mean'][0]) / 2
+
+                    # Now, we need to get the first time we cross the half_peak value (before the peak), and the second time (after the peak). To do this, we are going to split the spike in two halves, and do the procedure separately.
+                    from scipy.interpolate import interp1d # load function to interpolate
+                    temp_3_avg_spike_first_half = temp_3_avg_spike[:temp_3_avg_spike_peak_index] # get first half of average spike
+                    temp_3_f1 = interp1d(temp_3_avg_spike_first_half, 
+                                        range(0, len(temp_3_avg_spike_first_half)), 
+                                        kind = "linear") # make function to interpolate
+                    temp_half_width_start = temp_3_f1(temp_3_half_peak) # find value corresponding to the half_peak
+                    
+                    temp_3_avg_spike_second_half = temp_3_avg_spike[temp_3_avg_spike_peak_index:] # get second half of average spike
+                    temp_3_f2 = interp1d(temp_3_avg_spike_second_half, 
+                                        range(temp_3_avg_spike_peak_index, 
+                                        temp_3_avg_spike_peak_index+len(temp_3_avg_spike_second_half)), 
+                                        kind = "linear") # make function to interpolate
+                    temp_half_width_end = temp_3_f2(temp_3_half_peak) # find value corresponding to the half_peak
+
+                    # Subtract beginning from end and multiply by the sampling rate to obtain the half_width in ms
+                    temp_3_half_width_interpolated = (temp_half_width_end - temp_half_width_start) * dt
+
+                    # Append the results to the data frame
+                    temp_3_avg_spike_results["half_width_start"] = temp_half_width_start
+                    temp_3_avg_spike_results["half_width_end"] = temp_half_width_end
+                    temp_3_avg_spike_results["half_width_ms"] = temp_3_half_width_interpolated
+                    temp_3_avg_spike_results["avg_spike"] = [temp_3_avg_spike]
+                
+                # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "spike_magnitude_pA" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
+                if isinstance(temp_3_avg_spike_results["spike_magnitude_pA"][0], str):
+                    # Append the 'NA' to the data frame
+                    temp_3_avg_spike_results["half_width_start"] = 'NA'
+                    temp_3_avg_spike_results["half_width_end"] = 'NA'
+                    temp_3_avg_spike_results["half_width_ms"] = 'NA'
+                    temp_3_avg_spike_results["avg_spike"] = 'NA'
+
+                vglut2_ctrl_temp_list.append(temp_3_avg_spike_results) # append the data frame to the list
+            
+            vglut2_ctrl_df = pd.concat(vglut2_ctrl_temp_list) # concatenate all the data frames in the list
+            vglut2_ctrl_df.to_json(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.json')) # save combined results as new .json file
+
+        if 'vglut2_picrotoxin' in folder:
+            vglut2_ptx_temp_list = [] # an empty list to store the data frames
+            vglut2_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
+            for file in vglut2_ptx_results_files:
+                # Get the cell ID
+                temp_file_id = [file.split('.')[0]]
+                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-4])]
+
+                temp_4_avg_spike_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
+
+                # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
+                if isinstance(temp_4_avg_spike_results["spike_magnitude_pA"][0], float):
+                    temp_4_npz_results = np.load(os.path.join(folder, temp_cell_id[0] + '_results.npz')) # load data from current cell ID
+                    temp_4_avg_spike = temp_4_npz_results["average_spike"] # retrieve average spike
+                    temp_4_avg_spike_peak_index = int(np.where(temp_4_avg_spike == min(temp_4_avg_spike))[0]) # find peak indez
+                    
+                    # Compute the half_peak value (baseline to peak divided by two) that will be used to measure the half-width
+                    temp_4_half_peak = (temp_4_avg_spike_results["spike_magnitude_pA"][0] - temp_4_avg_spike_results['baseline_start_mean'][0]) / 2
+
+                    # Now, we need to get the first time we cross the half_peak value (before the peak), and the second time (after the peak). To do this, we are going to split the spike in two halves, and do the procedure separately.
+                    from scipy.interpolate import interp1d # load function to interpolate
+                    temp_4_avg_spike_first_half = temp_4_avg_spike[(temp_4_avg_spike_peak_index-40):temp_4_avg_spike_peak_index] # get first half of average spike
+                    temp_4_f1 = interp1d(temp_4_avg_spike_first_half, 
+                                        range(0, len(temp_4_avg_spike_first_half)), 
+                                        kind = "linear") # make function to interpolate
+                    temp_half_width_start = temp_4_f1(temp_4_half_peak) + (temp_4_avg_spike_peak_index-40) # find value corresponding to the half_peak
+                    
+                    temp_4_avg_spike_second_half = temp_4_avg_spike[temp_4_avg_spike_peak_index:] # get second half of average spike
+                    temp_4_f2 = interp1d(temp_4_avg_spike_second_half, 
+                                        range(temp_4_avg_spike_peak_index, 
+                                        temp_4_avg_spike_peak_index+len(temp_4_avg_spike_second_half)), 
+                                        kind = "linear") # make function to interpolate
+                    temp_half_width_end = temp_4_f2(temp_4_half_peak) # find value corresponding to the half_peak
+
+                    # Subtract beginning from end and multiply by the sampling rate to obtain the half_width in ms
+                    temp_4_half_width_interpolated = (temp_half_width_end - temp_half_width_start) * dt
+
+                    # Append the results to the data frame
+                    temp_4_avg_spike_results["half_width_start"] = temp_half_width_start
+                    temp_4_avg_spike_results["half_width_end"] = temp_half_width_end
+                    temp_4_avg_spike_results["half_width_ms"] = temp_4_half_width_interpolated
+                    temp_4_avg_spike_results["avg_spike"] = [temp_4_avg_spike]
+                
+                # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "spike_magnitude_pA" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
+                if isinstance(temp_4_avg_spike_results["spike_magnitude_pA"][0], str):
+                    # Append the 'NA' to the data frame
+                    temp_4_avg_spike_results["half_width_start"] = 'NA'
+                    temp_4_avg_spike_results["half_width_end"] = 'NA'
+                    temp_4_avg_spike_results["half_width_ms"] = 'NA'
+                    temp_4_avg_spike_results["avg_spike"] = 'NA'
+
+                vglut2_ptx_temp_list.append(temp_4_avg_spike_results) # append the data frame to the list
+            
+            vglut2_ptx_df = pd.concat(vglut2_ptx_temp_list) # concatenate all the data frames in the list
+            vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+
+    print('results saved')
+
     return vgat_ctrl_df, vgat_kynac_ptx_df, vglut2_ctrl_df, vglut2_ptx_df # pandas dataframes
