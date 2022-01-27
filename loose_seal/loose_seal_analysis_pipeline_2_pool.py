@@ -105,6 +105,28 @@ vgat_ctrl_avg_spike_df
 # %%
 # ## 2.4 | Pool the data frames containing the interspike intervals for each cell type and condition
 
-temp = pd.read_json(os.path.join(vgat_ctrl_save_path, "dlpag_vgat_171113_c5_LIAI_OP_clear_VC_1_df_interspike_interval.json")) # read data frame from json file
+# Choose folders
+folders_to_check = [vgat_ctrl_save_path, 
+                    vgat_kynac_ptx_save_path, 
+                    vglut2_ctrl_save_path, 
+                    vglut2_ptx_save_path]
+
+# Choose type of results and suffix for saved file
+results_type_isi = '_df_interspike_interval'
+save_type_isi = '_interspike_interval'
+
+# Run function
+vgat_ctrl_isi_df, vgat_kynac_ptx_isi_df, vglut2_ctrl_isi_df, vglut2_ptx_isi_df = combineISIresults(folders_to_check, results_type_isi, save_type_isi)
+
+# Print results number of cells in each group and inspect one of the resulting data frames
+print(len(vgat_ctrl_isi_df))
+print(len(vgat_kynac_ptx_isi_df))
+print(len(vglut2_ctrl_isi_df))
+print(len(vglut2_ptx_isi_df))
+vgat_ctrl_isi_df
+
+# %%
+temp = pd.read_json(os.path.join(vgat_ctrl_save_path, "vlpag_vgat_190124_c2_LICJ_OP_VC_clear_nointerval_1_df_interspike_interval.json")) # read data frame from json file
+temp
 
 # %%
