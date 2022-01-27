@@ -17,11 +17,11 @@ from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from IPython import get_ipython
-from utilities import * # includes functions combineJSONresults, getAvgRsealResults, getSpikeHalfWidth
+from utilities import * # includes functions combineJSONresults, getAvgRsealResults, getSpikeHalfWidth, combineISIresults
 print("done!")
 
 # %% [markdown]
-# ## 2 | Pool results across cells: seal resistance and firing rate
+# ## 1 | Pool results across cells: seal resistance and firing rate
 
 # Once we have run the previous steps for each recording and we have extracted our results, we can proceed to pool them across cell_type and condition.
 
@@ -34,7 +34,7 @@ vglut2_ptx_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_s
 print("done!")
 
 # %%
-# ## 2.1 | Get average seal resistance for each cell and combine the results in one data frame for each cell type and condition
+# ## 1.1 | Get average seal resistance for each cell and combine the results in one data frame for each cell type and condition
 
 # Choose folders
 folders_to_check = [vgat_ctrl_save_path, 
@@ -57,7 +57,7 @@ print(len(vglut2_ptx_Rseal_df))
 vgat_ctrl_Rseal_df
 
 # %%
-# ## 2.2 | Pool the data frames containing the firing frequency for each cell type and condition
+# ## 1.2 | Pool the data frames containing the firing frequency for each cell type and condition
 
 # Choose folders
 folders_to_check = [vgat_ctrl_save_path, 
@@ -80,7 +80,7 @@ print(len(vglut2_ptx_firing_frequency_df))
 vgat_ctrl_firing_frequency_df
 
 # %%
-# ## 2.3 | Load the average spike, calculate the half-width, append to the results data frame, and then pool the data frames for each cell type and condition
+# ## 1.3 | Load the average spike, calculate the half-width, append to the results data frame, and then pool the data frames for each cell type and condition
 
 # Choose folders
 folders_to_check = [vgat_ctrl_save_path, 
@@ -103,7 +103,7 @@ print(len(vglut2_ptx_avg_spike_df))
 vgat_ctrl_avg_spike_df
 
 # %%
-# ## 2.4 | Pool the data frames containing the interspike intervals for each cell type and condition
+# ## 1.4 | Pool the data frames containing the interspike intervals for each cell type and condition
 
 # Choose folders
 folders_to_check = [vgat_ctrl_save_path, 
@@ -124,9 +124,3 @@ print(len(vgat_kynac_ptx_isi_df))
 print(len(vglut2_ctrl_isi_df))
 print(len(vglut2_ptx_isi_df))
 vgat_ctrl_isi_df
-
-# %%
-temp = pd.read_json(os.path.join(vgat_ctrl_save_path, "vlpag_vgat_190124_c2_LICJ_OP_VC_clear_nointerval_1_df_interspike_interval.json")) # read data frame from json file
-temp
-
-# %%
