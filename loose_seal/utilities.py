@@ -1662,13 +1662,13 @@ def getAvgRsealResults(
             vgat_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vgat_ctrl_results_files:
                 # Get the cell ID
-                temp_file_id = [file.split('.')[0]]
-                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-2])]
+                temp_1_file_id = [file.split('.')[0]]
+                temp_1_cell_id = ['_'.join((temp_1_file_id[0].split('_'))[0:-2])]
 
                 temp_1 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 temp_1_avg_Rseal = np.mean(temp_1.loc['seal_resistance_MOhm']) # compute the average Rseal across sweeps
                 temp_1_std_Rseal = np.std(temp_1.loc['seal_resistance_MOhm']) # compute the standard deviation of the Rseal average across sweeps
-                temp_1_df = pd.DataFrame([[temp_1_avg_Rseal, temp_1_std_Rseal]], index = temp_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
+                temp_1_df = pd.DataFrame([[temp_1_avg_Rseal, temp_1_std_Rseal]], index = temp_1_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
                 vgat_ctrl_temp_list.append(temp_1_df) # append the data frame to the list
             vgat_ctrl_df = pd.concat(vgat_ctrl_temp_list) # concatenate all the data frames in the list
             vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + save_type + '.json')) # save combined results as new .json file
@@ -1678,13 +1678,13 @@ def getAvgRsealResults(
             vgat_kynac_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vgat_kynac_ptx_results_files:
                 # Get the cell ID
-                temp_file_id = [file.split('.')[0]]
-                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-2])]
+                temp_2_file_id = [file.split('.')[0]]
+                temp_2_cell_id = ['_'.join((temp_2_file_id[0].split('_'))[0:-2])]
 
                 temp_2 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 temp_2_avg_Rseal = np.mean(temp_2.loc['seal_resistance_MOhm']) # compute the average Rseal across sweeps
                 temp_2_std_Rseal = np.std(temp_2.loc['seal_resistance_MOhm']) # compute the standard deviation of the Rseal average across sweeps
-                temp_2_df = pd.DataFrame([[temp_2_avg_Rseal, temp_2_std_Rseal]], index = temp_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
+                temp_2_df = pd.DataFrame([[temp_2_avg_Rseal, temp_2_std_Rseal]], index = temp_2_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
                 vgat_kynac_ptx_temp_list.append(temp_2_df) # append the data frame to the list
             vgat_kynac_ptx_df = pd.concat(vgat_kynac_ptx_temp_list) # concatenate all the data frames in the list
             vgat_kynac_ptx_df.to_json(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
@@ -1694,13 +1694,13 @@ def getAvgRsealResults(
             vglut2_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vglut2_ctrl_results_files:
                 # Get the cell ID
-                temp_file_id = [file.split('.')[0]]
-                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-2])]
+                temp_3_file_id = [file.split('.')[0]]
+                temp_3_cell_id = ['_'.join((temp_3_file_id[0].split('_'))[0:-2])]
 
                 temp_3 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 temp_3_avg_Rseal = np.mean(temp_3.loc['seal_resistance_MOhm']) # compute the average Rseal across sweeps
                 temp_3_std_Rseal = np.std(temp_3.loc['seal_resistance_MOhm']) # compute the standard deviation of the Rseal average across sweeps
-                temp_3_df = pd.DataFrame([[temp_3_avg_Rseal, temp_3_std_Rseal]], index = temp_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
+                temp_3_df = pd.DataFrame([[temp_3_avg_Rseal, temp_3_std_Rseal]], index = temp_3_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
                 vglut2_ctrl_temp_list.append(temp_3_df) # append the data frame to the list
             vglut2_ctrl_df = pd.concat(vglut2_ctrl_temp_list) # concatenate all the data frames in the list
             vglut2_ctrl_df.to_json(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.json')) # save combined results as new .json file
@@ -1710,13 +1710,13 @@ def getAvgRsealResults(
             vglut2_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vglut2_ptx_results_files:
                 # Get the cell ID
-                temp_file_id = [file.split('.')[0]]
-                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-2])]
+                temp_4_file_id = [file.split('.')[0]]
+                temp_4_cell_id = ['_'.join((temp_4_file_id[0].split('_'))[0:-2])]
 
                 temp_4 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 temp_4_avg_Rseal = np.mean(temp_4.loc['seal_resistance_MOhm']) # compute the average Rseal across sweeps
                 temp_4_std_Rseal = np.std(temp_4.loc['seal_resistance_MOhm']) # compute the standard deviation of the Rseal average across sweeps
-                temp_4_df = pd.DataFrame([[temp_4_avg_Rseal, temp_4_std_Rseal]], index = temp_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
+                temp_4_df = pd.DataFrame([[temp_4_avg_Rseal, temp_4_std_Rseal]], index = temp_4_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
                 vglut2_ptx_temp_list.append(temp_4_df) # append the data frame to the list
             vglut2_ptx_df = pd.concat(vglut2_ptx_temp_list) # concatenate all the data frames in the list
             vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
@@ -1754,14 +1754,14 @@ def getSpikeHalfWidth(
             vgat_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vgat_ctrl_results_files:
                 # Get the cell ID
-                temp_file_id = [file.split('.')[0]]
-                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-4])]
+                temp_1_file_id = [file.split('.')[0]]
+                temp_1_cell_id = ['_'.join((temp_1_file_id[0].split('_'))[0:-4])]
 
                 temp_1_avg_spike_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
 
                 # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
                 if isinstance(temp_1_avg_spike_results["spike_magnitude_pA"][0], float):
-                    temp_1_npz_results = np.load(os.path.join(folder, temp_cell_id[0] + '_results.npz')) # load data from current cell ID
+                    temp_1_npz_results = np.load(os.path.join(folder, temp_1_cell_id[0] + '_results.npz')) # load data from current cell ID
                     temp_1_avg_spike = temp_1_npz_results["average_spike"] # retrieve average spike
                     temp_1_avg_spike_peak_index = int(np.where(temp_1_avg_spike == min(temp_1_avg_spike))[0]) # find peak indez
                     
@@ -1810,14 +1810,14 @@ def getSpikeHalfWidth(
             vgat_kynac_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vgat_kynac_ptx_results_files:
                 # Get the cell ID
-                temp_file_id = [file.split('.')[0]]
-                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-4])]
+                temp_2_file_id = [file.split('.')[0]]
+                temp_2_cell_id = ['_'.join((temp_2_file_id[0].split('_'))[0:-4])]
 
                 temp_2_avg_spike_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
 
                 # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
                 if isinstance(temp_2_avg_spike_results["spike_magnitude_pA"][0], float):
-                    temp_2_npz_results = np.load(os.path.join(folder, temp_cell_id[0] + '_results.npz')) # load data from current cell ID
+                    temp_2_npz_results = np.load(os.path.join(folder, temp_2_cell_id[0] + '_results.npz')) # load data from current cell ID
                     temp_2_avg_spike = temp_2_npz_results["average_spike"] # retrieve average spike
                     temp_2_avg_spike_peak_index = int(np.where(temp_2_avg_spike == min(temp_2_avg_spike))[0]) # find peak indez
                     
@@ -1866,14 +1866,14 @@ def getSpikeHalfWidth(
             vglut2_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vglut2_ctrl_results_files:
                 # Get the cell ID
-                temp_file_id = [file.split('.')[0]]
-                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-4])]
+                temp_3_file_id = [file.split('.')[0]]
+                temp_3_cell_id = ['_'.join((temp_3_file_id[0].split('_'))[0:-4])]
 
                 temp_3_avg_spike_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
 
                 # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
                 if isinstance(temp_3_avg_spike_results["spike_magnitude_pA"][0], float):
-                    temp_3_npz_results = np.load(os.path.join(folder, temp_cell_id[0] + '_results.npz')) # load data from current cell ID
+                    temp_3_npz_results = np.load(os.path.join(folder, temp_3_cell_id[0] + '_results.npz')) # load data from current cell ID
                     temp_3_avg_spike = temp_3_npz_results["average_spike"] # retrieve average spike
                     temp_3_avg_spike_peak_index = int(np.where(temp_3_avg_spike == min(temp_3_avg_spike))[0]) # find peak indez
                     
@@ -1922,14 +1922,14 @@ def getSpikeHalfWidth(
             vglut2_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file] # get the files that contain the type of results you want
             for file in vglut2_ptx_results_files:
                 # Get the cell ID
-                temp_file_id = [file.split('.')[0]]
-                temp_cell_id = ['_'.join((temp_file_id[0].split('_'))[0:-4])]
+                temp_4_file_id = [file.split('.')[0]]
+                temp_4_cell_id = ['_'.join((temp_4_file_id[0].split('_'))[0:-4])]
 
                 temp_4_avg_spike_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
 
                 # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
                 if isinstance(temp_4_avg_spike_results["spike_magnitude_pA"][0], float):
-                    temp_4_npz_results = np.load(os.path.join(folder, temp_cell_id[0] + '_results.npz')) # load data from current cell ID
+                    temp_4_npz_results = np.load(os.path.join(folder, temp_4_cell_id[0] + '_results.npz')) # load data from current cell ID
                     temp_4_avg_spike = temp_4_npz_results["average_spike"] # retrieve average spike
                     temp_4_avg_spike_peak_index = int(np.where(temp_4_avg_spike == min(temp_4_avg_spike))[0]) # find peak indez
                     
@@ -1973,6 +1973,137 @@ def getSpikeHalfWidth(
             vglut2_ptx_df = pd.concat(vglut2_ptx_temp_list) # concatenate all the data frames in the list
             vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
 
+    print('results saved')
+
+    return vgat_ctrl_df, vgat_kynac_ptx_df, vglut2_ctrl_df, vglut2_ptx_df # pandas dataframes
+
+def combineISIresults(
+    folders_to_check,
+    results_type = "_df_interspike_interval",
+    save_type = "_interspike_interval"
+    ):
+    """
+    `combineISIresults` finds the .json files that match the criteria in each celltype_condition folder, loads the results they contain, combines all the values of a each row into a single vector and puts the vector in the corresponding column of a new dataframe, and saves the final dataframe as a new .json file. It returns one separate dataframe for the pooled results of each folder. For example, if we set `results_type = '_df_interspike_interval'` it will load the results from all the JSON files in a folder containing that type of data and will combine them into a single dataframe that can be used for statistical analysis and plotting.
+    
+    :folders_to_check: a list containing the paths to the four folders to check.
+    :results_type: a string containing the type of result (without its .json extension) to load and combine.
+    :save_type: a string containing the type of result you are saving. For example, if `results_type = "_df_interspike_interval"`, setting `save_type = "_interspike_interval"` will avoid errors if we re-run the function.
+    """   
+
+    # Check conditions
+    if not len(folders_to_check) == 4:
+        print(f"Please provide the path to the four folders corresponding to: vgat_control, vgat_kynurenic_picrotoxin, vglut2_control, vglut2_picrotoxin")
+        return None, None, None, None
+
+    for folder in folders_to_check:
+        if 'vgat_control' in folder:
+            vgat_ctrl_temp_list = [] # an empty list to store the data frames
+            vgat_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]  # get the files that contain the type of results you want
+            for file in vgat_ctrl_results_files:
+                # Get the cell ID
+                temp_1_file_id = [file.split('.')[0]]
+                temp_1_cell_id = ['_'.join((temp_1_file_id[0].split('_'))[0:-3])]
+
+                temp_1_isi_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
+
+                # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
+                if isinstance(temp_1_isi_results.loc['interspike_interval_ms'][0], float):
+                    temp_1_isi_ms = temp_1_isi_results.loc['interspike_interval_ms'].values
+                    temp_1_isi_pA_avg = temp_1_isi_results.loc['holding_isi_pA_avg'].values
+                    temp_1_isi_std = temp_1_isi_results.loc['holding_isi_std'].values
+                    
+                    temp_1_df = pd.DataFrame([[temp_1_isi_ms, temp_1_isi_pA_avg, temp_1_isi_std]], index = temp_1_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+
+                # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "interspike_interval_ms" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
+                if isinstance(temp_1_isi_results.loc['interspike_interval_ms'][0], str):            
+                    temp_1_df = pd.DataFrame([['NA', 'NA', 'NA']], index = temp_1_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                
+                vgat_ctrl_temp_list.append(temp_1_df)
+        
+            vgat_ctrl_df = pd.concat(vgat_ctrl_temp_list) # concatenate all the data frames in the list
+            vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + save_type + '.json')) # save combined results as new .json file
+
+        if 'vgat_kynurenic_picrotoxin' in folder:
+            vgat_kynac_ptx_temp_list = [] # an empty list to store the data frames
+            vgat_kynac_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]  # get the files that contain the type of results you want
+            for file in vgat_kynac_ptx_results_files:
+                # Get the cell ID
+                temp_2_file_id = [file.split('.')[0]]
+                temp_2_cell_id = ['_'.join((temp_2_file_id[0].split('_'))[0:-3])]
+
+                temp_2_isi_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
+
+                # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
+                if isinstance(temp_2_isi_results.loc['interspike_interval_ms'][0], float):
+                    temp_2_isi_ms = temp_2_isi_results.loc['interspike_interval_ms'].values
+                    temp_2_isi_pA_avg = temp_2_isi_results.loc['holding_isi_pA_avg'].values
+                    temp_2_isi_std = temp_2_isi_results.loc['holding_isi_std'].values
+                    
+                    temp_2_df = pd.DataFrame([[temp_2_isi_ms, temp_2_isi_pA_avg, temp_2_isi_std]], index = temp_2_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+
+                # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "interspike_interval_ms" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
+                if isinstance(temp_2_isi_results.loc['interspike_interval_ms'][0], str):            
+                    temp_2_df = pd.DataFrame([['NA', 'NA', 'NA']], index = temp_2_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                
+                vgat_kynac_ptx_temp_list.append(temp_2_df)
+        
+            vgat_kynac_ptx_df = pd.concat(vgat_kynac_ptx_temp_list) # concatenate all the data frames in the list
+            vgat_kynac_ptx_df.to_json(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+
+        if 'vglut2_control' in folder:
+            vglut2_ctrl_temp_list = [] # an empty list to store the data frames
+            vglut2_ctrl_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]  # get the files that contain the type of results you want
+            for file in vglut2_ctrl_results_files:
+                # Get the cell ID
+                temp_3_file_id = [file.split('.')[0]]
+                temp_3_cell_id = ['_'.join((temp_3_file_id[0].split('_'))[0:-3])]
+
+                temp_3_isi_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
+
+                # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
+                if isinstance(temp_3_isi_results.loc['interspike_interval_ms'][0], float):
+                    temp_3_isi_ms = temp_3_isi_results.loc['interspike_interval_ms'].values
+                    temp_3_isi_pA_avg = temp_3_isi_results.loc['holding_isi_pA_avg'].values
+                    temp_3_isi_std = temp_3_isi_results.loc['holding_isi_std'].values
+                    
+                    temp_3_df = pd.DataFrame([[temp_3_isi_ms, temp_3_isi_pA_avg, temp_3_isi_std]], index = temp_3_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+
+                # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "interspike_interval_ms" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
+                if isinstance(temp_3_isi_results.loc['interspike_interval_ms'][0], str):            
+                    temp_3_df = pd.DataFrame([['NA', 'NA', 'NA']], index = temp_3_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                
+                vglut2_ctrl_temp_list.append(temp_3_df)
+        
+            vglut2_ctrl_df = pd.concat(vglut2_ctrl_temp_list) # concatenate all the data frames in the list
+            vglut2_ctrl_df.to_json(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.json')) # save combined results as new .json file
+
+        if 'vglut2_picrotoxin' in folder:
+            vglut2_ptx_temp_list = [] # an empty list to store the data frames
+            vglut2_ptx_results_files = [results_file for results_file in os.listdir(folder) if results_type in results_file]  # get the files that contain the type of results you want
+            for file in vglut2_ptx_results_files:
+                # Get the cell ID
+                temp_4_file_id = [file.split('.')[0]]
+                temp_4_cell_id = ['_'.join((temp_4_file_id[0].split('_'))[0:-3])]
+
+                temp_4_isi_results = pd.read_json(os.path.join(folder, file)) # read data frame from json file
+
+                # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
+                if isinstance(temp_4_isi_results.loc['interspike_interval_ms'][0], float):
+                    temp_4_isi_ms = temp_4_isi_results.loc['interspike_interval_ms'].values
+                    temp_4_isi_pA_avg = temp_4_isi_results.loc['holding_isi_pA_avg'].values
+                    temp_4_isi_std = temp_4_isi_results.loc['holding_isi_std'].values
+                    
+                    temp_4_df = pd.DataFrame([[temp_4_isi_ms, temp_4_isi_pA_avg, temp_4_isi_std]], index = temp_4_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+
+                # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "interspike_interval_ms" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
+                if isinstance(temp_4_isi_results.loc['interspike_interval_ms'][0], str):            
+                    temp_4_df = pd.DataFrame([['NA', 'NA', 'NA']], index = temp_4_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                
+                vglut2_ptx_temp_list.append(temp_4_df)
+        
+            vglut2_ptx_df = pd.concat(vglut2_ptx_temp_list) # concatenate all the data frames in the list
+            vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+    
     print('results saved')
 
     return vgat_ctrl_df, vgat_kynac_ptx_df, vglut2_ctrl_df, vglut2_ptx_df # pandas dataframes
