@@ -26,7 +26,7 @@ print("done!")
 # Once we have run the previous steps for each recording and we have extracted our results, we can proceed to pool them across cell_type and condition.
 
 # %%
-# ## 2.0 | Set paths to subfolders where extracted results files are stored
+# ## 1.0 | Set paths to subfolders where extracted results files are stored
 vgat_ctrl_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vgat_control"
 vgat_kynac_ptx_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vgat_kynurenic_picrotoxin"
 vglut2_ctrl_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\loose_seal\loose_seal_results\vglut2_control"
