@@ -417,10 +417,10 @@ def getInputResistance(
                 ## Get input resistance = mV/pA
                 InputR = (tp_membrane / tp_command) * 1000 # to get MOhm
                 # Append results
-                test_pulse_command.append(np.round(tp_command), 2)
-                test_pulse_membrane.append(np.round(tp_membrane), 2)
-                holding_mV.append(np.round(sweep_IA_baseline), 2)
-                input_resistance.append(np.round(InputR), 2)
+                test_pulse_command.append(tp_command)
+                test_pulse_membrane.append(tp_membrane)
+                holding_mV.append(sweep_IA_baseline)
+                input_resistance.append(InputR)
 
                 ## Get trial name for results dataframe
                 trial_keys.append(sweep)
