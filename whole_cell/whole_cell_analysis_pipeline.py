@@ -38,6 +38,7 @@ vgat_kynac_ptx_IR_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\
 vgat_ttx_IR_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_tau_inputresistance\vgat_ttx"
 vglut2_ctrl_IR_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_tau_inputresistance\vglut2_control"
 vglut2_dopamine_IR_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_tau_inputresistance\vglut2_dopamine"
+vglut2_kynac_ptx_IR_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_tau_inputresistance\vglut2_kynurenic_picrotoxin"
 vglut2_ptx_IR_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_tau_inputresistance\vglut2_picrotoxin"
 vglut2_ptx_leucine_IR_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_tau_inputresistance\vglut2_picrotoxin_leucine"
 vglut2_ttx_IR_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_tau_inputresistance\vglut2_ttx"
@@ -54,6 +55,7 @@ folders_to_check_IR = [vgat_agatoxin_IR_save_path,
                     vgat_ttx_IR_save_path,
                     vglut2_ctrl_IR_save_path,
                     vglut2_dopamine_IR_save_path,
+                    vglut2_kynac_ptx_IR_save_path,
                     vglut2_ptx_IR_save_path,
                     vglut2_ptx_leucine_IR_save_path,
                     vglut2_ttx_IR_save_path]
@@ -65,8 +67,11 @@ folder_to_save_IR = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell
 results_type_IR = '_IC_tau_inputresistance'
 save_type_IR = '_input_resistance'
 
+# Set the name of the curated channel, if any:
+curated_channel_IR = 'Sweeps_Analysis'
+
 # Run function
-last_folder_results_df = getInputResistance(folders_to_check_IR, folder_to_save_IR, results_type_IR, save_type_IR)
+last_folder_results_df = getInputResistance(folders_to_check_IR, folder_to_save_IR, results_type_IR, save_type_IR, curated_channel_IR)
 
 # Inspect the output, corresponding to the dataframe from the last folder in the list
 last_folder_results_df
