@@ -266,8 +266,8 @@ def getCellInputResistance(
         # Use the test_pulse indices to get the baseline and cell response to calculate the input resistance
         # To be exact and account for the delays between digital command and output from the amplifier, you could add +1 to the first index to calculate the baseline.
         sweep_IA_baseline = np.mean(sweep_IA[:(test_pulse_OA_indices[0])])
-        # To ensure we evaluate the epoch where the cell response has reached steady state, we average the values corresponding to the second half of the pulse.
-        sweep_IA_pulse = np.mean(sweep_IA[(round(len(test_pulse_OA_indices)/2)):(test_pulse_OA_indices[-1])])
+        # To ensure we evaluate the epoch where the cell response has reached steady state, we average the values corresponding to the final third of the pulse.
+        sweep_IA_pulse = np.mean(sweep_IA[(round(len(test_pulse_OA_indices)*2/3)):(test_pulse_OA_indices[-1])])
         tp_membrane = sweep_IA_pulse - sweep_IA_baseline # mV
 
         ## Get input resistance = mV/pA
@@ -353,7 +353,8 @@ def getInputResistance(
     folders_to_check,
     folder_to_save,
     results_type = "_IC_tau_inputresistance",
-    save_type = "_input_resistance"
+    save_type = "_input_resistance",
+    curated_channel = None,
     ):
     """
     `getInputResistance` loops through all the files in a selected folder, loads each file, extracts the relevant channels from a current-clamp recording using the IC_tau_inputresistance protocol, and calculates the input resistance (InputR) from the test pulse size and the cell's response to it.
@@ -364,6 +365,7 @@ def getInputResistance(
     :folder_to_save: path to folder where results will be saved.
     :results_type: a string containing the type of result (without its .json extension) to load and combine.
     :save_type: a string containing the type of result you are saving. For example, if `results_type = "_IC_tau_inputresistance"`, setting `save_type = "_input_resistance"` will avoid errors if we re-run the function.
+    :curated_channel: a string pointing to the curated channel ( e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality). Defaults to None.
     """
 
     for folder in folders_to_check:
@@ -376,7 +378,7 @@ def getInputResistance(
             # Get the recording ID
             temp_file_id = [file.split('.')[0]] # Get the file name without the extension
 
-            channels_dataframe, time, dt = openFile(os.path.join(folder, file)) # extract channels from current file
+            channels_dataframe, time, dt = openFile(os.path.join(folder, file), curated_channel = curated_channel) # extract channels from current file
 
             # Initialize variables to build results dataframe:
             test_pulse_command = []
@@ -408,8 +410,8 @@ def getInputResistance(
                 # Use the test_pulse indices to get the baseline and cell response to calculate the input resistance
                 # To be exact and account for the delays between digital command and output from the amplifier, you could add +1 to the first index to calculate the baseline.
                 sweep_IA_baseline = np.mean(sweep_IA[:(test_pulse_OA_indices[0])])
-                # To ensure we evaluate the epoch where the cell response has reached steady state, we average the values corresponding to the second half of the pulse.
-                sweep_IA_pulse = np.mean(sweep_IA[(round(len(test_pulse_OA_indices)/2)):(test_pulse_OA_indices[-1])])
+                # To ensure we evaluate the epoch where the cell response has reached steady state, we average the values corresponding to the final third of the pulse.
+                sweep_IA_pulse = np.mean(sweep_IA[(round(len(test_pulse_OA_indices)*2/3)):(test_pulse_OA_indices[-1])])
                 tp_membrane = sweep_IA_pulse - sweep_IA_baseline # mV
 
                 ## Get input resistance = mV/pA
@@ -431,28 +433,44 @@ def getInputResistance(
                 test_pulse_membrane_baselined.append(baselined_sweep_IA)
 
             # Compute average trace from all baselined sweeps
-            average_test_pulse_command_baselined = np.array(np.mean(test_pulse_command_baselined, 0))
-            average_test_pulse_membrane_baselined = np.array(np.mean(test_pulse_membrane_baselined, 0))
+            avg_test_pulse_command_baselined = np.array(np.mean(test_pulse_command_baselined, 0))
+            avg_test_pulse_membrane_baselined = np.array(np.mean(test_pulse_membrane_baselined, 0))
+
+            # Compute input resistance from average trace. Sanity check to compare both methods yield the same results
+            avg_trace_test_pulse = np.where(avg_test_pulse_command_baselined < 0)
+            avg_trace_test_pulse_OA_indices = avg_trace_test_pulse[0]
+            avg_trace_command_baseline = np.mean(avg_test_pulse_command_baselined[:(avg_trace_test_pulse_OA_indices[0]-1)])
+            avg_trace_command_pulse = np.mean(avg_test_pulse_command_baselined[avg_trace_test_pulse_OA_indices])
+            avg_trace_command = avg_trace_command_pulse - avg_trace_command_baseline # pA
+            avg_trace_membrane_baseline = np.mean(avg_test_pulse_membrane_baselined[:(avg_trace_test_pulse_OA_indices[0])])
+            avg_trace_membrane_pulse = np.mean(avg_test_pulse_membrane_baselined[(round(len(avg_trace_test_pulse_OA_indices)*2/3)):(avg_trace_test_pulse_OA_indices[-1])])
+            avg_trace_membrane = avg_trace_membrane_pulse - avg_trace_membrane_baseline # mV
+            avg_trace_input_resistance = (avg_trace_membrane / avg_trace_command) * 1000 # to get MOhm
             
             # Create dataframe of results across sweeps:
             InputR_dataframe = pd.DataFrame([test_pulse_command, test_pulse_membrane, holding_mV, input_resistance], index = ['test_pulse_command_pA', 'test_pulse_membrane_mV', 'holding_mV', 'input_resistance_MOhm'], columns = trial_keys)
             
             # Create dataframe of average InputR and cell ID
             InputR_avg_dataframe = pd.DataFrame([[
-                np.round(np.mean(InputR_dataframe.loc['test_pulse_command_pA']), 2),
-                np.round(np.mean(InputR_dataframe.loc['test_pulse_membrane_mV']), 2), 
-                np.round(np.mean(InputR_dataframe.loc['holding_mV']), 2), 
-                np.round(np.mean(InputR_dataframe.loc['input_resistance_MOhm']), 2),
+                np.round(np.mean(InputR_dataframe.loc['test_pulse_command_pA']), 3),
+                np.round(np.mean(InputR_dataframe.loc['test_pulse_membrane_mV']), 3), 
+                np.round(np.mean(InputR_dataframe.loc['holding_mV']), 3), 
+                np.round(np.mean(InputR_dataframe.loc['input_resistance_MOhm']), 3),
                 test_pulse_command, test_pulse_membrane, holding_mV, input_resistance,
-                average_test_pulse_command_baselined, average_test_pulse_membrane_baselined
+                avg_test_pulse_command_baselined, avg_test_pulse_membrane_baselined,
+                avg_trace_command, avg_trace_membrane, avg_trace_input_resistance
                 ]], 
-                columns =  ['command_pA', 'membrane_mV', 'holding_mV', 'input_resistance_MOhm', 'command_sweeps_pA', 'membrane_sweeps_mV', 'holding_sweeps_mV', 'input_resistance_sweeps_MOhm', 'command_avg_pA', 'membrane_avg_mV'], 
+                columns =  ['command_pA', 'membrane_mV', 'holding_mV', 'IR_MOhm',
+                            'command_bysweep_pA', 'membrane_bysweep_mV', 
+                            'holding_bysweep_mV', 'IR_bysweep_MOhm', 
+                            'command_avg_trace_pA', 'membrane_avg_trace_mV',
+                            'command_avg_pA', 'membrane_avg_mV', 'IR_avg_MOhm'], 
                 index = temp_file_id)
 
             cell_temp_list.append(InputR_avg_dataframe)
 
         folder_results_df = pd.concat(cell_temp_list) # concatenate all the data frames in the list
-        folder_results_df.to_json(os.path.join(folder_to_save, folder_id, folder_id + '_pooled' + save_type + '.json')) # save combined results as new .json file
+        folder_results_df.to_json(os.path.join(folder_to_save, folder_id + '_pooled' + save_type + '.json')) # save combined results as new .json file
         
     print('results saved')
     
