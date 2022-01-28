@@ -404,7 +404,7 @@ def getInputResistance(
                 # Use the indices of the test_pulse command (Output A) to define baseline period and test period
                 sweep_OA_baseline = np.mean(sweep_OA[:(test_pulse_OA_indices[0]-1)]) # -1 to stop baseline before command starts
                 sweep_OA_pulse = np.mean(sweep_OA[test_pulse_OA_indices])
-                tp_command = np.round((sweep_OA_pulse - sweep_OA_baseline), 2) # pA
+                tp_command = sweep_OA_pulse - sweep_OA_baseline # pA
 
                 ## Get cell response to test_pulse:
                 # Use the test_pulse indices to get the baseline and cell response to calculate the input resistance
@@ -412,15 +412,15 @@ def getInputResistance(
                 sweep_IA_baseline = np.mean(sweep_IA[:(test_pulse_OA_indices[0])])
                 # To ensure we evaluate the epoch where the cell response has reached steady state, we average the values corresponding to the final third of the pulse.
                 sweep_IA_pulse = np.mean(sweep_IA[(round(len(test_pulse_OA_indices)*2/3)):(test_pulse_OA_indices[-1])])
-                tp_membrane = np.round((sweep_IA_pulse - sweep_IA_baseline), 2) # mV
+                tp_membrane = sweep_IA_pulse - sweep_IA_baseline # mV
 
                 ## Get input resistance = mV/pA
-                InputR = np.round(((tp_membrane / tp_command) * 1000), 2) # to get MOhm
+                InputR = (tp_membrane / tp_command) * 1000 # to get MOhm
                 # Append results
-                test_pulse_command.append(tp_command)
-                test_pulse_membrane.append(tp_membrane)
-                holding_mV.append(sweep_IA_baseline)
-                input_resistance.append(InputR)
+                test_pulse_command.append(np.round(tp_command), 2)
+                test_pulse_membrane.append(np.round(tp_membrane), 2)
+                holding_mV.append(np.round(sweep_IA_baseline), 2)
+                input_resistance.append(np.round(InputR), 2)
 
                 ## Get trial name for results dataframe
                 trial_keys.append(sweep)
@@ -441,11 +441,11 @@ def getInputResistance(
             avg_trace_test_pulse_OA_indices = avg_trace_test_pulse[0]
             avg_trace_command_baseline = np.mean(avg_test_pulse_command_baselined[:(avg_trace_test_pulse_OA_indices[0]-1)])
             avg_trace_command_pulse = np.mean(avg_test_pulse_command_baselined[avg_trace_test_pulse_OA_indices])
-            avg_trace_command = np.round((avg_trace_command_pulse - avg_trace_command_baseline), 2) # pA
+            avg_trace_command = avg_trace_command_pulse - avg_trace_command_baseline # pA
             avg_trace_membrane_baseline = np.mean(avg_test_pulse_membrane_baselined[:(avg_trace_test_pulse_OA_indices[0])])
             avg_trace_membrane_pulse = np.mean(avg_test_pulse_membrane_baselined[(round(len(avg_trace_test_pulse_OA_indices)*2/3)):(avg_trace_test_pulse_OA_indices[-1])])
-            avg_trace_membrane = np.round((avg_trace_membrane_pulse - avg_trace_membrane_baseline), 2) # mV
-            avg_trace_input_resistance = np.round(((avg_trace_membrane / avg_trace_command) * 1000), 2) # to get MOhm
+            avg_trace_membrane = avg_trace_membrane_pulse - avg_trace_membrane_baseline # mV
+            avg_trace_input_resistance = (avg_trace_membrane / avg_trace_command) * 1000 # to get MOhm
             
             # Create dataframe of results across sweeps:
             InputR_dataframe = pd.DataFrame([test_pulse_command, test_pulse_membrane, holding_mV, input_resistance], index = ['test_pulse_command_pA', 'test_pulse_membrane_mV', 'holding_mV', 'input_resistance_MOhm'], columns = trial_keys)
@@ -458,7 +458,9 @@ def getInputResistance(
                 np.round(np.mean(InputR_dataframe.loc['input_resistance_MOhm']), 2),
                 test_pulse_command, test_pulse_membrane, holding_mV, input_resistance,
                 avg_test_pulse_command_baselined, avg_test_pulse_membrane_baselined,
-                avg_trace_command, avg_trace_membrane, avg_trace_input_resistance
+                np.round(avg_trace_command, 2),
+                np.round(avg_trace_membrane, 2),
+                np.round(avg_trace_input_resistance, 2)
                 ]], 
                 columns =  ['command_pA', 'membrane_mV', 'holding_mV', 'IR_MOhm',
                             'command_bysweep_pA', 'membrane_bysweep_mV', 
