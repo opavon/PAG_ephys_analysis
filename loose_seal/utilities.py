@@ -1668,9 +1668,17 @@ def getAvgRsealResults(
                 temp_1 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 temp_1_avg_Rseal = np.mean(temp_1.loc['seal_resistance_MOhm']) # compute the average Rseal across sweeps
                 temp_1_std_Rseal = np.std(temp_1.loc['seal_resistance_MOhm']) # compute the standard deviation of the Rseal average across sweeps
-                temp_1_df = pd.DataFrame([[temp_1_avg_Rseal, temp_1_std_Rseal]], index = temp_1_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
+                temp_1_Rseal = temp_1.loc['seal_resistance_MOhm'].values # get Rseal values
+                
+                temp_1_df = pd.DataFrame([[
+                    temp_1_avg_Rseal, temp_1_std_Rseal, temp_1_Rseal
+                    ]], 
+                    index = temp_1_cell_id, 
+                    columns = ['Rseal_avg_MOhm', 'Rseal_avg_std', 'RSeal_across_sweeps']) # create a new dataframe with the average Rseal and the cell ID
                 vgat_ctrl_temp_list.append(temp_1_df) # append the data frame to the list
+
             vgat_ctrl_df = pd.concat(vgat_ctrl_temp_list) # concatenate all the data frames in the list
+            
             vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + save_type + '.json')) # save combined results as new .json file
         
         if 'vgat_kynurenic_picrotoxin' in folder:
@@ -1684,8 +1692,16 @@ def getAvgRsealResults(
                 temp_2 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 temp_2_avg_Rseal = np.mean(temp_2.loc['seal_resistance_MOhm']) # compute the average Rseal across sweeps
                 temp_2_std_Rseal = np.std(temp_2.loc['seal_resistance_MOhm']) # compute the standard deviation of the Rseal average across sweeps
-                temp_2_df = pd.DataFrame([[temp_2_avg_Rseal, temp_2_std_Rseal]], index = temp_2_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
+                temp_2_Rseal = temp_2.loc['seal_resistance_MOhm'].values # get Rseal values
+
+                temp_2_df = pd.DataFrame([[
+                    temp_2_avg_Rseal, temp_2_std_Rseal, temp_2_Rseal
+                    ]], 
+                    index = temp_2_cell_id, 
+                    columns = ['Rseal_avg_MOhm', 'Rseal_avg_std', 'RSeal_across_sweeps']) # create a new dataframe with the average Rseal and the cell ID
+
                 vgat_kynac_ptx_temp_list.append(temp_2_df) # append the data frame to the list
+
             vgat_kynac_ptx_df = pd.concat(vgat_kynac_ptx_temp_list) # concatenate all the data frames in the list
             vgat_kynac_ptx_df.to_json(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
 
@@ -1700,8 +1716,16 @@ def getAvgRsealResults(
                 temp_3 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 temp_3_avg_Rseal = np.mean(temp_3.loc['seal_resistance_MOhm']) # compute the average Rseal across sweeps
                 temp_3_std_Rseal = np.std(temp_3.loc['seal_resistance_MOhm']) # compute the standard deviation of the Rseal average across sweeps
-                temp_3_df = pd.DataFrame([[temp_3_avg_Rseal, temp_3_std_Rseal]], index = temp_3_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
+                temp_3_Rseal = temp_3.loc['seal_resistance_MOhm'].values # get Rseal values
+
+                temp_3_df = pd.DataFrame([[
+                    temp_3_avg_Rseal, temp_3_std_Rseal, temp_3_Rseal
+                    ]], 
+                    index = temp_3_cell_id, 
+                    columns = ['Rseal_avg_MOhm', 'Rseal_avg_std', 'RSeal_across_sweeps']) # create a new dataframe with the average Rseal and the cell ID
+
                 vglut2_ctrl_temp_list.append(temp_3_df) # append the data frame to the list
+
             vglut2_ctrl_df = pd.concat(vglut2_ctrl_temp_list) # concatenate all the data frames in the list
             vglut2_ctrl_df.to_json(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.json')) # save combined results as new .json file
         
@@ -1716,8 +1740,16 @@ def getAvgRsealResults(
                 temp_4 = pd.read_json(os.path.join(folder, file)) # read data frame from json file
                 temp_4_avg_Rseal = np.mean(temp_4.loc['seal_resistance_MOhm']) # compute the average Rseal across sweeps
                 temp_4_std_Rseal = np.std(temp_4.loc['seal_resistance_MOhm']) # compute the standard deviation of the Rseal average across sweeps
-                temp_4_df = pd.DataFrame([[temp_4_avg_Rseal, temp_4_std_Rseal]], index = temp_4_cell_id, columns = ['Rseal_avg_MOhm', 'Rseal_avg_std']) # create a new dataframe with the average Rseal and the cell ID
+                temp_4_Rseal = temp_4.loc['seal_resistance_MOhm'].values # get Rseal values
+
+                temp_4_df = pd.DataFrame([[
+                    temp_4_avg_Rseal, temp_4_std_Rseal, temp_4_Rseal
+                    ]], 
+                    index = temp_4_cell_id, 
+                    columns = ['Rseal_avg_MOhm', 'Rseal_avg_std', 'RSeal_across_sweeps']) # create a new dataframe with the average Rseal and the cell ID
+
                 vglut2_ptx_temp_list.append(temp_4_df) # append the data frame to the list
+
             vglut2_ptx_df = pd.concat(vglut2_ptx_temp_list) # concatenate all the data frames in the list
             vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
     
@@ -2012,11 +2044,41 @@ def combineISIresults(
                     temp_1_isi_pA_avg = temp_1_isi_results.loc['holding_isi_pA_avg'].values
                     temp_1_isi_std = temp_1_isi_results.loc['holding_isi_std'].values
                     
-                    temp_1_df = pd.DataFrame([[temp_1_isi_ms, temp_1_isi_pA_avg, temp_1_isi_std]], index = temp_1_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                    # Compute average, standard deviation, and coefficient of variation
+                    temp_1_avg_isi_ms = np.mean(temp_1_isi_ms)
+                    temp_1_std_isi_ms = np.std(temp_1_isi_ms)
+                    temp_1_cv_isi_ms = temp_1_std_isi_ms / temp_1_avg_isi_ms
+                    temp_1_avg_holding_pA = np.mean(temp_1_isi_pA_avg)
+                    temp_1_std_holding_pA = np.std(temp_1_isi_pA_avg)
+                    temp_1_cv_holding_pA = temp_1_std_holding_pA / temp_1_avg_holding_pA
+                    
+                    # Put results into dataframe
+                    temp_1_df = pd.DataFrame([[
+                        temp_1_avg_isi_ms, temp_1_std_isi_ms, temp_1_cv_isi_ms,
+                        temp_1_avg_holding_pA, temp_1_std_holding_pA, temp_1_cv_holding_pA,
+                        temp_1_isi_ms, temp_1_isi_pA_avg, temp_1_isi_std
+                        ]], 
+                        index = temp_1_cell_id, 
+                        columns = [
+                            'avg_isi_ms', 'std_isi_ms', 'cv_isi',
+                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
+                            ])
 
                 # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "interspike_interval_ms" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
-                if isinstance(temp_1_isi_results.loc['interspike_interval_ms'][0], str):            
-                    temp_1_df = pd.DataFrame([['NA', 'NA', 'NA']], index = temp_1_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                if isinstance(temp_1_isi_results.loc['interspike_interval_ms'][0], str):
+                    # Make empty dataframe            
+                    temp_1_df = pd.DataFrame([[
+                        'NA', 'NA', 'NA',
+                        'NA', 'NA', 'NA',
+                        'NA', 'NA', 'NA'
+                        ]], 
+                        index = temp_1_cell_id,
+                        columns = [
+                            'avg_isi_ms', 'std_isi_ms', 'cv_isi',
+                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
+                            ])
                 
                 vgat_ctrl_temp_list.append(temp_1_df)
         
@@ -2039,11 +2101,41 @@ def combineISIresults(
                     temp_2_isi_pA_avg = temp_2_isi_results.loc['holding_isi_pA_avg'].values
                     temp_2_isi_std = temp_2_isi_results.loc['holding_isi_std'].values
                     
-                    temp_2_df = pd.DataFrame([[temp_2_isi_ms, temp_2_isi_pA_avg, temp_2_isi_std]], index = temp_2_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                    # Compute average, standard deviation, and coefficient of variation
+                    temp_2_avg_isi_ms = np.mean(temp_2_isi_ms)
+                    temp_2_std_isi_ms = np.std(temp_2_isi_ms)
+                    temp_2_cv_isi_ms = temp_2_std_isi_ms / temp_2_avg_isi_ms
+                    temp_2_avg_holding_pA = np.mean(temp_2_isi_pA_avg)
+                    temp_2_std_holding_pA = np.std(temp_2_isi_pA_avg)
+                    temp_2_cv_holding_pA = temp_2_std_holding_pA / temp_2_avg_holding_pA
+                    
+                    # Put results into dataframe
+                    temp_2_df = pd.DataFrame([[
+                        temp_2_avg_isi_ms, temp_2_std_isi_ms, temp_2_cv_isi_ms,
+                        temp_2_avg_holding_pA, temp_2_std_holding_pA, temp_2_cv_holding_pA,
+                        temp_2_isi_ms, temp_2_isi_pA_avg, temp_2_isi_std
+                        ]], 
+                        index = temp_2_cell_id, 
+                        columns = [
+                            'avg_isi_ms', 'std_isi_ms', 'cv_isi',
+                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
+                            ])
 
                 # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "interspike_interval_ms" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
-                if isinstance(temp_2_isi_results.loc['interspike_interval_ms'][0], str):            
-                    temp_2_df = pd.DataFrame([['NA', 'NA', 'NA']], index = temp_2_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                if isinstance(temp_2_isi_results.loc['interspike_interval_ms'][0], str):
+                    # Make empty dataframe            
+                    temp_2_df = pd.DataFrame([[
+                        'NA', 'NA', 'NA',
+                        'NA', 'NA', 'NA',
+                        'NA', 'NA', 'NA'
+                        ]], 
+                        index = temp_2_cell_id,
+                        columns = [
+                            'avg_isi_ms', 'std_isi_ms', 'cv_isi',
+                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
+                            ])
                 
                 vgat_kynac_ptx_temp_list.append(temp_2_df)
         
@@ -2066,11 +2158,41 @@ def combineISIresults(
                     temp_3_isi_pA_avg = temp_3_isi_results.loc['holding_isi_pA_avg'].values
                     temp_3_isi_std = temp_3_isi_results.loc['holding_isi_std'].values
                     
-                    temp_3_df = pd.DataFrame([[temp_3_isi_ms, temp_3_isi_pA_avg, temp_3_isi_std]], index = temp_3_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                    # Compute average, standard deviation, and coefficient of variation
+                    temp_3_avg_isi_ms = np.mean(temp_3_isi_ms)
+                    temp_3_std_isi_ms = np.std(temp_3_isi_ms)
+                    temp_3_cv_isi_ms = temp_3_std_isi_ms / temp_3_avg_isi_ms
+                    temp_3_avg_holding_pA = np.mean(temp_3_isi_pA_avg)
+                    temp_3_std_holding_pA = np.std(temp_3_isi_pA_avg)
+                    temp_3_cv_holding_pA = temp_3_std_holding_pA / temp_3_avg_holding_pA
+                    
+                    # Put results into dataframe
+                    temp_3_df = pd.DataFrame([[
+                        temp_3_avg_isi_ms, temp_3_std_isi_ms, temp_3_cv_isi_ms,
+                        temp_3_avg_holding_pA, temp_3_std_holding_pA, temp_3_cv_holding_pA,
+                        temp_3_isi_ms, temp_3_isi_pA_avg, temp_3_isi_std
+                        ]], 
+                        index = temp_3_cell_id, 
+                        columns = [
+                            'avg_isi_ms', 'std_isi_ms', 'cv_isi',
+                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
+                            ])
 
                 # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "interspike_interval_ms" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
-                if isinstance(temp_3_isi_results.loc['interspike_interval_ms'][0], str):            
-                    temp_3_df = pd.DataFrame([['NA', 'NA', 'NA']], index = temp_3_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                if isinstance(temp_3_isi_results.loc['interspike_interval_ms'][0], str):
+                    # Make empty dataframe            
+                    temp_3_df = pd.DataFrame([[
+                        'NA', 'NA', 'NA',
+                        'NA', 'NA', 'NA',
+                        'NA', 'NA', 'NA'
+                        ]], 
+                        index = temp_3_cell_id,
+                        columns = [
+                            'avg_isi_ms', 'std_isi_ms', 'cv_isi',
+                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
+                            ])
                 
                 vglut2_ctrl_temp_list.append(temp_3_df)
         
@@ -2093,11 +2215,41 @@ def combineISIresults(
                     temp_4_isi_pA_avg = temp_4_isi_results.loc['holding_isi_pA_avg'].values
                     temp_4_isi_std = temp_4_isi_results.loc['holding_isi_std'].values
                     
-                    temp_4_df = pd.DataFrame([[temp_4_isi_ms, temp_4_isi_pA_avg, temp_4_isi_std]], index = temp_4_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                    # Compute average, standard deviation, and coefficient of variation
+                    temp_4_avg_isi_ms = np.mean(temp_4_isi_ms)
+                    temp_4_std_isi_ms = np.std(temp_4_isi_ms)
+                    temp_4_cv_isi_ms = temp_4_std_isi_ms / temp_4_avg_isi_ms
+                    temp_4_avg_holding_pA = np.mean(temp_4_isi_pA_avg)
+                    temp_4_std_holding_pA = np.std(temp_4_isi_pA_avg)
+                    temp_4_cv_holding_pA = temp_4_std_holding_pA / temp_4_avg_holding_pA
+                    
+                    # Put results into dataframe
+                    temp_4_df = pd.DataFrame([[
+                        temp_4_avg_isi_ms, temp_4_std_isi_ms, temp_4_cv_isi_ms,
+                        temp_4_avg_holding_pA, temp_4_std_holding_pA, temp_4_cv_holding_pA,
+                        temp_4_isi_ms, temp_4_isi_pA_avg, temp_4_isi_std
+                        ]], 
+                        index = temp_4_cell_id, 
+                        columns = [
+                            'avg_isi_ms', 'std_isi_ms', 'cv_isi',
+                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
+                            ])
 
                 # If, on the other hand, we didn't detect any spikes for this cell, we will have "NA" in the "interspike_interval_ms" field. In that case, we just append "NA" to the new columns to keep the shape of the dataframe.
-                if isinstance(temp_4_isi_results.loc['interspike_interval_ms'][0], str):            
-                    temp_4_df = pd.DataFrame([['NA', 'NA', 'NA']], index = temp_4_cell_id, columns = ['interspike_interval_ms', 'holding_isi_pA_avg', 'holding_isi_std'])
+                if isinstance(temp_4_isi_results.loc['interspike_interval_ms'][0], str):
+                    # Make empty dataframe            
+                    temp_4_df = pd.DataFrame([[
+                        'NA', 'NA', 'NA',
+                        'NA', 'NA', 'NA',
+                        'NA', 'NA', 'NA'
+                        ]], 
+                        index = temp_4_cell_id,
+                        columns = [
+                            'avg_isi_ms', 'std_isi_ms', 'cv_isi',
+                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
+                            ])
                 
                 vglut2_ptx_temp_list.append(temp_4_df)
         
