@@ -462,7 +462,7 @@ def getInputResistance(
                 np.round(avg_trace_membrane, 2),
                 np.round(avg_trace_input_resistance, 2)
                 ]], 
-                columns =  ['command_pA', 'membrane_mV', 'holding_mV', 'IR_MOhm',
+                columns = ['command_pA', 'membrane_mV', 'holding_mV', 'IR_MOhm',
                             'command_bysweep_pA', 'membrane_bysweep_mV', 
                             'holding_bysweep_mV', 'IR_bysweep_MOhm', 
                             'command_avg_trace_pA', 'membrane_avg_trace_mV',
