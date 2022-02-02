@@ -1795,7 +1795,7 @@ def getSpikeHalfWidth(
                 if isinstance(temp_1_avg_spike_results["spike_magnitude_pA"][0], float):
                     temp_1_npz_results = np.load(os.path.join(folder, temp_1_cell_id[0] + '_results.npz')) # load data from current cell ID
                     temp_1_avg_spike = temp_1_npz_results["average_spike"] # retrieve average spike
-                    temp_1_avg_spike_peak_index = int(np.where(temp_1_avg_spike == min(temp_1_avg_spike))[0]) # find peak indez
+                    temp_1_avg_spike_peak_index = int(np.where(temp_1_avg_spike == min(temp_1_avg_spike))[0]) # find peak index
                     
                     # Compute the half_peak value (baseline to peak divided by two) that will be used to measure the half-width
                     temp_1_half_peak = (temp_1_avg_spike_results["spike_magnitude_pA"][0] - temp_1_avg_spike_results['baseline_start_mean'][0]) / 2
