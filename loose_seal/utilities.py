@@ -1678,7 +1678,7 @@ def getAvgRsealResults(
                 vgat_ctrl_temp_list.append(temp_1_df) # append the data frame to the list
 
             vgat_ctrl_df = pd.concat(vgat_ctrl_temp_list) # concatenate all the data frames in the list
-            
+
             vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + save_type + '.json')) # save combined results as new .json file
         
         if 'vgat_kynurenic_picrotoxin' in folder:
@@ -2040,9 +2040,10 @@ def combineISIresults(
 
                 # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
                 if isinstance(temp_1_isi_results.loc['interspike_interval_ms'][0], float):
-                    temp_1_isi_ms = temp_1_isi_results.loc['interspike_interval_ms'].values
-                    temp_1_isi_pA_avg = temp_1_isi_results.loc['holding_isi_pA_avg'].values
-                    temp_1_isi_std = temp_1_isi_results.loc['holding_isi_std'].values
+                    temp_1_check = ~np.isnan(temp_1_isi_results.loc['holding_isi_pA_avg'].values) # check for NaN values and use to remove
+                    temp_1_isi_ms = temp_1_isi_results.loc['interspike_interval_ms'][temp_1_check].values
+                    temp_1_isi_pA_avg = temp_1_isi_results.loc['holding_isi_pA_avg'][temp_1_check].values
+                    temp_1_isi_std = temp_1_isi_results.loc['holding_isi_std'][temp_1_check].values
                     
                     # Compute average, standard deviation, and coefficient of variation
                     temp_1_avg_isi_ms = np.mean(temp_1_isi_ms)
@@ -2061,7 +2062,7 @@ def combineISIresults(
                         index = temp_1_cell_id, 
                         columns = [
                             'avg_isi_ms', 'std_isi_ms', 'cv_isi',
-                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'avg_holding_isi_pA', 'std_holding_isi_pA', 'cv_holding_isi',
                             'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
                             ])
 
@@ -2076,7 +2077,7 @@ def combineISIresults(
                         index = temp_1_cell_id,
                         columns = [
                             'avg_isi_ms', 'std_isi_ms', 'cv_isi',
-                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'avg_holding_isi_pA', 'std_holding_isi_pA', 'cv_holding_isi',
                             'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
                             ])
                 
@@ -2097,9 +2098,10 @@ def combineISIresults(
 
                 # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
                 if isinstance(temp_2_isi_results.loc['interspike_interval_ms'][0], float):
-                    temp_2_isi_ms = temp_2_isi_results.loc['interspike_interval_ms'].values
-                    temp_2_isi_pA_avg = temp_2_isi_results.loc['holding_isi_pA_avg'].values
-                    temp_2_isi_std = temp_2_isi_results.loc['holding_isi_std'].values
+                    temp_2_check = ~np.isnan(temp_2_isi_results.loc['holding_isi_pA_avg'].values) # check for NaN values and use to remove
+                    temp_2_isi_ms = temp_2_isi_results.loc['interspike_interval_ms'][temp_2_check].values
+                    temp_2_isi_pA_avg = temp_2_isi_results.loc['holding_isi_pA_avg'][temp_2_check].values
+                    temp_2_isi_std = temp_2_isi_results.loc['holding_isi_std'][temp_2_check].values
                     
                     # Compute average, standard deviation, and coefficient of variation
                     temp_2_avg_isi_ms = np.mean(temp_2_isi_ms)
@@ -2118,7 +2120,7 @@ def combineISIresults(
                         index = temp_2_cell_id, 
                         columns = [
                             'avg_isi_ms', 'std_isi_ms', 'cv_isi',
-                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'avg_holding_isi_pA', 'std_holding_isi_pA', 'cv_holding_isi',
                             'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
                             ])
 
@@ -2133,7 +2135,7 @@ def combineISIresults(
                         index = temp_2_cell_id,
                         columns = [
                             'avg_isi_ms', 'std_isi_ms', 'cv_isi',
-                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'avg_holding_isi_pA', 'std_holding_isi_pA', 'cv_holding_isi',
                             'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
                             ])
                 
@@ -2154,9 +2156,10 @@ def combineISIresults(
 
                 # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
                 if isinstance(temp_3_isi_results.loc['interspike_interval_ms'][0], float):
-                    temp_3_isi_ms = temp_3_isi_results.loc['interspike_interval_ms'].values
-                    temp_3_isi_pA_avg = temp_3_isi_results.loc['holding_isi_pA_avg'].values
-                    temp_3_isi_std = temp_3_isi_results.loc['holding_isi_std'].values
+                    temp_3_check = ~np.isnan(temp_3_isi_results.loc['holding_isi_pA_avg'].values) # check for NaN values and use to remove
+                    temp_3_isi_ms = temp_3_isi_results.loc['interspike_interval_ms'][temp_3_check].values
+                    temp_3_isi_pA_avg = temp_3_isi_results.loc['holding_isi_pA_avg'][temp_3_check].values
+                    temp_3_isi_std = temp_3_isi_results.loc['holding_isi_std'][temp_3_check].values
                     
                     # Compute average, standard deviation, and coefficient of variation
                     temp_3_avg_isi_ms = np.mean(temp_3_isi_ms)
@@ -2175,7 +2178,7 @@ def combineISIresults(
                         index = temp_3_cell_id, 
                         columns = [
                             'avg_isi_ms', 'std_isi_ms', 'cv_isi',
-                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'avg_holding_isi_pA', 'std_holding_isi_pA', 'cv_holding_isi',
                             'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
                             ])
 
@@ -2190,7 +2193,7 @@ def combineISIresults(
                         index = temp_3_cell_id,
                         columns = [
                             'avg_isi_ms', 'std_isi_ms', 'cv_isi',
-                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'avg_holding_isi_pA', 'std_holding_isi_pA', 'cv_holding_isi',
                             'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
                             ])
                 
@@ -2211,9 +2214,10 @@ def combineISIresults(
 
                 # We need to check wheter the cell we are looking at had any spikes. If number of spikes is zero, then we don't need to calculate anything.
                 if isinstance(temp_4_isi_results.loc['interspike_interval_ms'][0], float):
-                    temp_4_isi_ms = temp_4_isi_results.loc['interspike_interval_ms'].values
-                    temp_4_isi_pA_avg = temp_4_isi_results.loc['holding_isi_pA_avg'].values
-                    temp_4_isi_std = temp_4_isi_results.loc['holding_isi_std'].values
+                    temp_4_check = ~np.isnan(temp_4_isi_results.loc['holding_isi_pA_avg'].values) # check for NaN values and use to remove
+                    temp_4_isi_ms = temp_4_isi_results.loc['interspike_interval_ms'][temp_4_check].values
+                    temp_4_isi_pA_avg = temp_4_isi_results.loc['holding_isi_pA_avg'][temp_4_check].values
+                    temp_4_isi_std = temp_4_isi_results.loc['holding_isi_std'][temp_4_check].values
                     
                     # Compute average, standard deviation, and coefficient of variation
                     temp_4_avg_isi_ms = np.mean(temp_4_isi_ms)
@@ -2232,7 +2236,7 @@ def combineISIresults(
                         index = temp_4_cell_id, 
                         columns = [
                             'avg_isi_ms', 'std_isi_ms', 'cv_isi',
-                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'avg_holding_isi_pA', 'std_holding_isi_pA', 'cv_holding_isi',
                             'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
                             ])
 
@@ -2247,7 +2251,7 @@ def combineISIresults(
                         index = temp_4_cell_id,
                         columns = [
                             'avg_isi_ms', 'std_isi_ms', 'cv_isi',
-                            'avg_holding_pA', 'std_holding_pA', 'cv_holding',
+                            'avg_holding_isi_pA', 'std_holding_isi_pA', 'cv_holding_isi',
                             'interspike_intervals_ms', 'holding_isi_pA_avg', 'holding_isi_std'
                             ])
                 
