@@ -236,6 +236,9 @@ plt.show()
 
 #%%
 # Print the extracted parameters
+print(f'The test pulse command is       {np.mean(test_pulse_command_pA)} pA')
+print(f'The injected current is         {np.round(np.mean(injected_current_pA), 2)} pA')
+print(f'The holding is                  {np.round(np.mean(holding_mV), 2)} mV')
 print(f'The peak is                     {np.round(peak_mV, 2)} mV')
 print(f'The trough is                   {np.round(trough_mV, 2)} mV')
 print(f'The adp is                      {np.round(adp_peak_mV, 2)} mV')
