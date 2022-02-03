@@ -1166,7 +1166,7 @@ def getSpikeParameters(
     else:
         # Find the peak magnitude and where the peak is, defined by the cutSpikes() function (should be sample 150)
         spike_magnitude = min(average_spike)
-        average_spike_peak_index = int(np.where(average_spike == min(average_spike))[0]) # needs to be an integer
+        average_spike_peak_index = np.where(average_spike == min(average_spike))[0][0] # needs to be an integer
         
         # Compute the mean and std of the 3ms period of the average spike equivalent to the one used to baseline the cut spikes. This will be used to detect the onset of the spike.
         baseline_average_spike = average_spike[(average_spike_peak_index-100):(average_spike_peak_index-25)]
@@ -1795,7 +1795,7 @@ def getSpikeHalfWidth(
                 if isinstance(temp_1_avg_spike_results["spike_magnitude_pA"][0], float):
                     temp_1_npz_results = np.load(os.path.join(folder, temp_1_cell_id[0] + '_results.npz')) # load data from current cell ID
                     temp_1_avg_spike = temp_1_npz_results["average_spike"] # retrieve average spike
-                    temp_1_avg_spike_peak_index = int(np.where(temp_1_avg_spike == min(temp_1_avg_spike))[0]) # find peak index
+                    temp_1_avg_spike_peak_index = np.where(temp_1_avg_spike == min(temp_1_avg_spike))[0][0] # find peak index
                     
                     # Compute the half_peak value (baseline to peak divided by two) that will be used to measure the half-width
                     temp_1_half_peak = (temp_1_avg_spike_results["spike_magnitude_pA"][0] - temp_1_avg_spike_results['baseline_start_mean'][0]) / 2
@@ -1851,7 +1851,7 @@ def getSpikeHalfWidth(
                 if isinstance(temp_2_avg_spike_results["spike_magnitude_pA"][0], float):
                     temp_2_npz_results = np.load(os.path.join(folder, temp_2_cell_id[0] + '_results.npz')) # load data from current cell ID
                     temp_2_avg_spike = temp_2_npz_results["average_spike"] # retrieve average spike
-                    temp_2_avg_spike_peak_index = int(np.where(temp_2_avg_spike == min(temp_2_avg_spike))[0]) # find peak indez
+                    temp_2_avg_spike_peak_index = np.where(temp_2_avg_spike == min(temp_2_avg_spike))[0][0] # find peak index
                     
                     # Compute the half_peak value (baseline to peak divided by two) that will be used to measure the half-width
                     temp_2_half_peak = (temp_2_avg_spike_results["spike_magnitude_pA"][0] - temp_2_avg_spike_results['baseline_start_mean'][0]) / 2
@@ -1907,7 +1907,7 @@ def getSpikeHalfWidth(
                 if isinstance(temp_3_avg_spike_results["spike_magnitude_pA"][0], float):
                     temp_3_npz_results = np.load(os.path.join(folder, temp_3_cell_id[0] + '_results.npz')) # load data from current cell ID
                     temp_3_avg_spike = temp_3_npz_results["average_spike"] # retrieve average spike
-                    temp_3_avg_spike_peak_index = int(np.where(temp_3_avg_spike == min(temp_3_avg_spike))[0]) # find peak indez
+                    temp_3_avg_spike_peak_index = np.where(temp_3_avg_spike == min(temp_3_avg_spike))[0][0] # find peak indez
                     
                     # Compute the half_peak value (baseline to peak divided by two) that will be used to measure the half-width
                     temp_3_half_peak = (temp_3_avg_spike_results["spike_magnitude_pA"][0] - temp_3_avg_spike_results['baseline_start_mean'][0]) / 2
@@ -1963,7 +1963,7 @@ def getSpikeHalfWidth(
                 if isinstance(temp_4_avg_spike_results["spike_magnitude_pA"][0], float):
                     temp_4_npz_results = np.load(os.path.join(folder, temp_4_cell_id[0] + '_results.npz')) # load data from current cell ID
                     temp_4_avg_spike = temp_4_npz_results["average_spike"] # retrieve average spike
-                    temp_4_avg_spike_peak_index = int(np.where(temp_4_avg_spike == min(temp_4_avg_spike))[0]) # find peak indez
+                    temp_4_avg_spike_peak_index = np.where(temp_4_avg_spike == min(temp_4_avg_spike))[0][0] # find peak indez
                     
                     # Compute the half_peak value (baseline to peak divided by two) that will be used to measure the half-width
                     temp_4_half_peak = (temp_4_avg_spike_results["spike_magnitude_pA"][0] - temp_4_avg_spike_results['baseline_start_mean'][0]) / 2
