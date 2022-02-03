@@ -520,7 +520,6 @@ def getSpikeParameters(
         for file in folder_results_files:
             # Get the recording ID
             temp_file_id = [file.split('.')[0]] # Get the file name without the extension
-            print(temp_file_id)
             channels_df, time, dt = openFile(os.path.join(folder, file), curated_channel = curated_channel) # extract channels from current file
 
             # Given that we have already curated all the recordings and left only the sweeps with one single spike in the "Sweeps_Analysis" curated channel, we can find the spikes by simply finding where the max value of each sweep is.
@@ -604,13 +603,13 @@ def getSpikeParameters(
             half_peak_mV = peak_mV - (abs(peak_to_trough_magnitude) / 2) # mV
             # Now, we need to get the first time we cross the half_peak value (before the peak), and the second time (after the peak). To do this, we are going to split the spike in two halves, and do an interpolation separately.
             from scipy.interpolate import interp1d # load function to interpolate
-            temp_avg_spike_first_half = temp_avg_spike[:temp_avg_spike_peak_index] # get first half of average spike
+            temp_avg_spike_first_half = temp_avg_spike[(temp_avg_spike_peak_index-100):temp_avg_spike_peak_index] # get first half of average spike
             temp_1_f1 = interp1d(temp_avg_spike_first_half,
                                 range(0, len(temp_avg_spike_first_half)), 
                                 kind = "linear") # make function to interpolate
-            temp_half_width_start = temp_1_f1(half_peak_mV) # find value corresponding to the half_peak
+            temp_half_width_start = temp_1_f1(half_peak_mV) + (temp_avg_spike_peak_index-100) # find value corresponding to the half_peak
 
-            temp_avg_spike_second_half = temp_avg_spike[temp_avg_spike_peak_index:] # get second half of average spike
+            temp_avg_spike_second_half = temp_avg_spike[temp_avg_spike_peak_index:(temp_avg_spike_peak_index+100)] # get second half of average spike
             temp_1_f2 = interp1d(temp_avg_spike_second_half, 
                                 range(temp_avg_spike_peak_index, 
                                 temp_avg_spike_peak_index+len(temp_avg_spike_second_half)), 
