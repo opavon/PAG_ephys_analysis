@@ -17,7 +17,7 @@ from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from IPython import get_ipython
-from whole_cell_utilities import * # includes functions importFile, openFile, openHDF5file, getInputResistance
+from whole_cell_utilities import * # includes functions importFile, openFile, openHDF5file, getInputResistance, getSpikeParameters
 print("done!")
 
 # %%
@@ -71,7 +71,51 @@ save_type_IR = '_input_resistance'
 curated_channel_IR = 'Sweeps_Analysis'
 
 # Run function
-last_folder_results_df = getInputResistance(folders_to_check_IR, folder_to_save_IR, results_type_IR, save_type_IR, curated_channel_IR)
+last_folder_IR_results_df = getInputResistance(folders_to_check_IR, folder_to_save_IR, results_type_IR, save_type_IR, curated_channel_IR)
 
 # Inspect the output, corresponding to the dataframe from the last folder in the list
-last_folder_results_df
+last_folder_IR_results_df
+
+# %% [markdown]
+# ## 2 | Get the action potential threshold and other parameters from all the curated cells in one or more folders
+
+# ## 2.0 | Set paths to subfolders where curated .hdf5 files are stored
+# Each file has already been inspected and moved to the subfolder corresponding to the celltype_condition of the experiment
+vgat_agatoxin_single_AP_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_single_AP\vgat_agatoxin"
+vgat_ctrl_single_AP_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_single_AP\vgat_control"
+vgat_dopamine_single_AP_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_single_AP\vgat_dopamine"
+vgat_kynac_ptx_single_AP_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_single_AP\vgat_kynurenic_picrotoxin"
+vglut2_ctrl_single_AP_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_single_AP\vglut2_control"
+vglut2_dopamine_single_AP_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_single_AP\vglut2_dopamine"
+vglut2_ptx_single_AP_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_single_AP\vglut2_picrotoxin"
+vglut2_ptx_leucine_single_AP_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_single_AP\vglut2_picrotoxin_leucine"
+print("done!")
+
+# %%
+# ## 2.1 | Get the action potential threshold and other parameters from the single AP protocol for each cell and combine the results in one data frame for each cell type and condition
+
+# Choose folders
+folders_to_check_single_AP = [vgat_agatoxin_single_AP_save_path,
+                    vgat_ctrl_single_AP_save_path,
+                    vgat_dopamine_single_AP_save_path, 
+                    vgat_kynac_ptx_single_AP_save_path,
+                    vglut2_ctrl_single_AP_save_path,
+                    vglut2_dopamine_single_AP_save_path,
+                    vglut2_ptx_single_AP_save_path,
+                    vglut2_ptx_leucine_single_AP_save_path]
+
+# Specify the path to the folder where results will be saved. It should contain the same number of subfolders with the same names as the ones specified in `folders_to_check`
+folder_to_save_single_AP = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_results\IC_single_AP"
+
+# Choose type of results and suffix for saved file
+results_type_single_AP = '_IC_single_AP'
+save_type_single_AP = '_single_AP_parameters'
+
+# Set the name of the curated channel, if any:
+curated_channel_single_AP = 'Sweeps_Analysis'
+
+# Run function
+last_folder_single_AP_results_df = getSpikeParameters(folders_to_check_single_AP, folder_to_save_single_AP, results_type_single_AP, save_type_single_AP, curated_channel_single_AP)
+
+# Inspect the output, corresponding to the dataframe from the last folder in the list
+last_folder_single_AP_results_df
