@@ -17,8 +17,8 @@ def importFile(
     sampling_rate_khz = 25
     ):
     """
-    `importFile` opens a dialog window to select a file to import.
-    It then uses the path to the selected file to call `openFile` to extract the data.
+    `importFile` opens a dialog window to select a file to import. It then uses the path to the selected file to call `openFile` to extract the data.
+
     It returns a dataframe with the extracted channels (where each row is a channel and each column a sweep) and four objects containing time, delta time, folder name, and file name.
 
     :channel_list: list of channels to extract. If empty, defaults to 'Channel A', 'Channel B', 'Output A', 'Output B'.
@@ -45,8 +45,8 @@ def openFile(
     sampling_rate_khz = 25
     ):
     """
-    `openFile` checks whether you are attempting to open a `.tdms` or a `.hdf5` file.
-    It then calls the right function to extract the data from the selected channels.
+    `openFile` checks whether you are attempting to open a `.tdms` or a `.hdf5` file. It then calls the right function to extract the data from the selected channels.
+
     It returns a dataframe with the extracted channels (where each row is a channel and each column a sweep) and two objects containing time and delta time.
 
     :in_path: path to the selected file.
@@ -70,6 +70,7 @@ def openHDF5file(
     ):
     """
     `openHDF5file` opens the selected `.hdf5` file and extracts sorted data from the selected channels.
+
     It returns a dataframe with the extracted channels (where each row is a channel and each column a sweep) and two objects containing time and delta time.
     
     :in_path: path to the selected file.
@@ -229,6 +230,7 @@ def getCellInputResistance(
     ):
     """
     `getCellInputResistance` takes the dataframe containing the extracted channel data from a current-clamp recording using the IC_tau_inputresistance protocol and calculates the input resistance (InputR) from the test pulse size and the cell's response to it.
+
     It returns a dataframe with the InputR value (MOhm) across sweeps for the time of recording (where the columns are sweeps) together with the magnitude of the test_pulse command (pA), the response of the cell (mV), and the holding potential (mV). It also plots the calculated InputR across sweeps and returns a second dataframe with the average values and cell ID.
     
     :file_name: contains useful metadata (PAG subdivision, cell type, date, cell ID, protocol name).
@@ -358,14 +360,16 @@ def getInputResistance(
     ):
     """
     `getInputResistance` loops through all the files in a selected folder, loads each file, extracts the relevant channels from a current-clamp recording using the IC_tau_inputresistance protocol, and calculates the input resistance (InputR) from the test pulse size and the cell's response to it.
+
     It saves a dataframe with the average command (mV), the average membrane response (mV), the average holding potential (mV), the average input resistance (MOhm), as well as four vectors containing the corresponding values across sweeps. The dataframe also contains an averaged trace for both the command (pA) and the membrane response (mV). Each row in the dataframe corresponds to a recording from a cell, and a single cell can have more than one repetition of the same protocol.
+
     The function will return the final dataframe. If more than one folder is being analysed, it will only output the dataframe corresponding to the last folder in the `folders_to_check` variable.
     
-    :folders_to_check: a list containing the paths to the folders to check. Results will be saved in the folders with the same name in the save path.
+    :folders_to_check: a list containing the paths to the folders to check.
     :folder_to_save: path to folder where results will be saved.
     :results_type: a string containing the type of result (without its .json extension) to load and combine.
     :save_type: a string containing the type of result you are saving. For example, if `results_type = "_IC_tau_inputresistance"`, setting `save_type = "_input_resistance"` will avoid errors if we re-run the function.
-    :curated_channel: a string pointing to the curated channel ( e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality). Defaults to None.
+    :curated_channel: a string pointing to the curated channel (e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality). Defaults to None.
     """
 
     for folder in folders_to_check:
@@ -380,21 +384,22 @@ def getInputResistance(
 
             channels_dataframe, time, dt = openFile(os.path.join(folder, file), curated_channel = curated_channel) # extract channels from current file
 
-            # Initialize variables to build results dataframe:
+            # Initialise variables to build results dataframe:
             test_pulse_command = []
             test_pulse_membrane = []
             test_pulse_command_baselined = []
             test_pulse_membrane_baselined = []
             input_resistance = []
+            injected_pA = []
             holding_mV = []
             trial_keys = []
 
             # Calculate the input resistance on a sweep-by-sweep basis:
             for sweep in channels_dataframe.columns:
-                ## Load sweep data: Channel A (recording in current-clamp) and Output B (command)
-                sweep_IA = np.array(channels_dataframe.at['Channel A', sweep])
-                # sweep_IB = np.array(channels_dataframe.at['Channel B', sweep]) # Not needed as we recorded in current-clamp
-                sweep_OA = np.array(channels_dataframe.at['Output A', sweep])
+                ## Load sweep data: Channel A (voltage recording in current-clamp), Channel B (injected current) and Output B (command)
+                sweep_IA = np.array(channels_dataframe.at['Channel A', sweep]) # voltage
+                sweep_IB = np.array(channels_dataframe.at['Channel B', sweep]) # current
+                sweep_OA = np.array(channels_dataframe.at['Output A', sweep]) # command
 
                 ## Get the indices corresponding to the test_pulse using the Output Channel
                 test_pulse = np.where(sweep_OA < 0)
@@ -405,6 +410,10 @@ def getInputResistance(
                 sweep_OA_baseline = np.mean(sweep_OA[:(test_pulse_OA_indices[0]-1)]) # -1 to stop baseline before command starts
                 sweep_OA_pulse = np.mean(sweep_OA[test_pulse_OA_indices])
                 tp_command = sweep_OA_pulse - sweep_OA_baseline # pA
+
+                ## Get average current injected to the cell to keep at the current voltage
+                # Use the indices of the test_pulse command (Output A) to define baseline period and test period
+                sweep_IB_baseline = np.mean(sweep_IB[:(test_pulse_OA_indices[0])])
 
                 ## Get cell response to test_pulse:
                 # Use the test_pulse indices to get the baseline and cell response to calculate the input resistance
@@ -419,6 +428,7 @@ def getInputResistance(
                 # Append results
                 test_pulse_command.append(tp_command)
                 test_pulse_membrane.append(tp_membrane)
+                injected_pA.append(sweep_IB_baseline)
                 holding_mV.append(sweep_IA_baseline)
                 input_resistance.append(InputR)
 
@@ -448,23 +458,24 @@ def getInputResistance(
             avg_trace_input_resistance = (avg_trace_membrane / avg_trace_command) * 1000 # to get MOhm
             
             # Create dataframe of results across sweeps:
-            InputR_dataframe = pd.DataFrame([test_pulse_command, test_pulse_membrane, holding_mV, input_resistance], index = ['test_pulse_command_pA', 'test_pulse_membrane_mV', 'holding_mV', 'input_resistance_MOhm'], columns = trial_keys)
+            InputR_dataframe = pd.DataFrame([test_pulse_command, test_pulse_membrane, injected_pA, holding_mV, input_resistance], index = ['test_pulse_command_pA', 'test_pulse_membrane_mV', 'injected_pA', 'holding_mV', 'input_resistance_MOhm'], columns = trial_keys)
             
             # Create dataframe of average InputR and cell ID
             InputR_avg_dataframe = pd.DataFrame([[
                 np.round(np.mean(InputR_dataframe.loc['test_pulse_command_pA']), 2),
-                np.round(np.mean(InputR_dataframe.loc['test_pulse_membrane_mV']), 2), 
+                np.round(np.mean(InputR_dataframe.loc['test_pulse_membrane_mV']), 2),
+                np.round(np.mean(InputR_dataframe.loc['injected_pA']), 2), 
                 np.round(np.mean(InputR_dataframe.loc['holding_mV']), 2), 
                 np.round(np.mean(InputR_dataframe.loc['input_resistance_MOhm']), 2),
-                test_pulse_command, test_pulse_membrane, holding_mV, input_resistance,
+                test_pulse_command, test_pulse_membrane, injected_pA, holding_mV, input_resistance,
                 avg_test_pulse_command_baselined, avg_test_pulse_membrane_baselined,
                 np.round(avg_trace_command, 2),
                 np.round(avg_trace_membrane, 2),
                 np.round(avg_trace_input_resistance, 2)
                 ]], 
-                columns = ['command_pA', 'membrane_mV', 'holding_mV', 'IR_MOhm',
+                columns = ['command_pA', 'membrane_mV', 'injected_pA', 'holding_mV', 'IR_MOhm',
                             'command_bysweep_pA', 'membrane_bysweep_mV', 
-                            'holding_bysweep_mV', 'IR_bysweep_MOhm', 
+                            'injected_bysweep_pA', 'holding_bysweep_mV', 'IR_bysweep_MOhm', 
                             'command_avg_trace_pA', 'membrane_avg_trace_mV',
                             'command_avg_pA', 'membrane_avg_mV', 'IR_avg_MOhm'], 
                 index = temp_file_id)
