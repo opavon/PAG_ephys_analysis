@@ -562,7 +562,7 @@ def getSpikeParameters(
                 temp_spike_index = np.where(sweep_IA == max(sweep_IA))[0][0]
                 temp_peak_magnitude = max(sweep_IA) # mV
                 # Cut the spike around the peak
-                temp_cut_spike = np.array(sweep_IA[(temp_spike_index-2000) : (temp_spike_index+4000)])
+                temp_cut_spike = np.array(sweep_IA[(temp_spike_index-2250) : (temp_spike_index+2750)])
                 
                 # Append results
                 test_pulse_command_pA.append(tp_command)
@@ -579,11 +579,14 @@ def getSpikeParameters(
             # Get the average spike
             temp_avg_spike = np.array(np.mean(cut_spikes, 0))
 
-            # Get peak, trough, adp, ahp indices
-            temp_avg_spike_peak_index = np.where(temp_avg_spike == max(temp_avg_spike))[0][0] # overall positive peak
-            temp_avg_spike_trough_index = np.where(temp_avg_spike == min(temp_avg_spike[temp_avg_spike_peak_index:temp_avg_spike_peak_index+100]))[0][0] # negative peak within 4 ms after the action potential peak
-            temp_avg_spike_adp_index = np.where(temp_avg_spike == max(temp_avg_spike[temp_avg_spike_trough_index+5:temp_avg_spike_trough_index+200]))[0][0] # positive peak within 8 ms after the trough (afterdepolarization)
-            temp_avg_spike_ahp_index = np.where(temp_avg_spike == min(temp_avg_spike[temp_avg_spike_trough_index+210:temp_avg_spike_trough_index+1250]))[0][0] # negative peak within 50 ms after the afterdepolarization (afterhyperpolarization)
+            # Get peak index (positive peak in the trace)
+            temp_avg_spike_peak_index = np.where(temp_avg_spike == max(temp_avg_spike))[0][0]
+            # Get trough index (negative peak within 4 ms after the action potential peak)
+            temp_avg_spike_trough_index = temp_avg_spike_peak_index + (np.where(temp_avg_spike[temp_avg_spike_peak_index:(temp_avg_spike_peak_index+100)] == min(temp_avg_spike[temp_avg_spike_peak_index:(temp_avg_spike_peak_index+100)]))[0][0]) 
+            # Get afterdepolarisation index (positive peak within 8 ms after the trough)
+            temp_avg_spike_adp_index = (temp_avg_spike_trough_index+5) + (np.where(temp_avg_spike[(temp_avg_spike_trough_index+5):(temp_avg_spike_trough_index+200)] == max(temp_avg_spike[(temp_avg_spike_trough_index+5):(temp_avg_spike_trough_index+200)]))[0][0])
+            # Get afterhyperpolarisation index (negative peak within 50 ms after the trough)
+            temp_avg_spike_ahp_index = (temp_avg_spike_trough_index+205) + (np.where(temp_avg_spike[(temp_avg_spike_trough_index+205):(temp_avg_spike_trough_index+1250)] == min(temp_avg_spike[(temp_avg_spike_trough_index+205):(temp_avg_spike_trough_index+1250)]))[0][0])
 
             # Get peak, trough, adp, ahp metrics
             peak_mV = temp_avg_spike[temp_avg_spike_peak_index] # mV
@@ -654,12 +657,13 @@ def getSpikeParameters(
             axs['A'].set_title(f'Average spike \n {temp_file_id[0]}', fontsize = 14)
             axs['A'].set_ylabel('voltage [mV]', fontsize = 12)
             axs['A'].set_xlim([temp_avg_spike_peak_index-100, temp_avg_spike_peak_index+2000])
+            axs['A'].set_ylim([-90, 60])
             axs['B'].plot(temp_avg_spike[1:], dvdt, 'k')
             axs['B'].set_title('Phase plot', fontsize = 14)
             axs['B'].set_xlabel('voltage [mV]', fontsize = 12)
             axs['B'].set_ylabel('dV/dt [mV/ms]', fontsize = 12)
-            axs['B'].set_ylim([-700, 700])
             axs['B'].set_xlim([-100, 100])
+            axs['B'].set_ylim([-700, 700])
             fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
             plt.show(block = True) # Lets you interact with plot and proceeds once figure is closed
             plt.close()
