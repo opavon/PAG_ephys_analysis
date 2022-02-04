@@ -93,13 +93,13 @@ vglut2_ttx_IR = pd.read_json(os.path.join(folder_to_save_IR, 'vglut2_ttx_pooled_
 
 # Print average input resistance across conditions
 print('----- Input Resistance -----')
-print(f'The vgat_control input resistance is    {np.round(np.mean(vgat_control_IR[["IR_MOhm"]])[0], 2)} MOhm')
-print(f'The vgat_kyn_ptx input resistance is    {np.round(np.mean(vgat_kyn_ptx_IR[["IR_MOhm"]])[0], 2)} MOhm')
-print(f'The vgat_ttx input resistance is        {np.round(np.mean(vgat_ttx_IR[["IR_MOhm"]])[0], 2)} MOhm')
-print(f'The vglut2_control input resistance is  {np.round(np.mean(vglut2_control_IR[["IR_MOhm"]])[0], 2)} MOhm')
-print(f'The vglut2_kyn_ptx input resistance is  {np.round(np.mean(vglut2_kyn_ptx_IR[["IR_MOhm"]])[0], 2)} MOhm')
-print(f'The vglut2_ptx input resistance is      {np.round(np.mean(vglut2_ptx_IR[["IR_MOhm"]])[0], 2)} MOhm')
-print(f'The vglut2_ttx input resistance is      {np.round(np.mean(vglut2_ttx_IR[["IR_MOhm"]])[0], 2)} MOhm')
+print(f'The vgat_control input resistance is    {np.round(np.mean(vgat_control_IR[["IR_MOhm"]])[0], 2)} +/- {np.round(np.std(vgat_control_IR[["IR_MOhm"]])[0], 2)} MOhm')
+print(f'The vgat_kyn_ptx input resistance is    {np.round(np.mean(vgat_kyn_ptx_IR[["IR_MOhm"]])[0], 2)} +/- {np.round(np.std(vgat_kyn_ptx_IR[["IR_MOhm"]])[0], 2)} MOhm')
+print(f'The vgat_ttx input resistance is        {np.round(np.mean(vgat_ttx_IR[["IR_MOhm"]])[0], 2)} +/- {np.round(np.std(vgat_ttx_IR[["IR_MOhm"]])[0], 2)} MOhm')
+print(f'The vglut2_control input resistance is  {np.round(np.mean(vglut2_control_IR[["IR_MOhm"]])[0], 2)} +/- {np.round(np.std(vglut2_control_IR[["IR_MOhm"]])[0], 2)} MOhm')
+print(f'The vglut2_kyn_ptx input resistance is  {np.round(np.mean(vglut2_kyn_ptx_IR[["IR_MOhm"]])[0], 2)} +/- {np.round(np.std(vglut2_kyn_ptx_IR[["IR_MOhm"]])[0], 2)} MOhm')
+print(f'The vglut2_ptx input resistance is      {np.round(np.mean(vglut2_ptx_IR[["IR_MOhm"]])[0], 2)} +/- {np.round(np.std(vglut2_ptx_IR[["IR_MOhm"]])[0], 2)} MOhm')
+print(f'The vglut2_ttx input resistance is      {np.round(np.mean(vglut2_ttx_IR[["IR_MOhm"]])[0], 2)} +/- {np.round(np.std(vglut2_ttx_IR[["IR_MOhm"]])[0], 2)} MOhm')
 
 # %% [markdown]
 # ## 2 | Get the action potential threshold and other parameters from all the curated cells in one or more folders
@@ -163,16 +163,16 @@ vglut2_ptx = pd.read_json(os.path.join(folder_to_save_single_AP, 'vglut2_picroto
 
 # Print average spike threshold and half-width across conditions
 print('----- Spike Threshold -----')
-print(f'The vgat_control spike threshold is     {np.round(np.mean(vgat_control[["avg_spike_threshold_mV"]])[0], 2)} mV')
-print(f'The vgat_kyn_ptx spike threshold is     {np.round(np.mean(vgat_kyn_ptx[["avg_spike_threshold_mV"]])[0], 2)} mV')
-print(f'The vglut2_control spike threshold is   {np.round(np.mean(vglut2_control[["avg_spike_threshold_mV"]])[0], 2)} mV')
-print(f'The vglut2_kyn_ptx spike threshold is   {np.round(np.mean(vglut2_kyn_ptx[["avg_spike_threshold_mV"]])[0], 2)} mV')
-print(f'The vglut2_ptx spike threshold is       {np.round(np.mean(vglut2_ptx[["avg_spike_threshold_mV"]])[0], 2)} mV')
+print(f'The vgat_control spike threshold is     {np.round(np.mean(vgat_control[["avg_spike_threshold_mV"]])[0], 2)} +/- {np.round(np.std(vgat_control[["avg_spike_threshold_mV"]])[0], 2)} mV')
+print(f'The vgat_kyn_ptx spike threshold is     {np.round(np.mean(vgat_kyn_ptx[["avg_spike_threshold_mV"]])[0], 2)} +/- {np.round(np.std(vgat_kyn_ptx[["avg_spike_threshold_mV"]])[0], 2)} mV')
+print(f'The vglut2_control spike threshold is   {np.round(np.mean(vglut2_control[["avg_spike_threshold_mV"]])[0], 2)} +/- {np.round(np.std(vglut2_control[["avg_spike_threshold_mV"]])[0], 2)} mV')
+print(f'The vglut2_kyn_ptx spike threshold is   {np.round(np.mean(vglut2_kyn_ptx[["avg_spike_threshold_mV"]])[0], 2)} +/- {np.round(np.std(vglut2_kyn_ptx[["avg_spike_threshold_mV"]])[0], 2)} mV')
+print(f'The vglut2_ptx spike threshold is       {np.round(np.mean(vglut2_ptx[["avg_spike_threshold_mV"]])[0], 2)} +/- {np.round(np.std(vglut2_ptx[["avg_spike_threshold_mV"]])[0], 2)} mV')
 print('\n----- Spike Half-width -----')
-print(f'The vgat_control half-width is          {np.round(np.mean(vgat_control[["half_width_ms"]])[0], 2)} ms')
-print(f'The vgat_kyn_ptx half-width is          {np.round(np.mean(vgat_kyn_ptx[["half_width_ms"]])[0], 2)} ms')
-print(f'The vglut2_control half-width is        {np.round(np.mean(vglut2_control[["half_width_ms"]])[0], 2)} ms')
-print(f'The vglut2_kyn_ptx half-width is        {np.round(np.mean(vglut2_kyn_ptx[["half_width_ms"]])[0], 2)} ms')
-print(f'The vglut2_ptx half-width is            {np.round(np.mean(vglut2_ptx[["half_width_ms"]])[0], 2)} ms')
+print(f'The vgat_control half-width is          {np.round(np.mean(vgat_control[["half_width_ms"]])[0], 2)} +/- {np.round(np.std(vgat_control[["half_width_ms"]])[0], 2)} ms')
+print(f'The vgat_kyn_ptx half-width is          {np.round(np.mean(vgat_kyn_ptx[["half_width_ms"]])[0], 2)} +/- {np.round(np.std(vgat_kyn_ptx[["half_width_ms"]])[0], 2)} ms')
+print(f'The vglut2_control half-width is        {np.round(np.mean(vglut2_control[["half_width_ms"]])[0], 2)} +/- {np.round(np.std(vglut2_control[["half_width_ms"]])[0], 2)} ms')
+print(f'The vglut2_kyn_ptx half-width is        {np.round(np.mean(vglut2_kyn_ptx[["half_width_ms"]])[0], 2)} +/- {np.round(np.std(vglut2_kyn_ptx[["half_width_ms"]])[0], 2)} ms')
+print(f'The vglut2_ptx half-width is            {np.round(np.mean(vglut2_ptx[["half_width_ms"]])[0], 2)} +/- {np.round(np.std(vglut2_ptx[["half_width_ms"]])[0], 2)} ms')
 
 # %%
