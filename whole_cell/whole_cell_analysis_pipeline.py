@@ -79,6 +79,7 @@ last_folder_IR_results_df
 # %% [markdown]
 # ## 2 | Get the action potential threshold and other parameters from all the curated cells in one or more folders
 
+# %%
 # ## 2.0 | Set paths to subfolders where curated .hdf5 files are stored
 # Each file has already been inspected and moved to the subfolder corresponding to the celltype_condition of the experiment
 vgat_agatoxin_single_AP_save_path = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_data\IC_single_AP\vgat_agatoxin"
@@ -96,13 +97,13 @@ print("done!")
 
 # Choose folders
 folders_to_check_single_AP = [vgat_agatoxin_single_AP_save_path,
-                    vgat_ctrl_single_AP_save_path,
-                    vgat_dopamine_single_AP_save_path, 
-                    vgat_kynac_ptx_single_AP_save_path,
-                    vglut2_ctrl_single_AP_save_path,
-                    vglut2_dopamine_single_AP_save_path,
-                    vglut2_ptx_single_AP_save_path,
-                    vglut2_ptx_leucine_single_AP_save_path]
+                            vgat_ctrl_single_AP_save_path,
+                            vgat_dopamine_single_AP_save_path,
+                            vgat_kynac_ptx_single_AP_save_path,
+                            vglut2_ctrl_single_AP_save_path,
+                            vglut2_dopamine_single_AP_save_path,
+                            vglut2_ptx_single_AP_save_path,
+                            vglut2_ptx_leucine_single_AP_save_path]
 
 # Specify the path to the folder where results will be saved. It should contain the same number of subfolders with the same names as the ones specified in `folders_to_check`
 folder_to_save_single_AP = r"D:\Dropbox (UCL)\Project_paginhibition\analysis\whole_cell\whole_cell_results\IC_single_AP"
