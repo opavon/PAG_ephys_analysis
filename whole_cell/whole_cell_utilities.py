@@ -581,7 +581,7 @@ def getSpikeParameters(
 
             # Get peak, trough, adp, ahp indices
             temp_avg_spike_peak_index = np.where(temp_avg_spike == max(temp_avg_spike))[0][0] # overall positive peak
-            temp_avg_spike_trough_index = np.where(temp_avg_spike == min(temp_avg_spike[temp_avg_spike_peak_index:temp_avg_spike_peak_index+50]))[0][0] # negative peak within 2 ms after the action potential peak
+            temp_avg_spike_trough_index = np.where(temp_avg_spike == min(temp_avg_spike[temp_avg_spike_peak_index:temp_avg_spike_peak_index+100]))[0][0] # negative peak within 4 ms after the action potential peak
             temp_avg_spike_adp_index = np.where(temp_avg_spike == max(temp_avg_spike[temp_avg_spike_trough_index+5:temp_avg_spike_trough_index+200]))[0][0] # positive peak within 8 ms after the trough (afterdepolarization)
             temp_avg_spike_ahp_index = np.where(temp_avg_spike == min(temp_avg_spike[temp_avg_spike_trough_index+205:temp_avg_spike_trough_index+1250]))[0][0] # negative peak within 50 ms after the afterdepolarization (afterhyperpolarization)
 
