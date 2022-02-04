@@ -583,7 +583,7 @@ def getSpikeParameters(
             temp_avg_spike_peak_index = np.where(temp_avg_spike == max(temp_avg_spike))[0][0] # overall positive peak
             temp_avg_spike_trough_index = np.where(temp_avg_spike == min(temp_avg_spike[temp_avg_spike_peak_index:temp_avg_spike_peak_index+100]))[0][0] # negative peak within 4 ms after the action potential peak
             temp_avg_spike_adp_index = np.where(temp_avg_spike == max(temp_avg_spike[temp_avg_spike_trough_index+5:temp_avg_spike_trough_index+200]))[0][0] # positive peak within 8 ms after the trough (afterdepolarization)
-            temp_avg_spike_ahp_index = np.where(temp_avg_spike == min(temp_avg_spike[temp_avg_spike_trough_index+205:temp_avg_spike_trough_index+1250]))[0][0] # negative peak within 50 ms after the afterdepolarization (afterhyperpolarization)
+            temp_avg_spike_ahp_index = np.where(temp_avg_spike == min(temp_avg_spike[temp_avg_spike_trough_index+210:temp_avg_spike_trough_index+1250]))[0][0] # negative peak within 50 ms after the afterdepolarization (afterhyperpolarization)
 
             # Get peak, trough, adp, ahp metrics
             peak_mV = temp_avg_spike[temp_avg_spike_peak_index] # mV
@@ -626,12 +626,12 @@ def getSpikeParameters(
             diff_v = np.diff(temp_avg_spike)
             # Now get dV/dt
             dvdt = diff_v / diff_t
-            # Define action potential threshold as 5% of the maximum value of dV/dt
-            dvdt_threshold_value = max(dvdt) * 0.05
+            # Define action potential threshold as 20 mV/ms
+            dvdt_threshold_value = 20 # we use 20 mV/ms instead of max(dvdt) * 0.05 as the latter depends too much on the quality of the spike
             # Find the index in the dV/dt trace where this threshold is crossed
-            dvdt_threshold_index = np.where(dvdt > dvdt_threshold_value)[0][0]
+            dvdt_threshold_index = np.where(dvdt[(temp_avg_spike_peak_index-100):temp_avg_spike_peak_index] > dvdt_threshold_value)[0][0]
             # Find the voltage value in the average trace corresponding to the threshold index
-            spike_threshold_index = dvdt_threshold_index + 1 # add one to make up for the index lost due to the derivative
+            spike_threshold_index = dvdt_threshold_index + (temp_avg_spike_peak_index-100) + 1 # add one to make up for the index lost due to the derivative
             spike_threshold_mV = temp_avg_spike[spike_threshold_index]
             # Get threshold to peak
             threshold_to_peak_ms = (temp_avg_spike_peak_index - spike_threshold_index) * dt # ms
