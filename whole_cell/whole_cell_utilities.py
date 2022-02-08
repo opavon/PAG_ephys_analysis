@@ -484,6 +484,7 @@ def getInputResistance(
 
         folder_results_df = pd.concat(cell_temp_list) # concatenate all the data frames in the list
         folder_results_df.to_json(os.path.join(folder_to_save, folder_id + '_pooled' + save_type + '.json')) # save combined results as new .json file
+        folder_results_df.to_csv(os.path.join(folder_to_save, folder_id + '_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
         print(f'{folder_id} results saved')
         
     print('all results saved')
@@ -709,6 +710,7 @@ def getSpikeParameters(
 
         folder_results_df = pd.concat(cell_temp_list) # concatenate all the data frames in the list
         folder_results_df.to_json(os.path.join(folder_to_save, folder_id + '_pooled' + save_type + '.json')) # save combined results as new .json file
+        folder_results_df.to_csv(os.path.join(folder_to_save, folder_id + '_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
         print(f'{folder_id} results saved')
         
     print('all results saved')

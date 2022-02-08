@@ -1607,6 +1607,8 @@ def combineJSONresults(
                 vgat_ctrl_temp_list.append(temp_1) # append the data frame to the list
             vgat_ctrl_df = pd.concat(vgat_ctrl_temp_list) # concatenate all the data frames in the list
             vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + save_type + '.json')) # save combined results as new .json file
+            vgat_ctrl_df.to_csv(os.path.join(folder, 'vgat_control_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
         
         if 'vgat_kynurenic_picrotoxin' in folder:
             vgat_kynac_ptx_temp_list = [] # an empty list to store the data frames
@@ -1616,6 +1618,8 @@ def combineJSONresults(
                 vgat_kynac_ptx_temp_list.append(temp_2) # append the data frame to the list
             vgat_kynac_ptx_df = pd.concat(vgat_kynac_ptx_temp_list) # concatenate all the data frames in the list
             vgat_kynac_ptx_df.to_json(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+            vgat_kynac_ptx_df.to_csv(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
 
         if 'vglut2_control' in folder:
             vglut2_ctrl_temp_list = [] # an empty list to store the data frames
@@ -1625,6 +1629,8 @@ def combineJSONresults(
                 vglut2_ctrl_temp_list.append(temp_3) # append the data frame to the list
             vglut2_ctrl_df = pd.concat(vglut2_ctrl_temp_list) # concatenate all the data frames in the list
             vglut2_ctrl_df.to_json(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.json')) # save combined results as new .json file
+            vglut2_ctrl_df.to_csv(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
         
         if 'vglut2_picrotoxin' in folder:
             vglut2_ptx_temp_list = [] # an empty list to store the data frames
@@ -1634,8 +1640,10 @@ def combineJSONresults(
                 vglut2_ptx_temp_list.append(temp_4) # append the data frame to the list
             vglut2_ptx_df = pd.concat(vglut2_ptx_temp_list) # concatenate all the data frames in the list
             vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+            vglut2_ptx_df.to_csv(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
     
-    print('results saved')
+    print('all results saved')
     
     return vgat_ctrl_df, vgat_kynac_ptx_df, vglut2_ctrl_df, vglut2_ptx_df # pandas dataframes
 
@@ -1680,6 +1688,8 @@ def getAvgRsealResults(
             vgat_ctrl_df = pd.concat(vgat_ctrl_temp_list) # concatenate all the data frames in the list
 
             vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + save_type + '.json')) # save combined results as new .json file
+            vgat_ctrl_df.to_csv(os.path.join(folder, 'vgat_control_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
         
         if 'vgat_kynurenic_picrotoxin' in folder:
             vgat_kynac_ptx_temp_list = [] # an empty list to store the data frames
@@ -1704,6 +1714,8 @@ def getAvgRsealResults(
 
             vgat_kynac_ptx_df = pd.concat(vgat_kynac_ptx_temp_list) # concatenate all the data frames in the list
             vgat_kynac_ptx_df.to_json(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+            vgat_kynac_ptx_df.to_csv(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
 
         if 'vglut2_control' in folder:
             vglut2_ctrl_temp_list = [] # an empty list to store the data frames
@@ -1728,6 +1740,8 @@ def getAvgRsealResults(
 
             vglut2_ctrl_df = pd.concat(vglut2_ctrl_temp_list) # concatenate all the data frames in the list
             vglut2_ctrl_df.to_json(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.json')) # save combined results as new .json file
+            vglut2_ctrl_df.to_csv(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
         
         if 'vglut2_picrotoxin' in folder:
             vglut2_ptx_temp_list = [] # an empty list to store the data frames
@@ -1752,8 +1766,10 @@ def getAvgRsealResults(
 
             vglut2_ptx_df = pd.concat(vglut2_ptx_temp_list) # concatenate all the data frames in the list
             vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+            vglut2_ptx_df.to_csv(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
     
-    print('results saved')
+    print('all results saved')
     
     return vgat_ctrl_df, vgat_kynac_ptx_df, vglut2_ctrl_df, vglut2_ptx_df # pandas dataframes
 
@@ -1836,6 +1852,8 @@ def getSpikeHalfWidth(
             
             vgat_ctrl_df = pd.concat(vgat_ctrl_temp_list) # concatenate all the data frames in the list
             vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + save_type + '.json')) # save combined results as new .json file
+            vgat_ctrl_df.to_csv(os.path.join(folder, 'vgat_control_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
         
         if 'vgat_kynurenic_picrotoxin' in folder:
             vgat_kynac_ptx_temp_list = [] # an empty list to store the data frames
@@ -1892,6 +1910,8 @@ def getSpikeHalfWidth(
             
             vgat_kynac_ptx_df = pd.concat(vgat_kynac_ptx_temp_list) # concatenate all the data frames in the list
             vgat_kynac_ptx_df.to_json(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+            vgat_kynac_ptx_df.to_csv(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
 
         if 'vglut2_control' in folder:
             vglut2_ctrl_temp_list = [] # an empty list to store the data frames
@@ -1948,6 +1968,8 @@ def getSpikeHalfWidth(
             
             vglut2_ctrl_df = pd.concat(vglut2_ctrl_temp_list) # concatenate all the data frames in the list
             vglut2_ctrl_df.to_json(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.json')) # save combined results as new .json file
+            vglut2_ctrl_df.to_csv(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
 
         if 'vglut2_picrotoxin' in folder:
             vglut2_ptx_temp_list = [] # an empty list to store the data frames
@@ -2004,8 +2026,10 @@ def getSpikeHalfWidth(
             
             vglut2_ptx_df = pd.concat(vglut2_ptx_temp_list) # concatenate all the data frames in the list
             vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+            vglut2_ptx_df.to_csv(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
 
-    print('results saved')
+    print('all results saved')
 
     return vgat_ctrl_df, vgat_kynac_ptx_df, vglut2_ctrl_df, vglut2_ptx_df # pandas dataframes
 
@@ -2085,6 +2109,8 @@ def combineISIresults(
         
             vgat_ctrl_df = pd.concat(vgat_ctrl_temp_list) # concatenate all the data frames in the list
             vgat_ctrl_df.to_json(os.path.join(folder, 'vgat_control_pooled' + save_type + '.json')) # save combined results as new .json file
+            vgat_ctrl_df.to_csv(os.path.join(folder, 'vgat_control_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
 
         if 'vgat_kynurenic_picrotoxin' in folder:
             vgat_kynac_ptx_temp_list = [] # an empty list to store the data frames
@@ -2143,6 +2169,8 @@ def combineISIresults(
         
             vgat_kynac_ptx_df = pd.concat(vgat_kynac_ptx_temp_list) # concatenate all the data frames in the list
             vgat_kynac_ptx_df.to_json(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+            vgat_kynac_ptx_df.to_csv(os.path.join(folder, 'vgat_kynurenic_picrotoxin_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
 
         if 'vglut2_control' in folder:
             vglut2_ctrl_temp_list = [] # an empty list to store the data frames
@@ -2201,6 +2229,8 @@ def combineISIresults(
         
             vglut2_ctrl_df = pd.concat(vglut2_ctrl_temp_list) # concatenate all the data frames in the list
             vglut2_ctrl_df.to_json(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.json')) # save combined results as new .json file
+            vglut2_ctrl_df.to_csv(os.path.join(folder, 'vglut2_control_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
 
         if 'vglut2_picrotoxin' in folder:
             vglut2_ptx_temp_list = [] # an empty list to store the data frames
@@ -2259,7 +2289,9 @@ def combineISIresults(
         
             vglut2_ptx_df = pd.concat(vglut2_ptx_temp_list) # concatenate all the data frames in the list
             vglut2_ptx_df.to_json(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.json')) # save combined results as new .json file
+            vglut2_ptx_df.to_csv(os.path.join(folder, 'vglut2_picrotoxin_pooled' + save_type + '.csv'), index = True, header = True) # save combined results as a .csv file
+            print(f'{folder} results saved')
     
-    print('results saved')
+    print('all results saved')
 
     return vgat_ctrl_df, vgat_kynac_ptx_df, vglut2_ctrl_df, vglut2_ptx_df # pandas dataframes
