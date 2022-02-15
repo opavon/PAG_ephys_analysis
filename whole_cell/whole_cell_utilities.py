@@ -582,12 +582,12 @@ def getSpikeParameters(
 
             # Get peak index (positive peak in the trace)
             temp_avg_spike_peak_index = np.where(temp_avg_spike == max(temp_avg_spike))[0][0]
-            # Get trough index (negative peak within 4 ms after the action potential peak)
-            temp_avg_spike_trough_index = temp_avg_spike_peak_index + (np.where(temp_avg_spike[temp_avg_spike_peak_index:(temp_avg_spike_peak_index+100)] == min(temp_avg_spike[temp_avg_spike_peak_index:(temp_avg_spike_peak_index+100)]))[0][0]) 
+            # Get trough index (negative peak within 3 ms after the action potential peak)
+            temp_avg_spike_trough_index = temp_avg_spike_peak_index + (np.where(temp_avg_spike[temp_avg_spike_peak_index:(temp_avg_spike_peak_index+75)] == min(temp_avg_spike[temp_avg_spike_peak_index:(temp_avg_spike_peak_index+75)]))[0][0]) 
             # Get afterdepolarisation index (positive peak within 8 ms after the trough)
             temp_avg_spike_adp_index = (temp_avg_spike_trough_index+5) + (np.where(temp_avg_spike[(temp_avg_spike_trough_index+5):(temp_avg_spike_trough_index+200)] == max(temp_avg_spike[(temp_avg_spike_trough_index+5):(temp_avg_spike_trough_index+200)]))[0][0])
-            # Get afterhyperpolarisation index (negative peak within 50 ms after the trough)
-            temp_avg_spike_ahp_index = (temp_avg_spike_trough_index+205) + (np.where(temp_avg_spike[(temp_avg_spike_trough_index+205):(temp_avg_spike_trough_index+1250)] == min(temp_avg_spike[(temp_avg_spike_trough_index+205):(temp_avg_spike_trough_index+1250)]))[0][0])
+            # Get afterhyperpolarisation index (negative peak within 40 ms after the trough)
+            temp_avg_spike_ahp_index = (temp_avg_spike_trough_index+205) + (np.where(temp_avg_spike[(temp_avg_spike_trough_index+205):(temp_avg_spike_trough_index+1000)] == min(temp_avg_spike[(temp_avg_spike_trough_index+205):(temp_avg_spike_trough_index+1000)]))[0][0])
 
             # Get peak, trough, adp, ahp metrics
             peak_mV = temp_avg_spike[temp_avg_spike_peak_index] # mV
