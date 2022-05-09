@@ -109,13 +109,14 @@ print(vglut2_ptx_single_AP.index) # row names
 
 # %%
 get_ipython().run_line_magic('matplotlib', 'qt')
-fig = plt.figure(figsize = (6, 10))
+fig = plt.figure(figsize = (6, 6))
 # sns.lineplot(data = vgat_control_single_AP['holding_mV'], label = "VGAT control")
 #sns.barplot(x = vgat_control_single_AP.index, y = vgat_control_single_AP['holding_mV'])
 #sns.heatmap(data = vgat_control_single_AP[["holding_mV", "peaks_magnitude_mV", "avg_spike_threshold_mV"]], annot = True)
-#sns.scatterplot(x = vgat_control_single_AP['avg_spike_trough_mV'], y = vgat_control_single_AP['avg_spike_threshold_mV'])
+sns.scatterplot(x = vglut2_control_IR['IR_MOhm'], 
+                y = vglut2_control_IR['injected_pA'])
 #sns.regplot(x = vgat_control_single_AP['avg_spike_trough_mV'], y = vgat_control_single_AP['avg_spike_threshold_mV'])
-sns.lmplot(x ='avg_spike_trough_mV', y = 'avg_spike_threshold_mV', data = vgat_control_single_AP)
+#sns.lmplot(x ='avg_spike_trough_mV', y = 'avg_spike_threshold_mV', data = vgat_control_single_AP)
 
 plt.title("A title")
 #plt.xlabel("X axis")

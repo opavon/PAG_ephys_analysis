@@ -83,10 +83,10 @@ fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
 # %%
 get_ipython().run_line_magic('matplotlib', 'qt')
 fig = plt.figure(figsize = (6, 10))
-sns.swarmplot(x = vgat_ctrl_summary_data['cell.area'],
+sns.boxplot(x = vgat_ctrl_summary_data['mouse.age'],
                 y = vgat_ctrl_summary_data['firing.rate.Hz'],
-                order = ["dmpag", "dlpag", "lpag", "vlpag"],
-                hue = vgat_ctrl_summary_data["cell.hemisphere"]
+                #order = ["dmpag", "dlpag", "lpag", "vlpag"],
+                hue = vgat_ctrl_summary_data["mouse.sex"]
 )
 plt.title("Firing Frequency across PAG subdivisions")
 plt.xlabel("PAG subdivision")
@@ -96,8 +96,9 @@ fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
 # %%
 get_ipython().run_line_magic('matplotlib', 'qt')
 fig = plt.figure(figsize = (6, 10))
-sns.scatterplot(vgat_ctrl_summary_data['Rseal.avg.Mohm'], vgat_ctrl_summary_data['firing.rate.Hz'])
-sns.regplot(x = vgat_ctrl_summary_data['Rseal.avg.Mohm'], y = vgat_ctrl_summary_data['firing.rate.Hz'])
+#sns.scatterplot(vgat_ctrl_summary_data['Rseal.avg.Mohm'], vgat_ctrl_summary_data['firing.rate.Hz'])
+#sns.regplot(x = vgat_ctrl_summary_data['Rseal.avg.Mohm'], y = vgat_ctrl_summary_data['firing.rate.Hz'])
+sns.lmplot(x = 'spike.halfwidth.ms', y = 'firing.rate.Hz', hue = 'mouse.sex', data = vgat_ctrl_summary_data)
 plt.title("Firing Frequency vs Seal resistance")
 plt.xlabel("seal resistance [MOhm]")
 plt.ylabel("firing frequency [Hz]")
