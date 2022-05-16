@@ -716,3 +716,51 @@ def getSpikeParameters(
     print('all results saved')
     
     return folder_results_df # last pandas dataframe
+
+def getSampleTracesIR(
+    path_to_sample_cells,
+    file_name,
+    curated_channel = "Sweeps_Analysis",
+    ):
+    """
+    `getSampleTracesIR` loads the recording from a selected example cell, extracts the data, baselines and averages the sweeps, and ouputs a the baselined sweeps together with the average so they can be used for plotting.
+    
+    :path_to_sample_cells: path to where the recordings from the sample cells are saved.
+    :file_name: name of the .hdf5 file to open.
+    :curated_channel: a string pointing to the curated channel (e.g. copy of a 'Channel' where some sweeps/trials have been deleted due to noise or quality, leaving only the ones were a single action potential was elicited). Defaults to 'Sweeps_Analysis', but should be changed to the name of the curated channel or the function will not work as intended.
+    """
+
+    channels_dataframe, time, dt = openFile(os.path.join(path_to_sample_cells, file_name), curated_channel = curated_channel) # extract channels from current file
+
+    # Initialize variables to export:
+    test_pulse_command_baselined = []
+    test_pulse_membrane_baselined = []
+
+    # Extract and baseline the recorded sweeps:
+    for sweep in channels_dataframe.columns:
+        ## Load sweep data: Channel A (voltage recording in current-clamp), Channel B (injected current) and Output B (command)
+        sweep_IA = np.array(channels_dataframe.at['Channel A', sweep]) # voltage
+        sweep_OA = np.array(channels_dataframe.at['Output A', sweep]) # command
+
+        ## Get the indices corresponding to the test_pulse using the Output Channel
+        test_pulse = np.where(sweep_OA < 0)
+        test_pulse_OA_indices = test_pulse[0]
+
+        # Compute the baseline for both the command and the recording channel
+        sweep_OA_baseline = np.mean(sweep_OA[:(test_pulse_OA_indices[0]-1)]) # -1 to stop baseline before command starts
+        sweep_IA_baseline = np.mean(sweep_IA[:(test_pulse_OA_indices[0])])
+
+        ## Baseline sweeps
+        baselined_sweep_OA = sweep_OA - sweep_OA_baseline
+        baselined_sweep_IA = sweep_IA - sweep_IA_baseline
+
+        # Append results
+        test_pulse_command_baselined.append(baselined_sweep_OA)
+        test_pulse_membrane_baselined.append(baselined_sweep_IA)
+
+    # Compute average trace from all baselined sweeps
+    avg_test_pulse_command_baselined = np.array(np.mean(test_pulse_command_baselined, 0))
+    avg_test_pulse_membrane_baselined = np.array(np.mean(test_pulse_membrane_baselined, 0))
+
+    return test_pulse_membrane_baselined, test_pulse_command_baselined, avg_test_pulse_membrane_baselined, avg_test_pulse_command_baselined, time, dt
+
