@@ -124,8 +124,9 @@ fig.canvas.manager.window.move(0, 0) # Move figure to top left corner
 # %% [markdown]
 # ## 2 | Plot average spike traces of sample cells for each condition
 
-# %% [markdown]
 # ### 2.1 | Explore potential sample traces for each condition
+
+# %%
 # Set path to save folder
 folder_sample_traces_loose_seal = r"D:\Dropbox (UCL - SWC)\Project_paginhibition\analysis\loose_seal\loose_seal_plots\sample_traces_average_spike"
 print("save path established!")
@@ -537,4 +538,5 @@ plt.ylim(-200, 125) # pA
 fig.canvas.manager.window.move(0, 0)
 plt.show()
 plt.savefig(os.path.join(folder_sample_traces_loose_seal, 'vglut2_ptx_sample_trace_LDEBO.eps'), format = 'eps') # save figure as .eps
+
 # %%
