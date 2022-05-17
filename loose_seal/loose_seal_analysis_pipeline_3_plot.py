@@ -192,9 +192,9 @@ axs['H'].set_xlim(120, 190)
 axs['H'].set_ylim(-225, 125)
 axs['H'].set_title('vlpag_vgat_171130_c1_LIBH', fontsize = 12)
 axs['H'].set_ylabel('current [pA]')
-fig.canvas.manager.window.move(0, 0)
 # Set figure title
 plt.suptitle('\nPotential sample traces for VGAT control\n', fontsize = 14)
+fig.canvas.manager.window.move(0, 0)
 plt.show()
 plt.savefig(os.path.join(folder_sample_traces_loose_seal, 'overview_vgat_ctrl.png'))
 
@@ -254,11 +254,11 @@ axs2['G'].set_xlim(120, 190)
 axs2['G'].set_ylim(-225, 125)
 axs2['G'].set_title('dmpag_vgat_201203_c8_LDICJ', fontsize = 12)
 axs2['G'].set_ylabel('current [pA]')
-fig2.canvas.manager.window.move(0, 0)
 # Set figure title
 plt.suptitle('\nPotential sample traces for VGAT in kynac_ptx\n', fontsize = 14)
+fig2.canvas.manager.window.move(0, 0)
 plt.show()
-plt.savefig(os.path.join(folder_sample_traces_loose_seal, 'overview_vgat_kynac.png'))
+plt.savefig(os.path.join(folder_sample_traces_loose_seal, 'overview_vgat_kynac_ptx.png'))
 
 # %%
 ## Potential vglut2_ctrl sample traces
@@ -322,9 +322,9 @@ axs3['H'].set_xlim(120, 190)
 axs3['H'].set_ylim(-225, 125)
 axs3['H'].set_title('vlpag_vglut2_190118_c7_LEBL', fontsize = 12)
 axs3['H'].set_ylabel('current [pA]')
-fig3.canvas.manager.window.move(0, 0)
 # Set figure title
 plt.suptitle('\nPotential sample traces for VGluT2 control\n', fontsize = 14)
+fig3.canvas.manager.window.move(0, 0)
 plt.show()
 plt.savefig(os.path.join(folder_sample_traces_loose_seal, 'overview_vglut2_ctrl.png'))
 
@@ -372,9 +372,9 @@ axs4['E'].set_xlim(120, 190)
 axs4['E'].set_ylim(-225, 125)
 axs4['E'].set_title('lpag_vglut2_201117_c8_LDECU', fontsize = 12)
 axs4['E'].set_ylabel('current [pA]')
-fig4.canvas.manager.window.move(0, 0)
 # Set figure title
 plt.suptitle('\nPotential sample traces for VGluT2 in ptx\n', fontsize = 14)
+fig4.canvas.manager.window.move(0, 0)
 plt.show()
 plt.savefig(os.path.join(folder_sample_traces_loose_seal, 'overview_vglut2_ptx.png'))
 
