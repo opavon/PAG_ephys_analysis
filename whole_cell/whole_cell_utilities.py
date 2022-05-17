@@ -738,7 +738,7 @@ def getSampleTracesIR(
 
     # Extract and baseline the recorded sweeps:
     for sweep in channels_dataframe.columns:
-        ## Load sweep data: Channel A (voltage recording in current-clamp), Channel B (injected current) and Output B (command)
+        ## Load sweep data: Channel A (voltage recording in current-clamp), and Output B (command)
         sweep_IA = np.array(channels_dataframe.at['Channel A', sweep]) # voltage
         sweep_OA = np.array(channels_dataframe.at['Output A', sweep]) # command
 
@@ -746,7 +746,7 @@ def getSampleTracesIR(
         test_pulse = np.where(sweep_OA < 0)
         test_pulse_OA_indices = test_pulse[0]
 
-        # Compute the baseline for both the command and the recording channel
+        ## Compute the baseline for both the command and the recording channel
         sweep_OA_baseline = np.mean(sweep_OA[:(test_pulse_OA_indices[0]-1)]) # -1 to stop baseline before command starts
         sweep_IA_baseline = np.mean(sweep_IA[:(test_pulse_OA_indices[0])])
 
@@ -754,7 +754,7 @@ def getSampleTracesIR(
         baselined_sweep_OA = sweep_OA - sweep_OA_baseline
         baselined_sweep_IA = sweep_IA - sweep_IA_baseline
 
-        # Append results
+        ## Append results
         test_pulse_command_baselined.append(baselined_sweep_OA)
         test_pulse_membrane_baselined.append(baselined_sweep_IA)
 
