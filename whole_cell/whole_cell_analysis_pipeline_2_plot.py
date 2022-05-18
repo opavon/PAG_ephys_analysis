@@ -320,16 +320,13 @@ print('path to results loaded!')
 # %%
 ## Potential vgat_ctrl sample traces
 # dlpag_vgat_200922_c1_WIAT_OP_IC_single_AP_4_5
-# dmpag_vgat_170227_c3_OP_IC_single_AP_2_1
-# dmpag_vgat_201217_c3_WDIBM_OP_IC_single_AP_5_4
-# dmpag_vgat_170315_c15_OP_IC_single_AP_1_1
 
 # Select vgat_ctrl sample cell
-vgat_ctrl_sample_cell_avg_spike = np.array(vgat_control_single_AP.avg_spike_trace_mV.loc['dmpag_vgat_170315_c15_OP_IC_single_AP_1_1'])
-vgat_ctrl_sample_cell_spikes = np.array(vgat_control_single_AP.cut_spikes_traces_mV.loc['dmpag_vgat_170315_c15_OP_IC_single_AP_1_1'])
-vgat_ctrl_sample_cell_threshold_index = vgat_control_single_AP.avg_spike_threshold_index.loc['dmpag_vgat_170315_c15_OP_IC_single_AP_1_1']
-vgat_ctrl_sample_cell_threshold_mV = np.round(vgat_control_single_AP.avg_spike_threshold_mV.loc['dmpag_vgat_170315_c15_OP_IC_single_AP_1_1'], 2)
-vgat_ctrl_sample_cell_dvdt = np.array(vgat_control_single_AP.dvdt_trace.loc['dmpag_vgat_170315_c15_OP_IC_single_AP_1_1'])
+vgat_ctrl_sample_cell_avg_spike = np.array(vgat_control_single_AP.avg_spike_trace_mV.loc['dlpag_vgat_200922_c1_WIAT_OP_IC_single_AP_4_5'])
+vgat_ctrl_sample_cell_spikes = np.array(vgat_control_single_AP.cut_spikes_traces_mV.loc['dlpag_vgat_200922_c1_WIAT_OP_IC_single_AP_4_5'])
+vgat_ctrl_sample_cell_threshold_index = vgat_control_single_AP.avg_spike_threshold_index.loc['dlpag_vgat_200922_c1_WIAT_OP_IC_single_AP_4_5']
+vgat_ctrl_sample_cell_threshold_mV = np.round(vgat_control_single_AP.avg_spike_threshold_mV.loc['dlpag_vgat_200922_c1_WIAT_OP_IC_single_AP_4_5'], 2)
+vgat_ctrl_sample_cell_dvdt = np.array(vgat_control_single_AP.dvdt_trace.loc['dlpag_vgat_200922_c1_WIAT_OP_IC_single_AP_4_5'])
 
 # Plot protocol and cell's voltage response
 get_ipython().run_line_magic('matplotlib', 'qt')
@@ -347,7 +344,7 @@ for sweep in range(len(vgat_ctrl_sample_cell_spikes)):
 axs['A'].plot(vgat_ctrl_sample_cell_avg_spike, color = 'k')
 # Plot average spike threshold
 axs['A'].plot(vgat_ctrl_sample_cell_threshold_index, vgat_ctrl_sample_cell_avg_spike[vgat_ctrl_sample_cell_threshold_index], "or")
-axs['A'].set_title('VGAT control: dmpag_vgat_170315_c15', fontsize = 14)
+axs['A'].set_title('VGAT control: dlpag_vgat_200922_c1_WIAT', fontsize = 14)
 axs['A'].text(2325, 20, f'AP threshold: {vgat_ctrl_sample_cell_threshold_mV} mV', fontsize = 11)
 axs['A'].set_xlabel('samples', fontsize = 12)
 axs['A'].set_ylabel('voltage [mV]', fontsize = 12)
@@ -359,16 +356,13 @@ axs['B'].set_title('Phase plot', fontsize = 14)
 axs['B'].set_xlabel('voltage [mV]', fontsize = 12)
 axs['B'].set_ylabel('dV/dt [mV/ms]', fontsize = 12)
 axs['B'].set_xlim([-100, 100])
-axs['B'].set_ylim([-700, 700])
+axs['B'].set_ylim([-500, 600])
 fig.canvas.manager.window.move(0, 0)
 plt.show()
-plt.savefig(os.path.join(folder_sample_traces_singleAP, 'dmpag_vgat_170315_c15.png'))
-#plt.savefig(os.path.join(folder_sample_traces_singleAP, 'vgat_ctrl_single_AP.eps'), format = 'eps') # save figure as .eps
+plt.savefig(os.path.join(folder_sample_traces_singleAP, 'vgat_ctrl_single_AP_WIAT.eps'), format = 'eps') # save figure as .eps
 
 # %%
 ## Potential vgat_kynac_ptx sample traces
-# dmpag_vgat_180507_c6_WDIAF_OP_IC_single_AP_1_1_kyn_ptx
-# dlpag_vgat_181210_c5_WDIAK_OP_IC_single_AP_3_1_kyn_ptx
 # dmpag_vgat_181211_c4_WDIAQ_OP_IC_single_AP_3_1_kyn_ptx
 
 # Select vgat_kynac_ptx sample cell
@@ -406,11 +400,10 @@ axs['B'].set_title('Phase plot', fontsize = 14)
 axs['B'].set_xlabel('voltage [mV]', fontsize = 12)
 axs['B'].set_ylabel('dV/dt [mV/ms]', fontsize = 12)
 axs['B'].set_xlim([-100, 100])
-axs['B'].set_ylim([-700, 700])
+axs['B'].set_ylim([-500, 600])
 fig.canvas.manager.window.move(0, 0)
 plt.show()
-plt.savefig(os.path.join(folder_sample_traces_singleAP, 'dmpag_vgat_181211_c4_WDIAQ.png'))
-#plt.savefig(os.path.join(folder_sample_traces_singleAP, 'vgat_kynac_ptx_single_AP.eps'), format = 'eps') # save figure as .eps
+plt.savefig(os.path.join(folder_sample_traces_singleAP, 'vgat_kynac_ptx_single_AP_WDIAQ.eps'), format = 'eps') # save figure as .eps
 
 # %%
 ## Potential vglut2_ctrl sample traces 
@@ -451,16 +444,13 @@ axs['B'].set_title('Phase plot', fontsize = 14)
 axs['B'].set_xlabel('voltage [mV]', fontsize = 12)
 axs['B'].set_ylabel('dV/dt [mV/ms]', fontsize = 12)
 axs['B'].set_xlim([-100, 100])
-axs['B'].set_ylim([-700, 700])
+axs['B'].set_ylim([-500, 600])
 fig.canvas.manager.window.move(0, 0)
 plt.show()
-plt.savefig(os.path.join(folder_sample_traces_singleAP, 'dlpag_vglut2_200722_c3_WEAL.png'))
-#plt.savefig(os.path.join(folder_sample_traces_singleAP, 'vglut2_ctrl_single_AP.eps'), format = 'eps') # save figure as .eps
+plt.savefig(os.path.join(folder_sample_traces_singleAP, 'vglut2_ctrl_single_AP_WEAL.eps'), format = 'eps') # save figure as .eps
 
 # %%
 ## Potential vglut2_kynac_ptx sample traces 
-# dmpag_vglut2_180503_c2_WDEAB_OP_IC_single_AP_1_1_kyn_ptx
-# dlpag_vglut2_180503_c4_WDEAD_OP_IC_single_AP_1_1_kyn_ptx
 # dmpag_vglut2_180504_c3_WDEAG_OP_IC_single_AP_1_1_kyn_ptx
 
 # Select vglut2_kynac_ptx sample cell
@@ -498,11 +488,68 @@ axs['B'].set_title('Phase plot', fontsize = 14)
 axs['B'].set_xlabel('voltage [mV]', fontsize = 12)
 axs['B'].set_ylabel('dV/dt [mV/ms]', fontsize = 12)
 axs['B'].set_xlim([-100, 100])
-axs['B'].set_ylim([-700, 700])
+axs['B'].set_ylim([-500, 600])
 fig.canvas.manager.window.move(0, 0)
 plt.show()
-plt.savefig(os.path.join(folder_sample_traces_singleAP, 'dmpag_vglut2_180504_c3_WDEAG.png'))
-#plt.savefig(os.path.join(folder_sample_traces_singleAP, 'vglut2_kynac_ptx_single_AP.eps'), format = 'eps') # save figure as .eps
+plt.savefig(os.path.join(folder_sample_traces_singleAP, 'vglut2_kynac_ptx_single_AP_WDEAG.eps'), format = 'eps') # save figure as .eps
+
+# %%
+# Plot all the sample traces together
+get_ipython().run_line_magic('matplotlib', 'qt')
+fig = plt.figure(tight_layout = True, figsize = (7, 10), dpi = 100) # Set figure size
+axs = fig.subplot_mosaic(
+    """
+    AA
+    BB
+    """
+)
+# Plot individual baselined sweeps
+for sweep in range(len(vgat_ctrl_sample_cell_spikes)):
+    axs['A'].plot(vgat_ctrl_sample_cell_spikes[sweep], color = colour_vgat_ctrl)
+# Plot average sweep
+axs['A'].plot(vgat_ctrl_sample_cell_avg_spike, color = 'k')
+# Plot average spike threshold
+axs['A'].plot(vgat_ctrl_sample_cell_threshold_index, vgat_ctrl_sample_cell_avg_spike[vgat_ctrl_sample_cell_threshold_index], "or")
+# Plot individual baselined sweeps
+for sweep in range(len(vgat_kynac_ptx_sample_cell_spikes)):
+    axs['A'].plot(vgat_kynac_ptx_sample_cell_spikes[sweep], color = colour_vgat_kynac_ptx)
+# Plot average sweep
+axs['A'].plot(vgat_kynac_ptx_sample_cell_avg_spike, color = 'k')
+# Plot average spike threshold
+axs['A'].plot(vgat_kynac_ptx_sample_cell_threshold_index, vgat_kynac_ptx_sample_cell_avg_spike[vgat_kynac_ptx_sample_cell_threshold_index], "or")
+# Plot individual baselined sweeps
+for sweep in range(len(vglut2_ctrl_sample_cell_spikes)):
+    axs['A'].plot(vglut2_ctrl_sample_cell_spikes[sweep], color = colour_vglut2_ctrl)
+# Plot average sweep
+axs['A'].plot(vglut2_ctrl_sample_cell_avg_spike, color = 'k')
+# Plot average spike threshold
+axs['A'].plot(vglut2_ctrl_sample_cell_threshold_index, vglut2_ctrl_sample_cell_avg_spike[vglut2_ctrl_sample_cell_threshold_index], "or")
+# Plot individual baselined sweeps
+for sweep in range(len(vglut2_kynac_ptx_sample_cell_spikes)):
+    axs['A'].plot(vglut2_kynac_ptx_sample_cell_spikes[sweep], color = colour_vglut2_kynac_ptx)
+# Plot average sweep
+axs['A'].plot(vglut2_kynac_ptx_sample_cell_avg_spike, color = 'k')
+# Plot average spike threshold
+axs['A'].plot(vglut2_kynac_ptx_sample_cell_threshold_index, vglut2_kynac_ptx_sample_cell_avg_spike[vglut2_kynac_ptx_sample_cell_threshold_index], "or")
+axs['A'].set_title('Action potential trace', fontsize = 14)
+axs['A'].set_xlabel('samples', fontsize = 12)
+axs['A'].set_ylabel('voltage [mV]', fontsize = 12)
+axs['A'].set_xlim([2200, 2300])
+axs['A'].set_ylim([-80, 40])
+# Phase plot
+axs['B'].plot(vgat_ctrl_sample_cell_avg_spike[1:], vgat_ctrl_sample_cell_dvdt, color = colour_vgat_ctrl)
+axs['B'].plot(vglut2_ctrl_sample_cell_avg_spike[1:], vglut2_ctrl_sample_cell_dvdt, color = colour_vglut2_ctrl)
+axs['B'].plot(vgat_kynac_ptx_sample_cell_avg_spike[1:], vgat_kynac_ptx_sample_cell_dvdt, color = colour_vgat_kynac_ptx)
+axs['B'].plot(vglut2_kynac_ptx_sample_cell_avg_spike[1:], vglut2_kynac_ptx_sample_cell_dvdt, color = colour_vglut2_kynac_ptx)
+axs['B'].set_title('Phase plot', fontsize = 14)
+axs['B'].set_xlabel('voltage [mV]', fontsize = 12)
+axs['B'].set_ylabel('dV/dt [mV/ms]', fontsize = 12)
+axs['B'].set_xlim([-100, 100])
+axs['B'].set_ylim([-500, 600])
+fig.canvas.manager.window.move(0, 0)
+plt.show()
+plt.savefig(os.path.join(folder_sample_traces_singleAP, 'all_cells_single_AP.eps'), format = 'eps') # save figure as .eps
+
 
 # %% [markdown]
 # ### 2.3 | Plot all average Action Potential sample traces for each condition
