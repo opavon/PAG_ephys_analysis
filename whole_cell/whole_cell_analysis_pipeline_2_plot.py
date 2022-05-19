@@ -503,35 +503,35 @@ axs = fig.subplot_mosaic(
     BB
     """
 )
-# Plot individual baselined sweeps
-for sweep in range(len(vgat_ctrl_sample_cell_spikes)):
-    axs['A'].plot(vgat_ctrl_sample_cell_spikes[sweep], color = colour_vgat_ctrl)
+# # # Plot individual baselined sweeps
+# # for sweep in range(len(vgat_ctrl_sample_cell_spikes)):
+# #     axs['A'].plot(vgat_ctrl_sample_cell_spikes[sweep], color = colour_vgat_ctrl)
+# # Plot average sweep
+# axs['A'].plot(vgat_ctrl_sample_cell_avg_spike, color = colour_vgat_ctrl)
+# # Plot average spike threshold
+# axs['A'].plot(vgat_ctrl_sample_cell_threshold_index, vgat_ctrl_sample_cell_avg_spike[vgat_ctrl_sample_cell_threshold_index], "or")
+# # # Plot individual baselined sweeps
+# # for sweep in range(len(vgat_kynac_ptx_sample_cell_spikes)):
+# #     axs['A'].plot(vgat_kynac_ptx_sample_cell_spikes[sweep], color = colour_vgat_kynac_ptx)
+# # Plot average sweep
+# axs['A'].plot(vgat_kynac_ptx_sample_cell_avg_spike, color = colour_vgat_kynac_ptx)
+# # Plot average spike threshold
+# axs['A'].plot(vgat_kynac_ptx_sample_cell_threshold_index, vgat_kynac_ptx_sample_cell_avg_spike[vgat_kynac_ptx_sample_cell_threshold_index], "or")
+# # Plot individual baselined sweeps
+# for sweep in range(len(vglut2_ctrl_sample_cell_spikes)):
+#     axs['A'].plot(vglut2_ctrl_sample_cell_spikes[sweep], color = colour_vglut2_ctrl)
 # Plot average sweep
-axs['A'].plot(vgat_ctrl_sample_cell_avg_spike, color = 'k')
-# Plot average spike threshold
-axs['A'].plot(vgat_ctrl_sample_cell_threshold_index, vgat_ctrl_sample_cell_avg_spike[vgat_ctrl_sample_cell_threshold_index], "or")
-# Plot individual baselined sweeps
-for sweep in range(len(vgat_kynac_ptx_sample_cell_spikes)):
-    axs['A'].plot(vgat_kynac_ptx_sample_cell_spikes[sweep], color = colour_vgat_kynac_ptx)
-# Plot average sweep
-axs['A'].plot(vgat_kynac_ptx_sample_cell_avg_spike, color = 'k')
-# Plot average spike threshold
-axs['A'].plot(vgat_kynac_ptx_sample_cell_threshold_index, vgat_kynac_ptx_sample_cell_avg_spike[vgat_kynac_ptx_sample_cell_threshold_index], "or")
-# Plot individual baselined sweeps
-for sweep in range(len(vglut2_ctrl_sample_cell_spikes)):
-    axs['A'].plot(vglut2_ctrl_sample_cell_spikes[sweep], color = colour_vglut2_ctrl)
-# Plot average sweep
-axs['A'].plot(vglut2_ctrl_sample_cell_avg_spike, color = 'k')
+axs['A'].plot(vglut2_ctrl_sample_cell_avg_spike, color = colour_vglut2_ctrl)
 # Plot average spike threshold
 axs['A'].plot(vglut2_ctrl_sample_cell_threshold_index, vglut2_ctrl_sample_cell_avg_spike[vglut2_ctrl_sample_cell_threshold_index], "or")
-# Plot individual baselined sweeps
-for sweep in range(len(vglut2_kynac_ptx_sample_cell_spikes)):
-    axs['A'].plot(vglut2_kynac_ptx_sample_cell_spikes[sweep], color = colour_vglut2_kynac_ptx)
+# # Plot individual baselined sweeps
+# for sweep in range(len(vglut2_kynac_ptx_sample_cell_spikes)):
+#     axs['A'].plot(vglut2_kynac_ptx_sample_cell_spikes[sweep], color = colour_vglut2_kynac_ptx)
 # Plot average sweep
-axs['A'].plot(vglut2_kynac_ptx_sample_cell_avg_spike, color = 'k')
+axs['A'].plot(vglut2_kynac_ptx_sample_cell_avg_spike, color = colour_vglut2_kynac_ptx)
 # Plot average spike threshold
 axs['A'].plot(vglut2_kynac_ptx_sample_cell_threshold_index, vglut2_kynac_ptx_sample_cell_avg_spike[vglut2_kynac_ptx_sample_cell_threshold_index], "or")
-axs['A'].set_title('Action potential trace', fontsize = 14)
+axs['A'].set_title('VGluT2 Action potential trace', fontsize = 14)
 axs['A'].set_xlabel('samples', fontsize = 12)
 axs['A'].set_ylabel('voltage [mV]', fontsize = 12)
 axs['A'].set_xlim([2200, 2300])
@@ -544,11 +544,11 @@ axs['B'].plot(vglut2_kynac_ptx_sample_cell_avg_spike[1:], vglut2_kynac_ptx_sampl
 axs['B'].set_title('Phase plot', fontsize = 14)
 axs['B'].set_xlabel('voltage [mV]', fontsize = 12)
 axs['B'].set_ylabel('dV/dt [mV/ms]', fontsize = 12)
-axs['B'].set_xlim([-100, 100])
-axs['B'].set_ylim([-500, 600])
+axs['B'].set_xlim([-60, -25])
+axs['B'].set_ylim([-15, 250])
 fig.canvas.manager.window.move(0, 0)
 plt.show()
-plt.savefig(os.path.join(folder_sample_traces_singleAP, 'all_cells_single_AP.eps'), format = 'eps') # save figure as .eps
+plt.savefig(os.path.join(folder_sample_traces_singleAP, 'vglut2_cells_single_AP.eps'), format = 'eps') # save figure as .eps
 
 
 # %% [markdown]
