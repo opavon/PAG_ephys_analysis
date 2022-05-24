@@ -76,7 +76,6 @@ print('colours set!')
 
 # Set path to save folder
 folder_sample_traces_IR = r"D:\Dropbox (UCL - SWC)\Project_paginhibition\analysis\whole_cell\whole_cell_plots\IC_tau_inputresistance\sample_traces"
-curated_channel = 'Sweeps_Analysis'
 print('path to results loaded!')
 
 # %%
@@ -87,6 +86,7 @@ print('path to results loaded!')
 
 # Select vgat_ctrl sample cell
 vgat_ctrl_sample_cell = 'dmpag_vgat_201217_c5_WDIBO_OP_IC_tau_inputresistance_3_1.hdf5'
+curated_channel = 'Sweeps_Analysis'
 
 test_pulse_membrane_baselined, test_pulse_command_baselined, avg_test_pulse_membrane_baselined, avg_test_pulse_command_baselined, time, dt = getSampleTracesIR(folder_sample_traces_IR, vgat_ctrl_sample_cell, curated_channel)
 
@@ -129,6 +129,7 @@ plt.savefig(os.path.join(folder_sample_traces_IR, 'vgat_ctrl_input_resistance_WD
 
 # Select vgat_kynac_ptx sample cell
 vgat_kynac_ptx_sample_cell = 'dmpag_vgat_201218_c5_WDIBT_OP_IC_tau_inputresistance_3_2_kyn_ptx.hdf5'
+curated_channel = 'Sweeps_Analysis'
 
 test_pulse_membrane_baselined, test_pulse_command_baselined, avg_test_pulse_membrane_baselined, avg_test_pulse_command_baselined, time, dt = getSampleTracesIR(folder_sample_traces_IR, vgat_kynac_ptx_sample_cell, curated_channel)
 
@@ -171,6 +172,7 @@ plt.savefig(os.path.join(folder_sample_traces_IR, 'vgat_kynac_ptx_input_resistan
 
 # Select vglut2_ctrl sample cell
 vglut2_ctrl_sample_cell = 'dlpag_vglut2_200722_c3_WEAL_OP_IC_tau_inputresistance_2_1.hdf5'
+curated_channel = 'Sweeps_Analysis'
 
 test_pulse_membrane_baselined, test_pulse_command_baselined, avg_test_pulse_membrane_baselined, avg_test_pulse_command_baselined, time, dt = getSampleTracesIR(folder_sample_traces_IR, vglut2_ctrl_sample_cell, curated_channel)
 
@@ -213,8 +215,19 @@ plt.savefig(os.path.join(folder_sample_traces_IR, 'vglut2_ctrl_input_resistance_
 
 # Select vglut2_kynac_ptx sample cell
 vglut2_kynac_ptx_sample_cell = 'dmpag_vglut2_180503_c2_WDEAB_OP_IC_tau_inputresistance_1_1_kyn_ptx.hdf5'
+curated_channel = 'Sweeps_Analysis'
 
 test_pulse_membrane_baselined, test_pulse_command_baselined, avg_test_pulse_membrane_baselined, avg_test_pulse_command_baselined, time, dt = getSampleTracesIR(folder_sample_traces_IR, vglut2_kynac_ptx_sample_cell, curated_channel)
+
+# This sample cell was recorded before adding a mesh grid to the Faraday cage in the rig and there is 50 Hz noise. We will filter that before exporting the sample trace for the figure.
+
+# We will use the iirnotch filter implemented by scipy.signal
+from scipy import signal
+sampling_frequency = 25000.0  # Sample frequency (Hz)
+filter_frequency = 50.0  # Frequency to be removed from signal (Hz)
+Q = 30.0  # Quality factor
+# Design notch filter
+b, a = signal.iirnotch(filter_frequency, Q, sampling_frequency)
 
 # Plot protocol and cell's voltage response
 get_ipython().run_line_magic('matplotlib', 'qt')
@@ -225,11 +238,11 @@ axs = fig.subplot_mosaic(
     BB
     """
 )
-# Plot individual baselined sweeps
+# Plot individual baselined sweeps after filtering 50Hz noise
 for sweep in range(len(test_pulse_membrane_baselined)):
-    axs['A'].plot(time[0], test_pulse_membrane_baselined[sweep], color = colour_vglut2_kynac_ptx)
-# Plot average sweep
-axs['A'].plot(time[0], avg_test_pulse_membrane_baselined, color = 'k')
+    axs['A'].plot(time[0], signal.filtfilt(b, a, test_pulse_membrane_baselined[sweep]), color = colour_vglut2_kynac_ptx)
+# Plot average sweep after filtering 50Hz noise
+axs['A'].plot(time[0], signal.filtfilt(b, a, avg_test_pulse_membrane_baselined), color = 'k')
 axs['A'].set_title("Cell's membrane response", fontsize = 12)
 axs['A'].set_xlabel('time [ms]', fontsize = 12)
 axs['A'].set_ylabel('voltage [mV]', fontsize = 12)
@@ -245,7 +258,7 @@ axs['B'].set_ylim([-25, 5])
 plt.suptitle('\nVGluT2 in kynac_ptx: dmpag_vglut2_180503_c2_WDEAB\n', fontsize = 14)
 fig.canvas.manager.window.move(0, 0)
 plt.show()
-plt.savefig(os.path.join(folder_sample_traces_IR, 'vglut2_kynac_ptx_input_resistance_WDEAB.eps'), format = 'eps') # save figure as .eps
+plt.savefig(os.path.join(folder_sample_traces_IR, 'vglut2_kynac_ptx_input_resistance_WDEAB_filtered.eps'), format = 'eps') # save figure as .eps
 
 # %% [markdown]
 # ## 2 | Single Action Potential characterisation
